@@ -78,6 +78,19 @@
   box-shadow: 0 4px 16px -1px rgba(198, 166, 107, 0.14), inset 0 1px 1px 0 rgba(255, 255, 255, 0.9);
 }
 
+/* Graceful Fallbacks for Devices/Browsers Lacking Backdrop-Filter Support */
+@supports not ((-webkit-backdrop-filter: blur(10px)) or (backdrop-filter: blur(10px))) {
+  .glass-pearl,
+  .glass-crystal,
+  .glass-frosted,
+  .glass-dock,
+  .glass-sheet {
+    background: #FFFFFF !important;
+    border: 1px solid #E7EAF0 !important;
+    box-shadow: 0 4px 20px -2px rgba(32, 40, 58, 0.08) !important;
+  }
+}
+
 /* Backwards-compatibility helpers */
 .glass-surface {
   @apply glass-pearl;

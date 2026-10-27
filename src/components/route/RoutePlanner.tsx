@@ -64,6 +64,7 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
   onOpenRouteDetails,
   onStartJourneyWithRoute,
 }) => {
+  const [travelMode, setTravelMode] = useState<'walk' | 'transit'>('walk');
   const [originInput, setOriginInput] = useState(originName);
   const [destInput, setDestInput] = useState(destinationName);
   const [showPreferences, setShowPreferences] = useState(false);
@@ -146,6 +147,40 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
 
         {/* Floating Route Search Surface (Royal Soft Glass) */}
         <div className="p-4 rounded-royal glass-pearl border border-white/95 shadow-glass-pearl space-y-3 relative">
+          {/* Travel Mode Segmented Control (Google Maps Usability Benchmark) */}
+          <div className="flex p-1 rounded-2xl bg-white/80 border border-brand-border/80 shadow-inner-glass text-xs font-semibold gap-1">
+            <button
+              type="button"
+              onClick={() => {
+                setTravelMode('walk');
+                onUpdatePreferences({ ...preferences, preferPublicTransport: false });
+              }}
+              className={`flex-1 py-1.5 px-2 rounded-xl transition-all flex items-center justify-center gap-1.5 ${
+                travelMode === 'walk'
+                  ? 'bg-teal-500 text-white shadow-xs font-bold'
+                  : 'text-brand-text-secondary hover:text-brand-text'
+              }`}
+            >
+              <span>🚶</span>
+              <span>Walk (Safety Focus)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setTravelMode('transit');
+                onUpdatePreferences({ ...preferences, preferPublicTransport: true });
+              }}
+              className={`flex-1 py-1.5 px-2 rounded-xl transition-all flex items-center justify-center gap-1.5 ${
+                travelMode === 'transit'
+                  ? 'bg-teal-500 text-white shadow-xs font-bold'
+                  : 'text-brand-text-secondary hover:text-brand-text'
+              }`}
+            >
+              <span>🚇</span>
+              <span>Transit Corridors</span>
+            </button>
+          </div>
+
           {/* Origin Input */}
           <div className="relative">
             <div className="flex items-center justify-between mb-1">

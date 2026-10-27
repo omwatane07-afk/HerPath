@@ -16,8 +16,12 @@ import { StorageRepository } from '@/lib/storage';
 import {
   DEMO_PRESET_ORIGINS,
   DEMO_PRESET_DESTINATIONS,
+  INITIAL_STREETLIGHTS,
+  INITIAL_REPORTS,
+  INITIAL_FACILITIES,
+  INITIAL_TRANSPORT_STOPS,
 } from '@/lib/mock-data';
-import { defaultRouteProvider } from '@/services/routing-service';
+import { defaultRouteProvider, generateSyntheticRouteAlternatives } from '@/services/routing-service';
 import { evaluateRoutes } from '@/services/route-context-engine';
 import { Header, ActiveTab } from '@/components/layout/Header';
 import { MobileNav } from '@/components/layout/MobileNav';
@@ -68,8 +72,24 @@ export default function HerPathHome() {
     StorageRepository.getPreferences()
   );
 
-  // Routing State
-  const [routes, setRoutes] = useState<RouteOption[]>([]);
+  // Routing State (pre-initialized with high-speed evaluated corridors for immediate interactivity)
+  const [routes, setRoutes] = useState<RouteOption[]>(() => {
+    try {
+      const initialRaw = generateSyntheticRouteAlternatives(
+        DEMO_PRESET_ORIGINS[0].coordinates,
+        DEMO_PRESET_DESTINATIONS[0].coordinates
+      );
+      return evaluateRoutes(initialRaw, {
+        streetlights: INITIAL_STREETLIGHTS,
+        reports: INITIAL_REPORTS,
+        facilities: INITIAL_FACILITIES,
+        transportStops: INITIAL_TRANSPORT_STOPS,
+        preferences: StorageRepository.getPreferences(),
+      });
+    } catch {
+      return [];
+    }
+  });
   const [selectedRouteIndex, setSelectedRouteIndex] = useState<number>(0);
   const [isLoadingRoutes, setIsLoadingRoutes] = useState<boolean>(false);
   const [inspectedRoute, setInspectedRoute] = useState<RouteOption | null>(null);
@@ -142,10 +162,12 @@ export default function HerPathHome() {
     }
   }, [origin, destination, preferences]);
 
-  // Compute initial routes on first mount
+  // Compute initial routes on first mount only if not already loaded
   useEffect(() => {
-    handleCalculateRoutes();
-  }, [handleCalculateRoutes]);
+    if (routes.length === 0) {
+      handleCalculateRoutes();
+    }
+  }, [handleCalculateRoutes, routes.length]);
 
   // Map Click Handler
   const handleMapClick = (coords: Coordinates) => {

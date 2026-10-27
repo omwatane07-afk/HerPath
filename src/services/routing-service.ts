@@ -21,7 +21,7 @@ export class OSRMRouteProvider implements RouteProvider {
     const url = `${OSRM_BASE}/route/v1/walking/${origin.lng},${origin.lat};${destination.lng},${destination.lat}?overview=full&geometries=geojson&alternatives=true&steps=true`;
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 4000);
+    const timeoutId = setTimeout(() => controller.abort(), 1200);
 
     try {
       const response = await fetch(url, { signal: controller.signal });

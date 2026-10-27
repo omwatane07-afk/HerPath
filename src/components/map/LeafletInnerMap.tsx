@@ -197,6 +197,53 @@ function MapClickHandler({ onMapClick }: { onMapClick?: (coords: Coordinates) =>
   return null;
 }
 
+// Floating crystal map controls (Zoom in, Zoom out, Recenter)
+function CustomMapControls({ center }: { center: Coordinates }) {
+  const map = useMap();
+  return (
+    <div className="leaflet-bottom leaflet-right !mb-32 lg:!mb-20 !mr-4 z-[990] flex flex-col gap-2 pointer-events-auto">
+      {/* Zoom In & Out Stack */}
+      <div className="flex flex-col rounded-2xl glass-crystal border border-white/95 shadow-glass-crystal overflow-hidden">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            map.zoomIn();
+          }}
+          className="w-10 h-10 flex items-center justify-center text-brand-text hover:bg-white/80 active:scale-95 transition-all border-b border-brand-border/60 text-lg font-bold"
+          title="Zoom In"
+        >
+          +
+        </button>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            map.zoomOut();
+          }}
+          className="w-10 h-10 flex items-center justify-center text-brand-text hover:bg-white/80 active:scale-95 transition-all text-lg font-bold"
+          title="Zoom Out"
+        >
+          −
+        </button>
+      </div>
+
+      {/* Re-center / GPS Location Tool */}
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          map.setView([center.lat, center.lng], 15, { animate: true });
+        }}
+        className="w-10 h-10 rounded-2xl glass-crystal border border-white/95 shadow-glass-crystal flex items-center justify-center text-teal-700 hover:text-teal-900 hover:bg-white active:scale-95 transition-all group"
+        title="Re-center on Corridor"
+      >
+        <Crosshair className="w-4 h-4 text-teal-600 group-hover:rotate-45 transition-transform" />
+      </button>
+    </div>
+  );
+}
+
 export const LeafletInnerMap: React.FC<LeafletInnerMapProps> = ({
   center,
   zoom = 14,
@@ -228,10 +275,13 @@ export const LeafletInnerMap: React.FC<LeafletInnerMapProps> = ({
     <MapContainer
       center={[center.lat, center.lng]}
       zoom={zoom}
+      zoomControl={false}
       scrollWheelZoom={true}
       className="w-full h-full z-0 font-sans"
     >
       <TileLayer url={tileUrl} attribution={tileAttribution} />
+
+      <CustomMapControls center={center} />
 
       <MapBoundsController
         routes={routes}

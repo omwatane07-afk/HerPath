@@ -29,6 +29,10 @@ export const RouteCard: React.FC<RouteCardProps> = ({
 }) => {
   const minutes = Math.round(route.durationSeconds / 60);
   const distanceKm = (route.distanceMeters / 1000).toFixed(1);
+  const arrivalTime = new Date(Date.now() + route.durationSeconds * 1000).toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 
   const getPerspectiveStyle = () => {
     switch (route.perspective) {
@@ -78,9 +82,12 @@ export const RouteCard: React.FC<RouteCardProps> = ({
           {route.perspective === 'balanced' && <Sparkles className="w-3.5 h-3.5 text-blue-600" />}
           {route.name}
         </span>
-        <div className="flex items-baseline gap-1.5">
-          <span className="text-xl font-black text-brand-text">{minutes}</span>
-          <span className="text-xs text-brand-text-secondary font-medium">min ({distanceKm} km)</span>
+        <div className="flex flex-col items-end">
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-xl font-black text-brand-text">{minutes}</span>
+            <span className="text-xs text-brand-text-secondary font-medium">min ({distanceKm} km)</span>
+          </div>
+          <span className="text-[10px] text-teal-700 font-bold tracking-tight">ETA ~{arrivalTime}</span>
         </div>
       </div>
 
