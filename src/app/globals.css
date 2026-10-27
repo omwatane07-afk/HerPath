@@ -1,0 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-navy-950 text-slate-100 antialiased selection:bg-teal-500 selection:text-white font-sans;
+    overflow-x: hidden;
+  }
+}
+
+/* Custom Leaflet Dark/Navy Styling and Popups */
+.leaflet-container {
+  background-color: #0b132b !important;
+  font-family: inherit !important;
+}
+
+.herpath-popup .leaflet-popup-content-wrapper {
+  background: #0d1527 !important;
+  color: #f1f5f9 !important;
+  border-radius: 14px !important;
+  border: 1px solid #334155 !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5) !important;
+  padding: 4px !important;
+}
+
+.herpath-popup .leaflet-popup-tip {
+  background: #0d1527 !important;
+  border: 1px solid #334155 !important;
+}
+
+.herpath-popup .leaflet-popup-content {
+  margin: 10px 12px !important;
+  line-height: 1.4 !important;
+}
+
+.herpath-popup a.leaflet-popup-close-button {
+  color: #94a3b8 !important;
+  padding: 6px !important;
+}
+
+.herpath-popup a.leaflet-popup-close-button:hover {
+  color: #ffffff !important;
+}
+
+/* Custom DivIcons */
+.custom-leaflet-icon {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Custom Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.15s ease-out forwards;
+}
+
+.animate-slideIn {
+  animation: slideIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes spinSlow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spinSlow 12s linear infinite;
+}
