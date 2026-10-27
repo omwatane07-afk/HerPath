@@ -25,7 +25,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({
   ];
 
   return (
-    <nav className="lg:hidden fixed bottom-4 left-2.5 right-2.5 sm:left-6 sm:right-6 max-w-md mx-auto h-16 rounded-full glass-dock flex items-center justify-between px-1.5 z-40 transition-all">
+    <nav className="lg:hidden fixed bottom-3.5 left-3 right-3 sm:left-6 sm:right-6 max-w-md mx-auto h-[62px] rounded-full glass-dock flex items-center justify-between p-1.5 z-40 shadow-glass-floating border border-white/95 backdrop-blur-2xl transition-all">
       {tabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = activeTab === tab.id;
@@ -34,17 +34,24 @@ export const MobileNav: React.FC<MobileNavProps> = ({
           <button
             key={tab.id}
             onClick={() => onSelectTab(tab.id)}
-            className={`flex flex-col items-center justify-center h-12 flex-1 min-w-0 px-1 rounded-full transition-all duration-200 relative ${
+            className={`flex flex-col items-center justify-center h-12 flex-1 min-w-0 px-0.5 rounded-full transition-all duration-200 relative ${
               isActive
-                ? 'bg-teal-50/95 text-teal-700 font-bold shadow-xs border border-teal-200/70'
-                : 'text-brand-text-secondary hover:text-brand-text active:scale-95'
+                ? 'bg-gradient-to-b from-teal-50 to-teal-100/90 text-teal-900 font-extrabold shadow-sm border border-teal-300/70 ring-1 ring-white/90 scale-[1.02]'
+                : 'text-brand-text-secondary hover:text-brand-text hover:bg-white/40 active:scale-95 font-medium'
             }`}
           >
-            <Icon className={`w-4 h-4 shrink-0 transition-transform ${isActive ? 'scale-110 text-teal-600' : ''}`} />
+            <Icon
+              className={`w-4 h-4 shrink-0 transition-transform ${
+                isActive ? 'scale-110 text-teal-700' : 'text-brand-text-secondary'
+              }`}
+            />
             <span className="text-[10px] mt-0.5 truncate w-full text-center leading-none">
               {tab.label}
             </span>
-            {tab.badge && (
+            {isActive && (
+              <span className="w-1 h-1 rounded-full bg-teal-600 mt-0.5 animate-pulse" />
+            )}
+            {tab.badge && !isActive && (
               <span className="w-2 h-2 rounded-full bg-teal-500 ring-2 ring-white animate-ping absolute top-1.5 right-2" />
             )}
           </button>

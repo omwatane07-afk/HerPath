@@ -129,13 +129,13 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full bg-brand-bg text-brand-text overflow-y-auto w-full">
+    <div className="w-full text-brand-text space-y-3.5">
       {/* Search & Planner Card Container */}
-      <div className="p-3.5 sm:p-5 space-y-3.5 sm:space-y-4">
+      <div className="space-y-3.5">
         {/* Title / Header */}
         <div>
           <h2 className="text-base sm:text-lg font-black text-brand-text flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center border border-teal-200/80 shadow-xs ring-1 ring-champagne-300/60">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-teal-50 to-teal-100 text-teal-700 flex items-center justify-center border border-teal-200/90 shadow-xs ring-1 ring-champagne-300/60 shrink-0">
               <Navigation className="w-4 h-4 text-teal-600" />
             </div>
             <span>Plan Your Safe Route</span>
@@ -146,9 +146,9 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
         </div>
 
         {/* Floating Route Search Surface (Royal Soft Glass) */}
-        <div className="p-4 rounded-royal glass-pearl border border-white/95 shadow-glass-pearl space-y-3 relative">
+        <div className="p-4 rounded-royal glass-pearl border border-white/95 shadow-glass-pearl space-y-3.5 relative">
           {/* Travel Mode Segmented Control (Google Maps Usability Benchmark) */}
-          <div className="flex p-1 rounded-2xl bg-white/80 border border-brand-border/80 shadow-inner-glass text-xs font-semibold gap-1">
+          <div className="flex p-1 rounded-2xl bg-white/75 border border-brand-border/80 shadow-inner-glass text-xs font-semibold gap-1">
             <button
               type="button"
               onClick={() => {
@@ -157,12 +157,12 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
               }}
               className={`flex-1 py-1.5 px-2 rounded-xl transition-all flex items-center justify-center gap-1.5 ${
                 travelMode === 'walk'
-                  ? 'bg-teal-500 text-white shadow-xs font-bold'
-                  : 'text-brand-text-secondary hover:text-brand-text'
+                  ? 'bg-gradient-to-r from-teal-500 to-teal-600 text-white shadow-sm font-bold'
+                  : 'text-brand-text-secondary hover:text-brand-text hover:bg-white/50'
               }`}
             >
               <span>🚶</span>
-              <span>Walk (Safety Focus)</span>
+              <span>Walk Focus</span>
             </button>
             <button
               type="button"
@@ -172,121 +172,140 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
               }}
               className={`flex-1 py-1.5 px-2 rounded-xl transition-all flex items-center justify-center gap-1.5 ${
                 travelMode === 'transit'
-                  ? 'bg-teal-500 text-white shadow-xs font-bold'
-                  : 'text-brand-text-secondary hover:text-brand-text'
+                  ? 'bg-gradient-to-r from-teal-500 to-teal-600 text-white shadow-sm font-bold'
+                  : 'text-brand-text-secondary hover:text-brand-text hover:bg-white/50'
               }`}
             >
               <span>🚇</span>
-              <span>Transit Corridors</span>
+              <span>Transit Hubs</span>
             </button>
           </div>
 
-          {/* Origin Input */}
-          <div className="relative">
-            <div className="flex items-center justify-between mb-1">
-              <label className="text-[10px] sm:text-[11px] font-bold text-teal-900 uppercase tracking-wider flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-emerald-100 animate-pulse" />
-                <span>Origin (Start)</span>
-              </label>
-              <button
-                onClick={handleUseCurrentLocation}
-                disabled={isLocating}
-                className="text-[10px] text-teal-700 hover:text-teal-800 bg-teal-50 hover:bg-teal-100/80 px-2.5 py-0.5 rounded-full font-semibold border border-teal-200/70 flex items-center gap-1 transition-all disabled:opacity-50 shadow-xs"
-              >
-                <Crosshair className={`w-3 h-3 ${isLocating ? 'animate-spin text-teal-600' : ''}`} />
-                <span>{isLocating ? 'Locating...' : 'Use GPS'}</span>
-              </button>
-            </div>
-
-            <div className="relative">
-              <input
-                type="text"
-                value={originInput}
-                onChange={(e) => {
-                  setOriginInput(e.target.value);
-                  setShowOriginDropdown(true);
-                }}
-                onFocus={() => setShowOriginDropdown(true)}
-                placeholder="Search starting location or station..."
-                className="w-full py-2.5 pl-9 pr-3 text-xs rounded-2xl bg-white/80 border border-brand-border/90 focus:border-teal-500 focus:bg-white focus:ring-2 focus:ring-teal-100 outline-none text-brand-text placeholder-brand-text-muted transition-all font-medium shadow-inner-glass"
-              />
-              <MapPin className="w-4 h-4 text-emerald-500 absolute left-3 top-3" />
-            </div>
-
-            {/* Origin Autocomplete Dropdown */}
-            {showOriginDropdown && originSuggestions.length > 0 && (
-              <div className="absolute top-full left-0 right-0 z-50 mt-1 surface-pearl border border-brand-border rounded-2xl shadow-float-lg overflow-hidden max-h-48 overflow-y-auto">
-                {originSuggestions.map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => {
-                      onSetOrigin(item.coordinates, item.name);
-                      setOriginInput(item.name);
-                      setShowOriginDropdown(false);
-                    }}
-                    className="w-full text-left p-2.5 hover:bg-teal-50/50 transition-colors border-b border-brand-border/60 last:border-b-0 text-xs"
-                  >
-                    <div className="font-bold text-brand-text">{item.name}</div>
-                    <div className="text-[10px] text-brand-text-secondary truncate">{item.displayName}</div>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Swap Origin & Destination Button with subtle vertical connector */}
-          <div className="flex justify-center -my-1 relative">
-            <div className="absolute left-6 top-1/2 -translate-y-1/2 w-0.5 h-6 border-l-2 border-dashed border-teal-200/80 pointer-events-none" />
+          {/* Unified Journey Track: Origin & Destination */}
+          <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-brand-border/80 shadow-inner-glass p-3 space-y-2 relative">
+            {/* Absolute Centered Swap Jewel Button */}
             <button
+              type="button"
               onClick={handleSwap}
               disabled={!origin || !destination}
-              className="p-1.5 rounded-full glass-crystal hover:border-teal-300 text-brand-text-secondary hover:text-teal-600 border border-brand-border/80 shadow-xs transition-all active:scale-95 disabled:opacity-40 z-10"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 z-20 w-7 h-7 rounded-full glass-crystal hover:border-teal-400 text-teal-700 hover:text-teal-900 border border-champagne-300/90 shadow-glass-crystal flex items-center justify-center transition-all active:scale-90 disabled:opacity-40 hover:rotate-180 duration-300"
               title="Swap Origin and Destination"
+              aria-label="Swap Origin and Destination"
             >
               <ArrowUpDown className="w-3.5 h-3.5" />
             </button>
-          </div>
 
-          {/* Destination Input */}
-          <div className="relative">
-            <label className="block text-[10px] sm:text-[11px] font-bold text-danger-700 uppercase tracking-wider mb-1 flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-danger-500 ring-2 ring-danger-100" />
-              <span>Destination</span>
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                value={destInput}
-                onChange={(e) => {
-                  setDestInput(e.target.value);
-                  setShowDestDropdown(true);
-                }}
-                onFocus={() => setShowDestDropdown(true)}
-                placeholder="Search destination, college, or facility..."
-                className="w-full py-2.5 pl-9 pr-3 text-xs rounded-2xl bg-white/80 border border-brand-border/90 focus:border-teal-500 focus:bg-white focus:ring-2 focus:ring-teal-100 outline-none text-brand-text placeholder-brand-text-muted transition-all font-medium shadow-inner-glass"
-              />
-              <MapPin className="w-4 h-4 text-danger-500 absolute left-3 top-3" />
+            {/* Origin row */}
+            <div className="relative flex items-start gap-2.5 pr-8">
+              <div className="pt-2 shrink-0">
+                <div className="w-5 h-5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center ring-2 ring-emerald-200/80 shadow-xs">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                </div>
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between mb-0.5">
+                  <label className="text-[10px] font-bold text-teal-900 uppercase tracking-wider">
+                    Origin (Start)
+                  </label>
+                  <button
+                    onClick={handleUseCurrentLocation}
+                    disabled={isLocating}
+                    className="text-[9px] text-teal-700 hover:text-teal-900 bg-teal-50 hover:bg-teal-100/90 px-2 py-0.5 rounded-full font-bold border border-teal-200/80 flex items-center gap-1 transition-all disabled:opacity-50 shadow-xs shrink-0"
+                  >
+                    <Crosshair className={`w-2.5 h-2.5 ${isLocating ? 'animate-spin text-teal-600' : ''}`} />
+                    <span>{isLocating ? 'Locating...' : 'GPS'}</span>
+                  </button>
+                </div>
+
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={originInput}
+                    onChange={(e) => {
+                      setOriginInput(e.target.value);
+                      setShowOriginDropdown(true);
+                    }}
+                    onFocus={() => setShowOriginDropdown(true)}
+                    placeholder="Search starting location..."
+                    className="w-full py-1.5 px-2.5 text-xs rounded-xl bg-white/85 border border-brand-border/80 focus:border-teal-500 focus:bg-white focus:ring-2 focus:ring-teal-100 outline-none text-brand-text placeholder-brand-text-muted transition-all font-semibold shadow-inner-glass"
+                  />
+                </div>
+
+                {/* Origin Autocomplete Dropdown */}
+                {showOriginDropdown && originSuggestions.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 z-50 mt-1 surface-pearl border border-brand-border rounded-2xl shadow-float-lg overflow-hidden max-h-48 overflow-y-auto">
+                    {originSuggestions.map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => {
+                          onSetOrigin(item.coordinates, item.name);
+                          setOriginInput(item.name);
+                          setShowOriginDropdown(false);
+                        }}
+                        className="w-full text-left p-2.5 hover:bg-teal-50/50 transition-colors border-b border-brand-border/60 last:border-b-0 text-xs"
+                      >
+                        <div className="font-bold text-brand-text">{item.name}</div>
+                        <div className="text-[10px] text-brand-text-secondary truncate">{item.displayName}</div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Destination Autocomplete Dropdown */}
-            {showDestDropdown && destSuggestions.length > 0 && (
-              <div className="absolute top-full left-0 right-0 z-50 mt-1 surface-pearl border border-brand-border rounded-2xl shadow-float-lg overflow-hidden max-h-48 overflow-y-auto">
-                {destSuggestions.map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => {
-                      onSetDestination(item.coordinates, item.name);
-                      setDestInput(item.name);
-                      setShowDestDropdown(false);
-                    }}
-                    className="w-full text-left p-2.5 hover:bg-teal-50/50 transition-colors border-b border-brand-border/60 last:border-b-0 text-xs"
-                  >
-                    <div className="font-bold text-brand-text">{item.name}</div>
-                    <div className="text-[10px] text-brand-text-secondary truncate">{item.displayName}</div>
-                  </button>
-                ))}
+            {/* Connecting Visual Rail Line */}
+            <div className="pl-4 -my-1">
+              <div className="w-0.5 h-3 border-l-2 border-dashed border-champagne-300" />
+            </div>
+
+            {/* Destination row */}
+            <div className="relative flex items-start gap-2.5 pr-8">
+              <div className="pt-2 shrink-0">
+                <div className="w-5 h-5 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center ring-2 ring-rose-200/80 shadow-xs">
+                  <MapPin className="w-3 h-3 text-rose-500" />
+                </div>
               </div>
-            )}
+
+              <div className="flex-1 min-w-0">
+                <label className="block text-[10px] font-bold text-rose-700 uppercase tracking-wider mb-0.5">
+                  Destination
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={destInput}
+                    onChange={(e) => {
+                      setDestInput(e.target.value);
+                      setShowDestDropdown(true);
+                    }}
+                    onFocus={() => setShowDestDropdown(true)}
+                    placeholder="Search destination..."
+                    className="w-full py-1.5 px-2.5 text-xs rounded-xl bg-white/85 border border-brand-border/80 focus:border-rose-400 focus:bg-white focus:ring-2 focus:ring-rose-100 outline-none text-brand-text placeholder-brand-text-muted transition-all font-semibold shadow-inner-glass"
+                  />
+                </div>
+
+                {/* Destination Autocomplete Dropdown */}
+                {showDestDropdown && destSuggestions.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 z-50 mt-1 surface-pearl border border-brand-border rounded-2xl shadow-float-lg overflow-hidden max-h-48 overflow-y-auto">
+                    {destSuggestions.map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => {
+                          onSetDestination(item.coordinates, item.name);
+                          setDestInput(item.name);
+                          setShowDestDropdown(false);
+                        }}
+                        className="w-full text-left p-2.5 hover:bg-teal-50/50 transition-colors border-b border-brand-border/60 last:border-b-0 text-xs"
+                      >
+                        <div className="font-bold text-brand-text">{item.name}</div>
+                        <div className="text-[10px] text-brand-text-secondary truncate">{item.displayName}</div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Location Error Notice */}
@@ -469,7 +488,7 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
 
               {/* Quick Action to Launch Family Companion with Selected Route */}
               {routes[selectedRouteIndex] && (
-                <div className="pt-2 pb-16 lg:pb-4">
+                <div className="pt-2 pb-6 lg:pb-2">
                   <button
                     onClick={() => onStartJourneyWithRoute(routes[selectedRouteIndex])}
                     className="w-full py-3.5 px-4 rounded-full glass-pearl border border-champagne-200/90 hover:border-champagne-300 text-teal-900 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-glass-pearl group active:scale-98"

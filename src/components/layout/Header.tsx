@@ -42,7 +42,7 @@ export const Header: React.FC<HeaderProps> = ({
           onClick={() => onSelectTab('route')}
           className="flex items-center gap-2.5 text-left group focus:outline-none min-w-0"
         >
-          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-br from-teal-500 via-teal-600 to-teal-700 flex items-center justify-center text-white shadow-md shadow-teal-600/25 ring-2 ring-champagne-200/80 group-hover:scale-105 transition-all shrink-0 relative overflow-hidden">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-br from-teal-500 via-teal-600 to-teal-800 flex items-center justify-center text-white shadow-md shadow-teal-700/20 ring-2 ring-champagne-300/80 group-hover:scale-105 transition-all shrink-0 relative overflow-hidden">
             <Compass className="w-5 h-5 animate-spin-slow text-white" />
             <div className="absolute top-0 right-0 w-3 h-3 bg-white/30 rounded-bl-lg pointer-events-none" />
           </div>
@@ -50,7 +50,7 @@ export const Header: React.FC<HeaderProps> = ({
             <div className="flex items-center gap-1.5 leading-none">
               <span className="font-black text-base sm:text-lg tracking-wider text-brand-text">HER</span>
               <span className="font-extrabold text-base sm:text-lg tracking-wider text-teal-600">PATH</span>
-              <span className="text-[9px] sm:text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-champagne-50 text-champagne-700 border border-champagne-200/90 shadow-xs flex items-center gap-1">
+              <span className="text-[9px] sm:text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-champagne-50/90 text-champagne-700 border border-champagne-300/80 shadow-xs flex items-center gap-1">
                 <Sparkles className="w-2.5 h-2.5 text-champagne-500" />
                 ROYAL
               </span>

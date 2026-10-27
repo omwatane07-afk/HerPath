@@ -10,15 +10,16 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          bg: "#FAF9F6", // Warm porcelain foundation
-          pearl: "#F5F7FB", // Soft pearl
-          mist: "#EEF3FA", // Mist blue
+          bg: "#FBFAF7", // Warm porcelain foundation
+          porcelain: "#FBFAF7",
+          pearl: "#FFFFFF", // Pearl white
+          mist: "#F4F7FA", // Dreamy mist
           ivory: "#FFFDF8", // Light ivory
           "bg-secondary": "#F3F5FA",
           surface: "#FFFFFF",
-          text: "#20283A", // Primary luxury slate
-          "text-secondary": "#667085", // Secondary slate
-          "text-muted": "#8992A4", // Muted metadata
+          text: "#263044", // Primary luxury slate
+          "text-secondary": "#69748A", // Secondary slate
+          "text-muted": "#8A94A6", // Muted metadata
           border: "#E7EAF0", // Soft architectural divider
           "border-light": "#F0F2F7",
         },
@@ -33,45 +34,36 @@ const config: Config = {
           700: "#8E703D",
         },
         teal: {
-          25: "#F1FAF6", // Mist mint
-          50: "#E6F7F2", // Pale mint
-          100: "#C9EFE4",
-          200: "#9FE1D1",
-          300: "#6ECEBB",
-          400: "#3EBAA6",
-          500: "#159F91", // Primary Royal Teal
-          600: "#117D75", // Deep Teal
-          700: "#0E645E",
-          800: "#0B4C47",
-          900: "#07322F",
+          25: "#F4FAF8", // Dreamy mist mint
+          50: "#E5F5EF", // Soft mint
+          100: "#CDEEE2",
+          200: "#A2DEC9",
+          300: "#6FC6AE",
+          400: "#48AB9E",
+          500: "#388F84", // Sea-glass teal
+          600: "#246E68", // Deep teal
+          700: "#1A5550",
+          800: "#123D3A",
+          900: "#0B2624",
         },
         powder: {
-          50: "#F4F8FF",
-          100: "#E9F1FF", // Powder blue surface
-          200: "#D4E4FF",
+          50: "#F6F9FE",
+          100: "#E8F0FC", // Powder blue surface
+          200: "#D2E2FA",
           500: "#3B82F6",
         },
         lavender: {
-          50: "#FAF9FF",
-          100: "#F0EDFF", // Lavender mist
-          200: "#DFD8FF",
+          50: "#FAF9FE",
+          100: "#EEE9F8", // Muted lavender surface
+          200: "#DDD4F3",
           500: "#8B5CF6",
         },
-        blush: {
-          50: "#FFF7F8",
-          100: "#FFF0F1", // Soft blush
-          500: "#F43F5E",
-        },
-        sage: {
-          50: "#F4F9F4",
-          100: "#E8F2E8", // Muted sage
-          500: "#10B981",
-        },
         mint: {
-          50: "#F1FAF6",
-          100: "#E6F7F2",
-          500: "#159F91",
-          600: "#117D75",
+          50: "#F4FAF8",
+          100: "#E5F5EF", // Soft mint
+          200: "#CDEEE2",
+          500: "#388F84", // Sea-glass teal
+          600: "#246E68", // Deep teal
         },
         warning: {
           50: "#FFF8EB",

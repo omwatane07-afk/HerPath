@@ -5,44 +5,44 @@
 @layer base {
   html, body {
     @apply w-full max-w-full overflow-x-hidden;
-    background-color: #FAF9F6;
+    background-color: #FBFAF7;
   }
   body {
     @apply text-brand-text antialiased selection:bg-teal-500 selection:text-white font-sans;
-    background: radial-gradient(circle at 15% 15%, #FAF9F6 0%, #F5F7FB 50%, #FAF9F6 100%);
+    background: radial-gradient(circle at 15% 15%, #FBFAF7 0%, #F4F7FA 50%, #FBFAF7 100%);
   }
 }
 
 /* =========================================================================
-   HERPATH ROYAL SOFT GLASS DESIGN SYSTEM
-   Pearl White Translucent Glass + Champagne Accents + Tactile Depth
+   HERPATH ROYAL SOFT GLASS × DREAMY CUTE DESIGN SYSTEM
+   Pearl White Translucent Glass + Champagne Accents + Iridescent Depth
    ========================================================================= */
 
 /* 1. Pearl Glass (Primary floating search & detail panels) */
 .glass-pearl {
-  background: rgba(255, 255, 255, 0.80);
-  backdrop-filter: blur(24px) saturate(145%);
-  -webkit-backdrop-filter: blur(24px) saturate(145%);
-  border: 1px solid rgba(255, 255, 255, 0.92);
-  box-shadow: 0 10px 32px -4px rgba(21, 159, 145, 0.06), 0 3px 10px -2px rgba(32, 40, 58, 0.03), inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(20px) saturate(145%);
+  -webkit-backdrop-filter: blur(20px) saturate(145%);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 0 10px 32px -4px rgba(56, 143, 132, 0.08), 0 3px 10px -2px rgba(38, 48, 68, 0.03), inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.95);
 }
 
 /* 2. Crystal Glass (Compact floating map tools, zoom buttons, GPS pills) */
 .glass-crystal {
-  background: rgba(255, 255, 255, 0.70);
-  backdrop-filter: blur(18px) saturate(140%);
-  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
   border: 1px solid rgba(255, 255, 255, 0.95);
-  box-shadow: 0 6px 20px -2px rgba(32, 40, 58, 0.06), inset 0 1px 1px 0 rgba(255, 255, 255, 0.9);
+  box-shadow: 0 6px 20px -2px rgba(38, 48, 68, 0.06), inset 0 1px 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 /* 3. Frosted Glass (High-readability lists and safety explanation cards) */
 .glass-frosted {
-  background: rgba(255, 255, 255, 0.90);
-  backdrop-filter: blur(20px) saturate(135%);
-  -webkit-backdrop-filter: blur(20px) saturate(135%);
-  border: 1px solid rgba(231, 234, 240, 0.85);
-  box-shadow: 0 4px 18px -2px rgba(32, 40, 58, 0.04);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(18px) saturate(135%);
+  -webkit-backdrop-filter: blur(18px) saturate(135%);
+  border: 1px solid rgba(231, 234, 240, 0.9);
+  box-shadow: 0 4px 18px -2px rgba(38, 48, 68, 0.04);
 }
 
 /* 4. Solid Pearl (Dense text forms & modal contents) */
@@ -51,25 +51,25 @@
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(231, 234, 240, 0.95);
-  box-shadow: 0 4px 20px -2px rgba(32, 40, 58, 0.03);
+  box-shadow: 0 4px 20px -2px rgba(38, 48, 68, 0.03);
 }
 
 /* 5. Signature Floating Bottom Glass Dock */
 .glass-dock {
   background: rgba(255, 255, 255, 0.84);
-  backdrop-filter: blur(30px) saturate(160%);
-  -webkit-backdrop-filter: blur(30px) saturate(160%);
+  backdrop-filter: blur(28px) saturate(160%);
+  -webkit-backdrop-filter: blur(28px) saturate(160%);
   border: 1px solid rgba(255, 255, 255, 0.95);
-  box-shadow: 0 16px 42px -6px rgba(32, 40, 58, 0.11), 0 4px 14px -2px rgba(32, 40, 58, 0.04), inset 0 1px 2px 0 rgba(255, 255, 255, 1);
+  box-shadow: 0 16px 42px -6px rgba(38, 48, 68, 0.10), 0 4px 14px -2px rgba(38, 48, 68, 0.04), inset 0 1px 2px 0 rgba(255, 255, 255, 1);
 }
 
-/* 6. Mobile Bottom Sheet Glass */
+/* 6. Mobile Bottom Sheet Glass (Dreamy frosted with gentle pearl glow) */
 .glass-sheet {
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(26px) saturate(145%);
-  -webkit-backdrop-filter: blur(26px) saturate(145%);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.90) 0%, rgba(251, 250, 247, 0.93) 100%);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
   border-top: 1px solid rgba(255, 255, 255, 0.95);
-  box-shadow: 0 -10px 38px -6px rgba(32, 40, 58, 0.09), inset 0 1px 1px 0 rgba(255, 255, 255, 0.9);
+  box-shadow: 0 -10px 38px -6px rgba(38, 48, 68, 0.08), inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.95);
 }
 
 /* 7. Champagne Gold Luxury Detail */

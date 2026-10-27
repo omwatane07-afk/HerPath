@@ -384,41 +384,65 @@ export default function HerPathHome() {
           <div
             className={`lg:hidden fixed left-0 right-0 z-30 transition-all duration-300 ease-out flex flex-col ${
               isMobileSheetMinimized
-                ? 'bottom-24 h-14 mx-4 rounded-full glass-dock shadow-float px-5 justify-center'
-                : 'bottom-0 h-[68vh] glass-sheet rounded-t-sheet shadow-float-lg pb-16'
+                ? 'bottom-24 h-13 mx-3.5 rounded-full glass-crystal border border-white/95 shadow-glass-floating justify-center overflow-hidden'
+                : 'bottom-0 max-h-[82vh] h-auto glass-sheet rounded-t-[32px] shadow-glass-floating border-t border-x border-white/95'
             }`}
           >
-            {/* Sheet Drag / Toggle Handle */}
-            <div
-              onClick={() => setIsMobileSheetMinimized(!isMobileSheetMinimized)}
-              className="w-full py-2.5 flex flex-col items-center justify-center cursor-pointer select-none shrink-0"
-            >
-              <div className="w-12 h-1.5 rounded-full bg-slate-300/80 mb-0.5" />
-              <div className="flex items-center justify-between w-full px-4 pt-1">
-                <span className="text-xs font-black text-brand-text uppercase tracking-wider flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
-                  {activeTab === 'route' && 'Route Planning'}
-                  {activeTab === 'facilities' && 'Nearby Facilities'}
-                  {activeTab === 'reports' && 'Community Reports'}
-                  {activeTab === 'family' && 'Family Trips'}
-                  {activeTab === 'civic' && 'Civic Insights'}
-                </span>
-                <button
-                  type="button"
-                  className="text-brand-text-secondary p-1 rounded-full hover:bg-teal-50/60 transition-colors"
-                >
-                  {isMobileSheetMinimized ? (
-                    <ChevronUp className="w-4 h-4 text-teal-600" />
-                  ) : (
-                    <ChevronDown className="w-4 h-4 text-brand-text-muted" />
-                  )}
-                </button>
+            {/* When Minimized: Compact Pill */}
+            {isMobileSheetMinimized ? (
+              <div
+                onClick={() => setIsMobileSheetMinimized(false)}
+                className="w-full h-full flex items-center justify-between px-4 cursor-pointer hover:bg-white/80 transition-colors"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="w-6 h-6 rounded-full bg-teal-50 text-teal-600 flex items-center justify-center border border-teal-200 shrink-0">
+                    <Navigation className="w-3.5 h-3.5 text-teal-600" />
+                  </div>
+                  <span className="text-xs font-bold text-brand-text truncate">
+                    {activeTab === 'route' &&
+                      (originName
+                        ? `${originName.split(' ')[0]} → ${destinationName ? destinationName.split(' ')[0] : 'Destination'}`
+                        : 'Plan Safe Journey')}
+                    {activeTab === 'facilities' && 'Browse Nearby Facilities'}
+                    {activeTab === 'reports' && 'Community Observations'}
+                    {activeTab === 'family' && 'Family Companion Status'}
+                    {activeTab === 'civic' && 'Civic Ward Telemetry'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 text-[11px] font-bold text-teal-700 bg-teal-50 px-2.5 py-0.5 rounded-full border border-teal-200/80 shrink-0 shadow-xs">
+                  <span>Open Planner</span>
+                  <ChevronUp className="w-3.5 h-3.5" />
+                </div>
               </div>
-            </div>
+            ) : (
+              <>
+                {/* Sheet Drag / Toggle Handle */}
+                <div
+                  onClick={() => setIsMobileSheetMinimized(true)}
+                  className="w-full pt-3 pb-2 flex flex-col items-center justify-center cursor-pointer select-none shrink-0 group"
+                >
+                  <div className="w-12 h-1.5 rounded-full bg-slate-300/80 mb-1 group-hover:bg-teal-500 transition-colors" />
+                  <div className="flex items-center justify-between w-full px-5 pt-0.5">
+                    <span className="text-xs font-black text-brand-text uppercase tracking-wider flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse" />
+                      {activeTab === 'route' && 'Safe Journey Planner'}
+                      {activeTab === 'facilities' && 'Nearby Essential Facilities'}
+                      {activeTab === 'reports' && 'Verified Community Reports'}
+                      {activeTab === 'family' && 'Family Journey Companion'}
+                      {activeTab === 'civic' && 'Civic Infrastructure Insights'}
+                    </span>
+                    <button
+                      type="button"
+                      className="text-brand-text-secondary p-1 rounded-full hover:bg-teal-50/80 transition-colors"
+                      aria-label="Minimize sheet"
+                    >
+                      <ChevronDown className="w-4 h-4 text-brand-text-muted" />
+                    </button>
+                  </div>
+                </div>
 
-            {/* Mobile Sheet Content */}
-            {!isMobileSheetMinimized && (
-              <div className="flex-1 overflow-y-auto pb-28">
+                {/* Mobile Sheet Content */}
+                <div className="flex-1 overflow-y-auto overscroll-contain pb-24 px-3 sm:px-5">
                 {activeTab === 'route' && (
                   <RoutePlanner
                     origin={origin}
@@ -495,9 +519,10 @@ export default function HerPathHome() {
                   />
                 )}
               </div>
-            )}
-          </div>
-        )}
+            </>
+          )}
+        </div>
+      )}
 
         {/* Interactive Map Canvas (Always Mounted and Visible) */}
         <main className="flex-1 h-full relative z-10 overflow-hidden">
