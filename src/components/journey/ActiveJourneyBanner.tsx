@@ -9,6 +9,9 @@ import {
   Clock,
   Share2,
   Check,
+  Navigation,
+  Shield,
+  Square,
 } from 'lucide-react';
 
 interface ActiveJourneyBannerProps {
@@ -38,7 +41,6 @@ export const ActiveJourneyBanner: React.FC<ActiveJourneyBannerProps> = ({
     const timer = setInterval(() => {
       setSecondsRemaining((prev) => {
         if (prev <= 1) {
-          // Check-in interval reached
           if (journey.status === 'in_progress') {
             onUpdateJourney({
               ...journey,
@@ -64,7 +66,7 @@ export const ActiveJourneyBanner: React.FC<ActiveJourneyBannerProps> = ({
       timestamp: now.toISOString(),
       coordinates: journey.currentCoords,
       status: 'ok',
-      note: 'Periodic safety confirmation sent',
+      note: 'Periodic safety check-in recorded',
     };
 
     const updated: JourneySession = {
@@ -106,7 +108,7 @@ export const ActiveJourneyBanner: React.FC<ActiveJourneyBannerProps> = ({
       journey.shareToken
     }`;
     navigator.clipboard.writeText(
-      `Tracking my journey on HERPATH to ${journey.destinationName}. Live link: ${shareUrl}`
+      `Following my journey to ${journey.destinationName}. Local demo link: ${shareUrl}`
     );
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
@@ -116,106 +118,111 @@ export const ActiveJourneyBanner: React.FC<ActiveJourneyBannerProps> = ({
   const secsRemaining = secondsRemaining % 60;
 
   return (
-    <div className="bg-white/85 border-b border-champagne-200/80 p-3 sm:p-4 text-brand-text backdrop-blur-2xl shadow-glass-pearl transition-all">
+    <div className="bg-white border-b border-border p-3 sm:px-6 text-ink shadow-e1 transition-all">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
-        {/* Left Side: Status & Destination */}
+        {/* Status & Destination */}
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-teal-50 border border-teal-200/90 flex items-center justify-center text-teal-600 shrink-0 shadow-sm ring-1 ring-champagne-300/70">
-            <Compass className="w-5 h-5 animate-spin-slow text-teal-600" />
+          <div className="w-9 h-9 rounded-lg bg-peacock-tint border border-peacock/30 flex items-center justify-center text-peacock shrink-0">
+            <Shield className="w-4 h-4 text-peacock" />
           </div>
 
           <div>
             <div className="flex items-center gap-2">
               <span
-                className={`text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full border shadow-xs ${
+                className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border ${
                   journey.status === 'check_in_due'
-                    ? 'bg-warning-50 text-warning-700 border-warning-200 animate-pulse'
+                    ? 'bg-caution-tint text-caution-dark border-caution/30'
                     : journey.status === 'arrived'
-                    ? 'bg-teal-50 text-teal-700 border-teal-200'
-                    : 'bg-softblue-50 text-blue-700 border-softblue-200'
+                    ? 'bg-verified-tint text-verified border-verified/30'
+                    : 'bg-paper text-ink border-border'
                 }`}
               >
                 {journey.status === 'check_in_due'
                   ? 'Check-In Due'
                   : journey.status === 'arrived'
                   ? 'Arrived Safely'
-                  : 'Journey In Progress'}
+                  : 'Journey Sharing Active'}
               </span>
-              <span className="text-[11px] text-brand-text-secondary font-medium">
-                Sharing with: <strong className="text-brand-text font-bold">{journey.trustedContact?.name || 'Contact'}</strong>
+              <span className="text-[11px] text-text-secondary">
+                Contact: <strong className="text-ink font-semibold">{journey.trustedContact?.name || 'Trusted Contact'}</strong>
               </span>
             </div>
-            <h4 className="text-sm font-black text-brand-text flex items-center gap-1.5 mt-0.5">
-              <span className="text-brand-text-secondary font-medium">Heading to:</span>
-              <span className="text-teal-700 truncate max-w-xs">{journey.destinationName}</span>
+            <h4 className="font-serif text-sm font-bold text-ink mt-0.5 flex items-center gap-1.5">
+              <span className="text-text-secondary font-normal font-sans">Destination:</span>
+              <span className="truncate max-w-xs">{journey.destinationName}</span>
             </h4>
           </div>
         </div>
 
-        {/* Center: Check-in Timer */}
+        {/* Check-in Timer */}
         {journey.status !== 'arrived' && (
-          <div className="flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-brand-bg border border-brand-border text-xs shadow-xs">
-            <Clock className="w-4 h-4 text-teal-600" />
+          <div className="flex items-center gap-2 px-3 py-1 rounded-md bg-paper border border-border text-xs">
+            <Clock className="w-3.5 h-3.5 text-text-secondary" />
             <div className="leading-tight">
-              <span className="text-[10px] text-brand-text-muted uppercase tracking-wider block font-bold">
-                Next Check-In In
+              <span className="text-[10px] text-text-secondary uppercase tracking-wider block font-medium">
+                Next Check-In
               </span>
-              <span className="font-mono font-black text-brand-text">
+              <span className="font-serif font-bold text-ink">
                 {minutesRemaining}:{secsRemaining < 10 ? `0${secsRemaining}` : secsRemaining}
               </span>
             </div>
           </div>
         )}
 
-        {/* Right Side: Action Buttons */}
+        {/* Action Buttons: I'm OK, Arrived, Share, Stop Sharing */}
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end">
           {journey.status !== 'arrived' ? (
             <>
               <button
+                type="button"
                 onClick={handleCheckIn}
-                className="py-2 px-4 rounded-full bg-teal-500 hover:bg-teal-600 active:scale-95 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all"
+                className="btn-ink py-1.5 px-3.5 text-xs font-semibold flex items-center gap-1.5 shadow-e1"
               >
                 {showCheckInSuccess ? (
                   <>
-                    <Check className="w-4 h-4 text-white" />
+                    <Check className="w-3.5 h-3.5 text-peacock-tint" />
                     <span>Checked In!</span>
                   </>
                 ) : (
                   <>
-                    <CheckCircle className="w-4 h-4" />
-                    <span>I'm OK (Check In)</span>
+                    <CheckCircle className="w-3.5 h-3.5 text-peacock-tint" />
+                    <span>I'm OK (Check-In)</span>
                   </>
                 )}
               </button>
 
               <button
+                type="button"
                 onClick={handleArrived}
-                className="py-2 px-4 rounded-full bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm"
+                className="btn-secondary py-1.5 px-3 text-xs font-semibold flex items-center gap-1.5"
               >
-                <span>Arrived Safely 🎉</span>
+                <span>Arrived Safely</span>
               </button>
             </>
           ) : (
-            <div className="text-xs font-bold text-teal-800 bg-teal-50 px-3.5 py-1.5 rounded-full border border-teal-200">
-              Trip completed safely!
+            <div className="text-xs font-semibold text-verified bg-verified-tint px-3 py-1 rounded border border-verified/30">
+              Trip completed safely
             </div>
           )}
 
           <button
+            type="button"
             onClick={handleCopyShareLink}
-            className="py-2 px-3.5 rounded-full bg-brand-bg hover:bg-white border border-brand-border text-xs font-semibold text-brand-text transition-colors flex items-center gap-1.5 shadow-xs"
-            title="Copy shareable journey link"
+            className="btn-secondary py-1.5 px-3 text-xs flex items-center gap-1.5"
+            title="Copy share link (stored locally on this device)"
           >
-            {copied ? <Check className="w-3.5 h-3.5 text-teal-600" /> : <Share2 className="w-3.5 h-3.5" />}
-            <span className="hidden sm:inline">{copied ? 'Link Copied' : 'Share'}</span>
+            {copied ? <Check className="w-3.5 h-3.5 text-peacock" /> : <Share2 className="w-3.5 h-3.5" />}
+            <span className="hidden sm:inline">{copied ? 'Link Copied' : 'Share Link'}</span>
           </button>
 
+          {/* Persistent Stop Sharing Button */}
           <button
+            type="button"
             onClick={onEndJourney}
-            className="py-2 px-3.5 rounded-full bg-danger-50 hover:bg-danger-100 border border-danger-200 text-xs font-bold text-danger-700 transition-colors"
-            title="End or cancel journey"
+            className="py-1.5 px-3 rounded-lg bg-white border border-danger/40 hover:bg-danger-tint text-xs font-bold text-danger transition-colors focus-ring-peacock"
+            title="Immediately stop sharing location and trip status"
           >
-            <span>End Trip</span>
+            <span>Stop sharing</span>
           </button>
         </div>
       </div>

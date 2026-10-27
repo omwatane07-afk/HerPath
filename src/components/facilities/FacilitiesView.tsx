@@ -10,6 +10,10 @@ import {
   Clock,
   Phone,
   Search,
+  CheckCircle,
+  Accessibility,
+  UserCheck,
+  Bookmark,
 } from 'lucide-react';
 
 interface FacilitiesViewProps {
@@ -19,14 +23,14 @@ interface FacilitiesViewProps {
   onFlagFacility?: (id: string) => void;
 }
 
-const CATEGORY_TABS: { id: string; label: string; icon: string }[] = [
-  { id: 'all', label: 'All Services', icon: '✨' },
-  { id: 'womens_restroom', label: 'Women Restrooms', icon: '🚺' },
-  { id: 'public_toilet', label: 'Public Toilets', icon: '🚻' },
-  { id: 'pharmacy', label: 'Pharmacies', icon: '💊' },
-  { id: 'police_station', label: 'Police Desks', icon: '👮' },
-  { id: 'hospital', label: 'Hospitals', icon: '🏥' },
-  { id: 'help_point', label: 'Help Kiosks', icon: 'ℹ️' },
+const CATEGORY_TABS = [
+  { id: 'all', label: 'All Places' },
+  { id: 'womens_restroom', label: "Women's Restrooms" },
+  { id: 'public_toilet', label: 'Public Toilets' },
+  { id: 'pharmacy', label: 'Pharmacies' },
+  { id: 'police_station', label: 'Police Desks' },
+  { id: 'hospital', label: 'Hospitals' },
+  { id: 'help_point', label: 'Help Kiosks' },
 ];
 
 export const FacilitiesView: React.FC<FacilitiesViewProps> = ({
@@ -38,6 +42,16 @@ export const FacilitiesView: React.FC<FacilitiesViewProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [accessibleOnly, setAccessibleOnly] = useState(false);
   const [femaleStaffOnly, setFemaleStaffOnly] = useState(false);
+  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+
+  const toggleSave = (id: string) => {
+    setSavedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   const filtered = facilities.filter((fac) => {
     if (selectedCategory !== 'all' && fac.category !== selectedCategory) return false;
@@ -54,172 +68,186 @@ export const FacilitiesView: React.FC<FacilitiesViewProps> = ({
   });
 
   return (
-    <div className="flex flex-col h-full bg-brand-bg text-brand-text overflow-hidden w-full">
+    <div className="flex flex-col h-full bg-paper text-ink overflow-hidden w-full">
       {/* Header */}
-      <div className="p-3.5 sm:p-5 border-b border-brand-border/70 glass-pearl">
-        <h2 className="text-base sm:text-lg font-black text-brand-text flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-pink-50 text-pink-600 flex items-center justify-center border border-pink-200/90 shadow-xs ring-1 ring-champagne-300/60">
-            <Building2 className="w-4 h-4 text-pink-600" />
-          </div>
-          <span>Essential Support & Facilities</span>
-        </h2>
-        <p className="text-[11px] sm:text-xs text-brand-text-secondary mt-1 font-medium leading-relaxed">
-          Verified women's facilities, emergency desks, and essential public points
+      <div className="p-4 sm:p-5 border-b border-border bg-white shadow-e1">
+        <h2 className="font-serif text-xl font-bold text-ink">Essential Facilities</h2>
+        <p className="text-xs text-text-secondary mt-0.5 leading-relaxed">
+          Curated directory of women’s restrooms, pharmacies, and 24/7 assistance points.
         </p>
-      </div>
 
-      {/* Search & Category Filter */}
-      <div className="p-3 sm:p-4 bg-white/70 backdrop-blur-md border-b border-brand-border/70 space-y-2.5 shadow-xs">
-        <div className="relative">
+        {/* Search Input */}
+        <div className="mt-3.5 relative">
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search facility name, street, or service..."
-            className="w-full py-2.5 pl-9 pr-3 text-xs rounded-2xl bg-white/80 border border-brand-border/90 focus:border-teal-500 focus:bg-white focus:ring-2 focus:ring-teal-100 outline-none text-brand-text placeholder-brand-text-muted font-medium transition-all shadow-inner-glass"
+            placeholder="Search facility name, address, or service..."
+            className="w-full py-2 pl-9 pr-3 text-xs rounded-lg bg-paper border border-border focus:border-peacock focus-ring-peacock text-ink placeholder:text-text-muted font-medium"
+            aria-label="Search facilities"
           />
-          <Search className="w-4 h-4 text-brand-text-muted absolute left-3 top-3" />
+          <Search className="w-4 h-4 text-text-secondary absolute left-3 top-2.5" />
         </div>
 
-        {/* Category Pills */}
-        <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none text-xs">
+        {/* Horizontally scrollable category filter row */}
+        <div className="mt-3 flex gap-1.5 overflow-x-auto pb-1 scrollbar-none text-xs" role="tablist">
           {CATEGORY_TABS.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setSelectedCategory(tab.id)}
-              className={`px-3 py-1.5 rounded-full whitespace-nowrap font-bold transition-all flex items-center gap-1.5 text-xs ${
+              className={`px-3 py-1.5 rounded-md whitespace-nowrap font-semibold transition-colors focus-ring-peacock ${
                 selectedCategory === tab.id
-                  ? 'bg-teal-500 text-white shadow-xs font-bold'
-                  : 'bg-white/80 text-brand-text-secondary hover:text-brand-text border border-brand-border/80 hover:bg-champagne-50/50'
+                  ? 'bg-ink text-white font-bold shadow-e1'
+                  : 'bg-paper text-text-secondary hover:text-ink hover:bg-raised border border-border'
               }`}
+              role="tab"
+              aria-selected={selectedCategory === tab.id}
             >
-              <span>{tab.icon}</span>
-              <span>{tab.label}</span>
+              {tab.label}
             </button>
           ))}
         </div>
 
-        {/* Feature Toggles */}
-        <div className="flex items-center gap-4 text-xs text-brand-text-secondary pt-0.5 font-medium">
-          <label className="flex items-center gap-1.5 cursor-pointer">
+        {/* Attribute toggles */}
+        <div className="mt-2.5 flex items-center gap-3 pt-2 border-t border-border/70 text-xs">
+          <label className="flex items-center gap-1.5 cursor-pointer select-none text-text-secondary hover:text-ink">
             <input
               type="checkbox"
               checked={accessibleOnly}
               onChange={(e) => setAccessibleOnly(e.target.checked)}
-              className="rounded text-teal-600 focus:ring-teal-400 h-3.5 w-3.5 border-brand-border"
+              className="rounded border-border text-peacock focus:ring-peacock h-3.5 w-3.5"
             />
-            <span>♿ Wheelchair Accessible</span>
+            <span>Step-free access</span>
           </label>
-          <label className="flex items-center gap-1.5 cursor-pointer">
+          <label className="flex items-center gap-1.5 cursor-pointer select-none text-text-secondary hover:text-ink">
             <input
               type="checkbox"
               checked={femaleStaffOnly}
               onChange={(e) => setFemaleStaffOnly(e.target.checked)}
-              className="rounded text-teal-600 focus:ring-teal-400 h-3.5 w-3.5 border-brand-border"
+              className="rounded border-border text-peacock focus:ring-peacock h-3.5 w-3.5"
             />
-            <span>👩 Female Staff Present</span>
+            <span>Female staff on duty</span>
           </label>
         </div>
       </div>
 
-      {/* Facilities List */}
-      <div className="flex-1 overflow-y-auto p-3.5 sm:p-4 space-y-3 pb-24 lg:pb-6">
-        {filtered.length > 0 ? (
-          filtered.map((facility) => {
-            const distance = currentLocation
-              ? calculateDistanceMeters(currentLocation, facility.coordinates)
+      {/* Facility List */}
+      <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3">
+        <div className="flex items-center justify-between text-xs text-text-secondary px-0.5">
+          <span className="font-semibold uppercase tracking-wider text-[11px]">
+            {filtered.length} Facilities Located
+          </span>
+          {currentLocation && (
+            <span className="text-[11px]">Distances from current position</span>
+          )}
+        </div>
+
+        {filtered.length === 0 ? (
+          <div className="surface-card p-6 text-center text-text-secondary space-y-1">
+            <Building2 className="w-8 h-8 text-border-strong mx-auto" />
+            <p className="text-sm font-semibold text-ink">No facilities match your filter</p>
+            <p className="text-xs">Try selecting a different category or clearing search terms.</p>
+          </div>
+        ) : (
+          filtered.map((fac) => {
+            const dist = currentLocation
+              ? calculateDistanceMeters(currentLocation, fac.coordinates)
               : null;
+            const isSaved = savedIds.has(fac.id);
 
             return (
-              <div
-                key={facility.id}
-                className="p-4 rounded-royal surface-pearl border border-brand-border/80 shadow-card hover:border-teal-200 transition-all space-y-2.5"
+              <article
+                key={fac.id}
+                className="surface-card p-4 space-y-2.5 transition-all card-interactive shadow-e1"
               >
-                {/* Header */}
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <span className="text-[10px] uppercase font-bold text-teal-700 tracking-wider">
-                      {facility.category.replace(/_/g, ' ')}
-                    </span>
-                    <h3 className="font-bold text-sm text-brand-text leading-tight mt-0.5">
-                      {facility.name}
+                {/* Header: Name, Distance, Verification */}
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <span className="text-[11px] font-semibold text-peacock-dark uppercase tracking-wider">
+                        {fac.category.replace(/_/g, ' ')}
+                      </span>
+                      {dist !== null && (
+                        <span className="text-[11px] text-text-secondary font-medium">
+                          · {formatDistance(dist)} away
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="font-serif text-base font-bold text-ink leading-snug">
+                      {fac.name}
                     </h3>
+                    <p className="text-xs text-text-secondary mt-0.5 line-clamp-1">
+                      {fac.address}
+                    </p>
                   </div>
-                  <DataSourceBadge source={facility.source} />
+
+                  <DataSourceBadge source={fac.source} />
                 </div>
 
-                {/* Address & distance */}
-                <p className="text-xs text-brand-text-secondary leading-relaxed font-medium">
-                  {facility.address}
-                </p>
+                {/* Operating hours & phone if known */}
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-secondary">
+                  <div className="flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-text-secondary" />
+                    <span>{fac.openingHours ? fac.openingHours : 'Hours not listed'}</span>
+                  </div>
 
-                {/* Details Badges */}
-                <div className="flex flex-wrap items-center gap-1.5 text-xs">
-                  {distance !== null && (
-                    <span className="px-2.5 py-0.5 rounded-full bg-brand-pearl text-brand-text font-mono text-[11px] border border-brand-border font-semibold shadow-xs">
-                      📍 {formatDistance(distance)} away
-                    </span>
-                  )}
-                  {facility.openingHours && (
-                    <span className="px-2.5 py-0.5 rounded-full bg-brand-pearl text-brand-text text-[11px] border border-brand-border flex items-center gap-1 font-medium shadow-xs">
-                      <Clock className="w-3 h-3 text-brand-text-muted" />
-                      <span>{facility.openingHours}</span>
-                    </span>
-                  )}
-                  {facility.isAccessible && (
-                    <span className="px-2.5 py-0.5 rounded-full bg-teal-50 text-teal-700 text-[11px] border border-teal-200 font-semibold shadow-xs">
-                      ♿ Accessible
-                    </span>
-                  )}
-                  {facility.hasFemaleStaff && (
-                    <span className="px-2.5 py-0.5 rounded-full bg-pink-50 text-pink-700 text-[11px] border border-pink-200 font-semibold shadow-xs">
-                      👩 Women Attendants
-                    </span>
+                  {fac.phone && (
+                    <div className="flex items-center gap-1.5">
+                      <Phone className="w-3.5 h-3.5 text-text-secondary" />
+                      <a
+                        href={`tel:${fac.phone.replace(/[^0-9+]/g, '')}`}
+                        className="hover:text-ink font-medium underline"
+                      >
+                        {fac.phone}
+                      </a>
+                    </div>
                   )}
                 </div>
 
-                {/* Notes if present */}
-                {facility.notes && (
-                  <p className="text-[11px] text-brand-text-secondary bg-brand-bg/70 p-2.5 rounded-xl border border-brand-border/80 font-medium">
-                    💡 {facility.notes}
-                  </p>
-                )}
-
-                {/* Actions */}
-                <div className="pt-2 border-t border-brand-border/70 flex items-center justify-between gap-2">
-                  {facility.phone ? (
-                    <a
-                      href={`tel:${facility.phone}`}
-                      className="text-xs text-teal-700 hover:text-teal-900 flex items-center gap-1 font-semibold py-1.5 px-3 rounded-full bg-teal-50 hover:bg-teal-100 border border-teal-200/60 transition-colors"
-                    >
-                      <Phone className="w-3.5 h-3.5 text-teal-600" />
-                      <span>Call Facility</span>
-                    </a>
-                  ) : (
-                    <span className="text-[11px] text-brand-text-muted font-medium">
-                      Official listing verified
+                {/* Maximum 2 Attribute Chips */}
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {fac.hasFemaleStaff && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-peacock-tint text-peacock-dark border border-peacock/25">
+                      <UserCheck className="w-3 h-3 text-peacock" />
+                      <span>Female Staff</span>
                     </span>
                   )}
+                  {fac.isAccessible && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-raised text-text border border-border">
+                      <Accessibility className="w-3 h-3 text-text-secondary" />
+                      <span>Step-Free Access</span>
+                    </span>
+                  )}
+                </div>
+
+                {/* Actions: Get Directions & Save */}
+                <div className="pt-2.5 border-t border-border flex items-center justify-between gap-2">
+                  <button
+                    type="button"
+                    onClick={() => onSetAsDestination(fac.coordinates, fac.name)}
+                    className="btn-ink py-2 px-3.5 text-xs font-semibold flex items-center gap-1.5 shadow-e1"
+                  >
+                    <Navigation className="w-3 h-3 text-peacock-tint" />
+                    <span>Get directions</span>
+                  </button>
 
                   <button
-                    onClick={() => onSetAsDestination(facility.coordinates, facility.name)}
-                    className="py-1.5 px-3.5 rounded-full bg-gradient-to-r from-teal-500 to-teal-700 hover:from-teal-600 hover:to-teal-800 text-white font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-xs active:scale-95"
+                    type="button"
+                    onClick={() => toggleSave(fac.id)}
+                    className={`p-2 rounded-lg text-xs font-medium border transition-colors flex items-center gap-1.5 ${
+                      isSaved
+                        ? 'bg-peacock-tint text-peacock-dark border-peacock/30'
+                        : 'bg-paper text-text-secondary hover:text-ink hover:bg-raised border-border'
+                    }`}
+                    title={isSaved ? 'Saved to places' : 'Save place'}
                   >
-                    <Navigation className="w-3.5 h-3.5" />
-                    <span>Get Directions</span>
+                    <Bookmark className={`w-3.5 h-3.5 ${isSaved ? 'fill-current' : ''}`} />
+                    <span>{isSaved ? 'Saved' : 'Save'}</span>
                   </button>
                 </div>
-              </div>
+              </article>
             );
           })
-        ) : (
-          <div className="h-44 flex flex-col items-center justify-center text-center p-6 text-brand-text-secondary border border-dashed border-brand-border/80 rounded-royal bg-white/50">
-            <Building2 className="w-8 h-8 text-brand-text-muted mb-2 stroke-1" />
-            <h4 className="font-bold text-brand-text text-sm">No Facilities Found</h4>
-            <p className="text-xs text-brand-text-secondary mt-1">
-              Try switching category filters or clearing the search query.
-            </p>
-          </div>
         )}
       </div>
     </div>

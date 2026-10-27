@@ -10,7 +10,7 @@ import {
   Building2,
   Bus,
   AlertTriangle,
-  Compass,
+  Navigation,
   Footprints,
   Info,
   CheckCircle,
@@ -33,22 +33,30 @@ export const RouteContextDrawer: React.FC<RouteContextDrawerProps> = ({
   const distanceKm = (route.distanceMeters / 1000).toFixed(1);
 
   return (
-    <div className="fixed inset-0 z-[9998] flex items-center justify-end bg-brand-text/30 backdrop-blur-sm animate-fadeIn">
-      <div className="surface-pearl border-l border-white/95 w-full max-w-md h-full flex flex-col text-brand-text shadow-glass-floating overflow-hidden animate-slideIn">
-        {/* Header */}
-        <div className="p-4 sm:p-5 border-b border-brand-border/70 flex items-center justify-between glass-pearl">
+    <div
+      className="fixed inset-0 z-[9998] flex items-center justify-end bg-ink/30 backdrop-blur-sm animate-fade-in"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="route-context-title"
+    >
+      <div className="bg-paper border-l border-border w-full max-w-md h-full flex flex-col text-ink shadow-e3 overflow-hidden">
+        {/* Drawer Header */}
+        <div className="p-4 sm:p-5 border-b border-border bg-white flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs font-black uppercase tracking-wider text-teal-700">
+              <span className="text-xs font-semibold uppercase tracking-wider text-peacock-dark">
                 Route Analysis
               </span>
-              <span className="text-xs font-mono text-brand-text-secondary">• {route.name}</span>
+              <span className="text-xs text-text-secondary">• {route.name}</span>
             </div>
-            <h3 className="text-lg font-black text-brand-text">Transparent Route Context</h3>
+            <h3 id="route-context-title" className="font-serif text-xl font-bold text-ink">
+              Why this route?
+            </h3>
           </div>
           <button
             onClick={onClose}
-            className="text-brand-text-secondary hover:text-brand-text p-2 rounded-xl glass-crystal transition-colors active:scale-95"
+            className="text-text-secondary hover:text-ink p-2 rounded-lg bg-paper hover:bg-raised transition-colors focus-ring-peacock"
+            aria-label="Close drawer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -56,71 +64,69 @@ export const RouteContextDrawer: React.FC<RouteContextDrawerProps> = ({
 
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
-          {/* Quick Metrics */}
-          <div className="p-4 rounded-royal surface-pearl border border-brand-border/80 flex items-center justify-around text-center shadow-card">
+          {/* Summary Figures */}
+          <div className="surface-card p-4 grid grid-cols-3 divide-x divide-border text-center">
             <div>
-              <div className="text-2xl font-black text-brand-text">{minutes} min</div>
-              <div className="text-xs text-brand-text-secondary font-medium">Travel Time</div>
+              <div className="font-serif text-2xl font-bold text-ink">{minutes} min</div>
+              <div className="text-[11px] text-text-secondary font-medium">Walking Time</div>
             </div>
-            <div className="h-8 w-px bg-brand-border" />
             <div>
-              <div className="text-2xl font-black text-brand-text">{distanceKm} km</div>
-              <div className="text-xs text-brand-text-secondary font-medium">Total Distance</div>
+              <div className="font-serif text-2xl font-bold text-ink">{distanceKm} km</div>
+              <div className="text-[11px] text-text-secondary font-medium">Distance</div>
             </div>
-            <div className="h-8 w-px bg-brand-border" />
             <div>
-              <div className="text-2xl font-black text-teal-700">
+              <div className="font-serif text-2xl font-bold text-peacock-dark">
                 {route.dataCoveragePercent}%
               </div>
-              <div className="text-xs text-brand-text-secondary font-medium">Documented</div>
+              <div className="text-[11px] text-text-secondary font-medium">Data Coverage</div>
             </div>
           </div>
 
-          {/* Perspective Rationalization */}
-          <div className="p-4 rounded-royal bg-teal-50/80 border border-teal-100 shadow-xs">
-            <h4 className="text-xs font-bold text-teal-800 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-              <Info className="w-4 h-4 text-teal-600" />
-              Why this perspective?
+          {/* Perspective Reasoning */}
+          <div className="p-4 rounded-card bg-peacock-tint border border-peacock/25">
+            <h4 className="text-xs font-bold text-peacock-dark uppercase tracking-wider mb-1 flex items-center gap-1.5">
+              <Info className="w-3.5 h-3.5 text-peacock" />
+              Routing Recommendation
             </h4>
-            <p className="text-xs text-teal-950 leading-relaxed font-medium">
+            <p className="text-xs text-ink leading-relaxed font-medium">
               {route.relativeScoreDescription}
             </p>
           </div>
 
           {/* Factor-by-factor breakdown list */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-brand-text-muted">
-              Evaluated Infrastructure Factors
+          <div className="space-y-2.5">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-text-secondary px-0.5">
+              Evaluated Infrastructure Evidence
             </h4>
 
             {route.factors.map((factor) => (
               <div
                 key={factor.id}
-                className="p-4 rounded-royal surface-pearl border border-brand-border/80 shadow-card space-y-2"
+                className="surface-card p-3.5 space-y-1.5"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-2">
                     {factor.category === 'lighting' && (
-                      <Lightbulb className="w-4 h-4 text-amber-500 shrink-0" />
+                      <Lightbulb className="w-4 h-4 text-caution shrink-0" />
                     )}
                     {factor.category === 'facilities' && (
-                      <Building2 className="w-4 h-4 text-pink-500 shrink-0" />
+                      <Building2 className="w-4 h-4 text-peacock shrink-0" />
                     )}
                     {factor.category === 'transport' && (
-                      <Bus className="w-4 h-4 text-blue-500 shrink-0" />
+                      <Bus className="w-4 h-4 text-info shrink-0" />
                     )}
                     {factor.category === 'community' && (
-                      <AlertTriangle className="w-4 h-4 text-danger-500 shrink-0" />
+                      <AlertTriangle className="w-4 h-4 text-danger shrink-0" />
                     )}
                     {factor.category === 'coverage' && (
-                      <CheckCircle className="w-4 h-4 text-teal-500 shrink-0" />
+                      <CheckCircle className="w-4 h-4 text-verified shrink-0" />
                     )}
-                    <span className="text-xs font-bold text-brand-text">{factor.name}</span>
+                    <span className="text-xs font-bold text-ink">{factor.name}</span>
                   </div>
                   <DataSourceBadge source={factor.source} />
                 </div>
-                <div className="text-xs font-bold text-brand-text">{factor.summary}</div>
-                <p className="text-[11px] text-brand-text-secondary leading-relaxed font-medium">
+                <div className="text-xs font-semibold text-ink">{factor.summary}</div>
+                <p className="text-[11px] text-text-secondary leading-relaxed">
                   {factor.details}
                 </p>
               </div>
@@ -129,25 +135,25 @@ export const RouteContextDrawer: React.FC<RouteContextDrawerProps> = ({
 
           {/* Turn-by-turn guidance */}
           {route.steps.length > 0 && (
-            <div className="space-y-3">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-brand-text-muted flex items-center gap-1.5">
-                <Footprints className="w-4 h-4 text-teal-600" />
-                Turn-by-Turn Waypoints ({route.steps.length} steps)
+            <div className="space-y-2.5">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-text-secondary px-0.5 flex items-center gap-1.5">
+                <Footprints className="w-3.5 h-3.5 text-peacock" />
+                Waypoints ({route.steps.length} steps)
               </h4>
 
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 {route.steps.map((step, idx) => (
                   <div
                     key={idx}
-                    className="flex items-start gap-3 p-3 rounded-2xl bg-white/80 border border-brand-border/80 text-xs shadow-xs"
+                    className="flex items-start gap-2.5 p-3 rounded-lg bg-white border border-border text-xs"
                   >
-                    <span className="w-6 h-6 rounded-full bg-white text-teal-700 font-bold flex items-center justify-center shrink-0 text-xs border border-brand-border shadow-xs">
+                    <span className="w-5 h-5 rounded-full bg-paper text-ink font-bold flex items-center justify-center shrink-0 text-[11px] border border-border">
                       {idx + 1}
                     </span>
-                    <div className="flex-1">
-                      <p className="text-brand-text font-semibold">{step.instruction}</p>
-                      <div className="text-[11px] text-brand-text-secondary mt-0.5 font-medium">
-                        {step.distanceMeters} m • approx {Math.ceil(step.durationSeconds / 60)} min
+                    <div className="flex-1 min-w-0">
+                      <p className="text-ink font-semibold">{step.instruction}</p>
+                      <div className="text-[11px] text-text-secondary mt-0.5">
+                        {step.distanceMeters} m · approx {Math.ceil(step.durationSeconds / 60)} min
                       </div>
                     </div>
                   </div>
@@ -156,24 +162,22 @@ export const RouteContextDrawer: React.FC<RouteContextDrawerProps> = ({
             </div>
           )}
 
-          {/* Disclaimer reminder */}
-          <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-100 text-[11px] text-amber-900 flex items-start gap-2.5">
-            <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+          {/* Transparent limitation reminder */}
+          <div className="p-3.5 rounded-lg bg-raised border border-border text-[11px] text-text-secondary flex items-start gap-2.5">
+            <ShieldAlert className="w-4 h-4 text-caution shrink-0 mt-0.5" />
             <p className="leading-relaxed">
-              <strong className="font-bold text-amber-950">Decision Support Advisory:</strong> Safety ratings
-              are relative context, not guarantees of personal security. Conditions change rapidly. Stay observant of
-              your surroundings and trust your instincts.
+              <strong className="text-ink font-semibold">Honest Decision Support:</strong> Infrastructure data reflects documented municipal databases and community reports. Missing information represents a data gap, not proof that a street is unsafe or empty.
             </p>
           </div>
         </div>
 
         {/* Footer with Journey Trigger */}
-        <div className="p-4 border-t border-brand-border/70 glass-pearl flex gap-3 shadow-glass">
+        <div className="p-4 border-t border-border bg-white flex gap-3">
           <button
             onClick={() => onStartJourney(route)}
-            className="flex-1 py-3 px-5 rounded-full bg-gradient-to-r from-teal-500 via-teal-600 to-teal-700 hover:from-teal-600 hover:to-teal-800 active:scale-98 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md shadow-teal-600/25 transition-all"
+            className="btn-ink flex-1 py-2.5 px-4 text-xs font-bold flex items-center justify-center gap-2 shadow-e1"
           >
-            <Compass className="w-4 h-4" />
+            <Navigation className="w-4 h-4 text-peacock-tint" />
             <span>Start Family Journey</span>
           </button>
         </div>

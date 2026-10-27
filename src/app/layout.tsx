@@ -1,10 +1,27 @@
 import type { Metadata, Viewport } from 'next';
+import { Source_Serif_4, Inter } from 'next/font/google';
 import './globals.css';
+
+const sourceSerif = Source_Serif_4({
+  subsets: ['latin'],
+  weight: ['600', '700'],
+  variable: '--font-source-serif',
+  display: 'swap',
+  fallback: ['Georgia', 'serif'],
+});
+
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-inter',
+  display: 'swap',
+  fallback: ['system-ui', '-apple-system', 'sans-serif'],
+});
 
 export const metadata: Metadata = {
   title: 'HERPATH | Safety-Aware Navigation & Family Companion',
   description:
-    'Transparent, context-rich navigation platform designed for women, students, and commuters. Transparent streetlights, facilities, disturbance reports, and family check-ins.',
+    'Transparent, context-rich navigation platform designed for women, students, and everyday commuters. Clear infrastructure context, verified facilities, and trusted check-ins.',
   icons: {
     icon: '/favicon.ico',
   },
@@ -13,8 +30,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  themeColor: '#F6F8FC',
+  maximumScale: 5,
+  themeColor: '#F8F4EC',
 };
 
 export default function RootLayout({
@@ -23,8 +40,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="light">
-      <body className="min-h-screen bg-brand-bg text-brand-text flex flex-col antialiased selection:bg-teal-500 selection:text-white">
+    <html lang="en" className={`${sourceSerif.variable} ${inter.variable}`}>
+      <body className="min-h-screen bg-paper text-ink flex flex-col font-sans antialiased selection:bg-peacock selection:text-white">
         {children}
       </body>
     </html>

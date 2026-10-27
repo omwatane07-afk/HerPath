@@ -2,7 +2,6 @@
 
 import React from 'react';
 import {
-  Compass,
   Navigation,
   MapPin,
   Building2,
@@ -12,7 +11,6 @@ import {
   PhoneCall,
   SlidersHorizontal,
   Plus,
-  Sparkles,
 } from 'lucide-react';
 
 export type ActiveTab = 'route' | 'map' | 'facilities' | 'reports' | 'family' | 'civic';
@@ -34,139 +32,94 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenSettings,
   hasActiveJourney,
 }) => {
+  const navItems: { id: ActiveTab; label: string; icon: React.ReactNode }[] = [
+    { id: 'route', label: 'Plan', icon: <Navigation className="w-4 h-4" /> },
+    { id: 'map', label: 'Explore', icon: <MapPin className="w-4 h-4" /> },
+    { id: 'facilities', label: 'Places', icon: <Building2 className="w-4 h-4" /> },
+    { id: 'reports', label: 'Reports', icon: <AlertTriangle className="w-4 h-4" /> },
+    { id: 'family', label: 'Family', icon: <Users className="w-4 h-4" /> },
+    { id: 'civic', label: 'Civic', icon: <Layers className="w-4 h-4" /> },
+  ];
+
   return (
-    <header className="h-16 w-full max-w-full bg-white/80 border-b border-white/90 px-3 sm:px-6 flex items-center justify-between text-brand-text z-30 sticky top-0 backdrop-blur-2xl shadow-glass transition-all">
-      {/* Brand Wordmark & Royal Emblem */}
-      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+    <header className="h-16 sm:h-[68px] w-full max-w-full bg-white border-b border-border px-4 sm:px-6 flex items-center justify-between text-ink z-30 sticky top-0 shadow-e1">
+      {/* Brand Wordmark */}
+      <div className="flex items-center gap-3 min-w-0">
         <button
           onClick={() => onSelectTab('route')}
-          className="flex items-center gap-2.5 text-left group focus:outline-none min-w-0"
+          className="flex items-baseline gap-1 text-left focus-ring-peacock rounded-md px-1 py-0.5"
+          aria-label="HERPATH Home"
         >
-          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-br from-teal-500 via-teal-600 to-teal-800 flex items-center justify-center text-white shadow-md shadow-teal-700/20 ring-2 ring-champagne-300/80 group-hover:scale-105 transition-all shrink-0 relative overflow-hidden">
-            <Compass className="w-5 h-5 animate-spin-slow text-white" />
-            <div className="absolute top-0 right-0 w-3 h-3 bg-white/30 rounded-bl-lg pointer-events-none" />
-          </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-1.5 leading-none">
-              <span className="font-black text-base sm:text-lg tracking-wider text-brand-text">HER</span>
-              <span className="font-extrabold text-base sm:text-lg tracking-wider text-teal-600">PATH</span>
-              <span className="text-[9px] sm:text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-champagne-50/90 text-champagne-700 border border-champagne-300/80 shadow-xs flex items-center gap-1">
-                <Sparkles className="w-2.5 h-2.5 text-champagne-500" />
-                ROYAL
-              </span>
-            </div>
-            <p className="text-[10px] sm:text-[11px] text-brand-text-secondary tracking-tight font-medium hidden md:block mt-0.5 truncate">
-              Safety-Aware Navigation & Royal Companion
-            </p>
-          </div>
+          <span className="font-serif text-2xl font-bold tracking-tight text-ink">
+            HERPATH
+          </span>
+          <span className="text-[11px] font-sans font-medium text-text-secondary tracking-normal hidden md:inline ml-2.5 pl-2.5 border-l border-border">
+            Safety-Aware Navigation & Journey Companion
+          </span>
         </button>
       </div>
 
       {/* Desktop Navigation Tabs */}
-      <nav className="hidden lg:flex items-center gap-1 bg-white/60 p-1.5 rounded-full border border-white/90 shadow-inner-glass text-xs font-semibold backdrop-blur-md">
-        <button
-          onClick={() => onSelectTab('route')}
-          className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full transition-all ${
-            activeTab === 'route'
-              ? 'bg-teal-500 text-white shadow-sm font-bold'
-              : 'text-brand-text-secondary hover:text-brand-text hover:bg-white/60'
-          }`}
-        >
-          <Navigation className="w-3.5 h-3.5" />
-          <span>Plan Route</span>
-        </button>
-
-        <button
-          onClick={() => onSelectTab('map')}
-          className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full transition-all ${
-            activeTab === 'map'
-              ? 'bg-teal-500 text-white shadow-sm font-bold'
-              : 'text-brand-text-secondary hover:text-brand-text hover:bg-white/60'
-          }`}
-        >
-          <MapPin className="w-3.5 h-3.5" />
-          <span>Explore Map</span>
-        </button>
-
-        <button
-          onClick={() => onSelectTab('facilities')}
-          className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full transition-all ${
-            activeTab === 'facilities'
-              ? 'bg-teal-500 text-white shadow-sm font-bold'
-              : 'text-brand-text-secondary hover:text-brand-text hover:bg-white/60'
-          }`}
-        >
-          <Building2 className="w-3.5 h-3.5" />
-          <span>Facilities</span>
-        </button>
-
-        <button
-          onClick={() => onSelectTab('reports')}
-          className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full transition-all ${
-            activeTab === 'reports'
-              ? 'bg-teal-500 text-white shadow-sm font-bold'
-              : 'text-brand-text-secondary hover:text-brand-text hover:bg-white/60'
-          }`}
-        >
-          <AlertTriangle className="w-3.5 h-3.5" />
-          <span>Reports</span>
-        </button>
-
-        <button
-          onClick={() => onSelectTab('family')}
-          className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full transition-all relative ${
-            activeTab === 'family'
-              ? 'bg-teal-500 text-white shadow-sm font-bold'
-              : 'text-brand-text-secondary hover:text-brand-text hover:bg-white/60'
-          }`}
-        >
-          <Users className="w-3.5 h-3.5" />
-          <span>Family Trips</span>
-          {hasActiveJourney && (
-            <span className="w-2 h-2 rounded-full bg-teal-500 animate-ping absolute top-1 right-1" />
-          )}
-        </button>
-
-        <button
-          onClick={() => onSelectTab('civic')}
-          className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full transition-all ${
-            activeTab === 'civic'
-              ? 'bg-teal-500 text-white shadow-sm font-bold'
-              : 'text-brand-text-secondary hover:text-brand-text hover:bg-white/60'
-          }`}
-        >
-          <Layers className="w-3.5 h-3.5" />
-          <span>Civic</span>
-        </button>
+      <nav className="hidden lg:flex items-center gap-1 text-sm font-medium" aria-label="Main Navigation">
+        {navItems.map((item) => {
+          const isActive = activeTab === item.id;
+          return (
+            <button
+              key={item.id}
+              onClick={() => onSelectTab(item.id)}
+              className={`relative flex items-center gap-1.5 px-3.5 py-2 rounded-md transition-colors focus-ring-peacock ${
+                isActive
+                  ? 'text-ink font-bold'
+                  : 'text-text-secondary hover:text-ink hover:bg-paper'
+              }`}
+            >
+              {item.icon}
+              <span>{item.label}</span>
+              {item.id === 'family' && hasActiveJourney && (
+                <span
+                  className="w-2 h-2 rounded-full bg-peacock ml-0.5"
+                  title="Journey active"
+                  aria-label="Journey active"
+                />
+              )}
+              {/* Active ink underline indicator */}
+              {isActive && (
+                <span className="absolute bottom-0 left-3 right-3 h-[2px] bg-ink rounded-full" />
+              )}
+            </button>
+          );
+        })}
       </nav>
 
-      {/* Right Controls: New Report, Settings, and SOS */}
-      <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+      {/* Right Controls: Report, Settings, and Persistent SOS */}
+      <div className="flex items-center gap-2 sm:gap-3 shrink-0">
         <button
           onClick={onOpenReportModal}
-          className="hidden sm:flex items-center gap-1.5 py-2 px-3.5 rounded-full glass-crystal hover:border-teal-300 text-xs font-semibold text-brand-text hover:text-teal-700 transition-all active:scale-95"
-          title="Post a community report or streetlight issue"
+          className="hidden sm:inline-flex items-center gap-1.5 py-2 px-3.5 rounded-md bg-paper hover:bg-raised text-xs font-semibold text-ink border border-border transition-colors focus-ring-peacock"
+          title="Submit a community report or streetlight condition"
         >
-          <Plus className="w-3.5 h-3.5 text-teal-600" />
+          <Plus className="w-3.5 h-3.5 text-peacock" />
           <span>Report</span>
         </button>
 
         <button
           onClick={onOpenSettings}
-          className="p-2 sm:p-2.5 rounded-2xl glass-crystal text-brand-text-secondary hover:text-brand-text transition-all active:scale-95"
-          title="Preferences & Settings"
+          className="p-2 sm:p-2.5 rounded-md text-text-secondary hover:text-ink hover:bg-paper border border-transparent hover:border-border transition-colors focus-ring-peacock"
+          title="Settings and Privacy"
+          aria-label="Settings and Privacy"
         >
-          <SlidersHorizontal className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-text-secondary" />
+          <SlidersHorizontal className="w-4 h-4 text-text-secondary" />
         </button>
 
-        {/* SOS Emergency Button */}
+        {/* SOS Emergency Control - Restrained, high-contrast solid red, no animation at rest */}
         <button
           onClick={onOpenEmergency}
-          className="py-1.5 sm:py-2 px-3 sm:px-4 rounded-full bg-gradient-to-r from-danger-500 to-rose-600 hover:from-danger-600 hover:to-rose-700 active:scale-95 text-white font-extrabold text-[11px] sm:text-xs uppercase tracking-wider flex items-center gap-1 sm:gap-1.5 shadow-md shadow-danger-500/25 animate-pulse-subtle transition-all shrink-0"
-          title="Open Emergency SOS contacts"
+          className="btn-emergency-sos min-w-[64px] h-10 sm:h-10 px-3.5 sm:px-4 flex items-center justify-center gap-1.5 text-xs font-bold shadow-e1 focus-ring-peacock"
+          title="Open Emergency SOS"
+          aria-label="Emergency SOS"
         >
-          <PhoneCall className="w-3.5 h-3.5" />
-          <span>SOS</span>
+          <PhoneCall className="w-3.5 h-3.5 text-white" />
+          <span className="font-extrabold tracking-wider">SOS</span>
         </button>
       </div>
     </header>

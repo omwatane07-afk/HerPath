@@ -11,7 +11,7 @@ import {
   ChevronRight,
   ShieldCheck,
   CheckCircle2,
-  Sparkles,
+  Navigation,
 } from 'lucide-react';
 
 interface RouteCardProps {
@@ -19,6 +19,7 @@ interface RouteCardProps {
   isSelected: boolean;
   onSelect: () => void;
   onOpenDetails: () => void;
+  onStartTrip?: () => void;
 }
 
 export const RouteCard: React.FC<RouteCardProps> = ({
@@ -26,6 +27,7 @@ export const RouteCard: React.FC<RouteCardProps> = ({
   isSelected,
   onSelect,
   onOpenDetails,
+  onStartTrip,
 }) => {
   const minutes = Math.round(route.durationSeconds / 60);
   const distanceKm = (route.distanceMeters / 1000).toFixed(1);
@@ -34,146 +36,162 @@ export const RouteCard: React.FC<RouteCardProps> = ({
     minute: '2-digit',
   });
 
-  const getPerspectiveStyle = () => {
+  const isSynthetic = (route as any).source === 'synthetic_fallback' || route.steps.some((s) => s.instruction.includes('thoroughfare'));
+
+  // Get route perspective display label
+  const getPerspectiveLabel = () => {
     switch (route.perspective) {
       case 'better_supported':
-        return {
-          badgeBg: 'bg-teal-50 text-teal-800 border-teal-200/90 ring-1 ring-champagne-300/60',
-          ringColor: 'ring-teal-500/40',
-          borderSelected: 'border-teal-400 glass-pearl shadow-glass-pearl',
-          accentColor: 'text-teal-600',
-        };
+        return 'Better-Supported';
       case 'fastest':
-        return {
-          badgeBg: 'bg-lavender-50 text-purple-800 border-lavender-200/90',
-          ringColor: 'ring-purple-400/40',
-          borderSelected: 'border-purple-400 glass-pearl shadow-glass-pearl',
-          accentColor: 'text-purple-600',
-        };
+        return 'Fastest Path';
       case 'balanced':
       default:
-        return {
-          badgeBg: 'bg-powder-50 text-blue-800 border-powder-200/90',
-          ringColor: 'ring-blue-400/40',
-          borderSelected: 'border-blue-400 glass-pearl shadow-glass-pearl',
-          accentColor: 'text-blue-600',
-        };
+        return 'Balanced Route';
     }
   };
 
-  const style = getPerspectiveStyle();
-
   return (
-    <div
+    <article
       onClick={onSelect}
-      className={`p-4 rounded-royal border transition-all duration-200 cursor-pointer relative overflow-hidden ${
+      className={`p-4 rounded-card border transition-all cursor-pointer relative select-none focus-ring-peacock ${
         isSelected
-          ? `${style.borderSelected} ring-2 ${style.ringColor}`
-          : 'surface-pearl border-brand-border/80 hover:border-teal-200 hover:bg-white shadow-card'
+          ? 'bg-peacock-tint border-2 border-peacock shadow-e1'
+          : 'bg-white border-border hover:border-border-strong card-interactive shadow-e1'
       }`}
+      aria-selected={isSelected}
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSelect();
+        }
+      }}
     >
-      {/* Top perspective badge and duration */}
-      <div className="flex items-center justify-between gap-2 mb-2">
-        <span
-          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider border shadow-xs ${style.badgeBg}`}
-        >
-          {route.perspective === 'better_supported' && <ShieldCheck className="w-3.5 h-3.5 text-teal-600" />}
-          {route.perspective === 'fastest' && <Clock className="w-3.5 h-3.5 text-purple-600" />}
-          {route.perspective === 'balanced' && <Sparkles className="w-3.5 h-3.5 text-blue-600" />}
-          {route.name}
-        </span>
-        <div className="flex flex-col items-end">
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-xl font-black text-brand-text">{minutes}</span>
-            <span className="text-xs text-brand-text-secondary font-medium">min ({distanceKm} km)</span>
+      {/* Header Row: Priority + ETA */}
+      <div className="flex items-start justify-between gap-3 mb-2">
+        <div>
+          <div className="flex items-center gap-2">
+            <span
+              className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                isSelected
+                  ? 'bg-white text-peacock-dark border border-peacock/30 shadow-e1'
+                  : 'bg-paper text-ink border border-border'
+              }`}
+            >
+              {route.perspective === 'better_supported' && <ShieldCheck className="w-3.5 h-3.5 text-peacock" />}
+              {route.perspective === 'fastest' && <Clock className="w-3.5 h-3.5 text-ink" />}
+              {route.perspective === 'balanced' && <CheckCircle2 className="w-3.5 h-3.5 text-ink" />}
+              <span>{getPerspectiveLabel()}</span>
+            </span>
+
+            {/* Truthful Geometry Status */}
+            <span
+              className={`text-[11px] font-medium px-2 py-0.5 rounded border ${
+                isSynthetic
+                  ? 'bg-paper text-text-secondary border-border border-dashed'
+                  : 'bg-verified-tint text-verified border-verified/30'
+              }`}
+              title={isSynthetic ? 'Synthesized route corridor based on street layout' : 'Navigable geometry verified by OpenStreetMap OSRM'}
+            >
+              {isSynthetic ? 'Approximate path' : 'OSRM Verified'}
+            </span>
           </div>
-          <span className="text-[10px] text-teal-700 font-bold tracking-tight">ETA ~{arrivalTime}</span>
+
+          <h4 className="font-serif text-lg font-bold text-ink mt-1.5 leading-snug">
+            {route.summary || route.name}
+          </h4>
+        </div>
+
+        {/* Large ETA Figure */}
+        <div className="text-right shrink-0">
+          <div className="font-serif text-3xl font-bold text-ink leading-none">
+            {minutes}
+            <span className="font-sans text-xs font-medium text-text-secondary ml-1">min</span>
+          </div>
+          <div className="text-[12px] text-text-secondary mt-1 font-medium">
+            {distanceKm} km · ETA {arrivalTime}
+          </div>
         </div>
       </div>
 
-      {/* Route tagline */}
-      <p className="text-xs text-brand-text-secondary leading-relaxed line-clamp-2 mb-3 font-medium">
-        {route.tagline}
-      </p>
-
-      {/* Metrics Row (Translucent Glass Pills) */}
-      <div className="grid grid-cols-4 gap-1.5 py-2.5 px-2 rounded-2xl bg-white/70 border border-brand-border/70 backdrop-blur-sm mb-3 text-center shadow-inner-glass">
-        {/* Lighting */}
-        <div className="flex flex-col items-center">
-          <div className="flex items-center gap-1 text-[11px] text-amber-700 font-bold">
-            <Lightbulb className="w-3.5 h-3.5 text-amber-500" />
-            <span>{route.verifiedLightCount} lit</span>
-          </div>
-          <span className="text-[10px] text-brand-text-muted mt-0.5 font-medium">
-            {route.outageReportCount > 0 ? (
-              <span className="text-danger-600 font-semibold">{route.outageReportCount} out</span>
+      {/* Supporting Evidence Lines (Truthful data only) */}
+      <div className="mt-3 pt-3 border-t border-border/80 space-y-1.5 text-xs text-text-secondary">
+        <div className="flex items-center gap-2">
+          <Lightbulb className="w-3.5 h-3.5 text-caution shrink-0" />
+          <span>
+            {route.verifiedLightCount > 0 ? (
+              <>
+                <strong className="text-ink font-semibold">{route.verifiedLightCount} working streetlights</strong> documented along corridor
+                {route.outageReportCount > 0 && (
+                  <span className="text-danger font-semibold"> ({route.outageReportCount} reported out)</span>
+                )}
+              </>
             ) : (
-              '0 outages'
+              <span className="text-text-muted">No streetlight data recorded for this stretch</span>
             )}
           </span>
         </div>
 
-        {/* Facilities */}
-        <div className="flex flex-col items-center">
-          <div className="flex items-center gap-1 text-[11px] text-pink-700 font-bold">
-            <Building2 className="w-3.5 h-3.5 text-pink-500" />
-            <span>{route.nearbyFacilityCount}</span>
-          </div>
-          <span className="text-[10px] text-brand-text-muted mt-0.5 font-medium">Services</span>
-        </div>
-
-        {/* Transport */}
-        <div className="flex flex-col items-center">
-          <div className="flex items-center gap-1 text-[11px] text-blue-700 font-bold">
-            <Bus className="w-3.5 h-3.5 text-blue-500" />
-            <span>{route.transportStopsNearby}</span>
-          </div>
-          <span className="text-[10px] text-brand-text-muted mt-0.5 font-medium">Transit</span>
-        </div>
-
-        {/* Data Coverage */}
-        <div className="flex flex-col items-center">
-          <div className="flex items-center gap-1 text-[11px] text-teal-700 font-bold">
-            <CheckCircle2 className="w-3.5 h-3.5 text-teal-500" />
-            <span>{route.dataCoveragePercent}%</span>
-          </div>
-          <span className="text-[10px] text-brand-text-muted mt-0.5 font-medium">Coverage</span>
-        </div>
-      </div>
-
-      {/* Active disturbance warning if present */}
-      {route.activeConcernsCount > 0 && (
-        <div className="flex items-center gap-2 p-2.5 rounded-xl bg-danger-50 border border-danger-100 text-danger-700 text-xs mb-3">
-          <AlertTriangle className="w-4 h-4 shrink-0 text-danger-500" />
-          <span className="font-medium text-[11px]">
-            {route.activeConcernsCount} community disturbance concern(s) along this stretch
+        <div className="flex items-center gap-2">
+          <Building2 className="w-3.5 h-3.5 text-peacock shrink-0" />
+          <span>
+            {route.nearbyFacilityCount > 0 ? (
+              <>
+                <strong className="text-ink font-semibold">{route.nearbyFacilityCount} essential facilities</strong> (pharmacies, restrooms, police help desks)
+              </>
+            ) : (
+              <span className="text-text-muted">No open facilities mapped directly on route</span>
+            )}
           </span>
         </div>
-      )}
 
-      {/* Card Footer */}
-      <div className="flex items-center justify-between pt-2.5 border-t border-brand-border/70 text-xs">
-        <span className="text-[11px] text-brand-text-secondary flex items-center gap-1 font-medium">
-          {isSelected ? (
-            <span className="text-teal-700 font-bold flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-teal-500 ring-2 ring-teal-200 animate-pulse" />
-              Active on Map
-            </span>
-          ) : (
-            <span>Tap to view on map</span>
-          )}
-        </span>
+        {route.activeConcernsCount > 0 && (
+          <div className="flex items-center gap-2 text-danger font-medium">
+            <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-danger" />
+            <span>{route.activeConcernsCount} community report(s) noted nearby</span>
+          </div>
+        )}
+      </div>
+
+      {/* Footer Actions */}
+      <div className="mt-3.5 pt-2.5 border-t border-border/70 flex items-center justify-between text-xs">
         <button
+          type="button"
           onClick={(e) => {
             e.stopPropagation();
             onOpenDetails();
           }}
-          className="text-teal-700 hover:text-teal-900 font-bold flex items-center gap-1 text-xs py-1 px-3 rounded-full bg-teal-50/80 hover:bg-teal-100/80 border border-teal-200/70 transition-all shadow-xs"
+          className="text-peacock-dark hover:text-ink font-semibold flex items-center gap-1 focus-ring-peacock rounded py-1 px-1.5 -ml-1.5 transition-colors"
         >
           <span>Why this route?</span>
           <ChevronRight className="w-3.5 h-3.5" />
         </button>
+
+        <div className="flex items-center gap-2">
+          {onStartTrip && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onStartTrip();
+              }}
+              className="btn-ink px-3 py-1.5 text-xs flex items-center gap-1.5 shadow-e1"
+            >
+              <Navigation className="w-3 h-3 text-peacock-tint" />
+              <span>Start Trip</span>
+            </button>
+          )}
+
+          <span className="text-[11px] font-medium text-text-secondary">
+            {isSelected ? (
+              <span className="text-peacock-dark font-bold">Selected</span>
+            ) : (
+              <span>Select route</span>
+            )}
+          </span>
+        </div>
       </div>
-    </div>
+    </article>
   );
 };

@@ -32,6 +32,8 @@ import {
   AlertTriangle,
   HeartPulse,
   Crosshair,
+  Plus,
+  Minus,
 } from 'lucide-react';
 
 interface LeafletInnerMapProps {
@@ -61,7 +63,7 @@ interface LeafletInnerMapProps {
   onResolveReport?: (id: string) => void;
 }
 
-// Custom DivIcon Builders for pristine light-mode glass & soft rounded markers
+// Custom DivIcon Builder
 function createCustomMarkerIcon(html: string, className: string = '', size: [number, number] = [32, 32]) {
   return L.divIcon({
     html,
@@ -72,14 +74,16 @@ function createCustomMarkerIcon(html: string, className: string = '', size: [num
   });
 }
 
+// Origin: Ink pin with contrasting white border
 const originIcon = createCustomMarkerIcon(
-  `<div class="w-8 h-8 rounded-full bg-[#159F91] border-2 border-white shadow-float flex items-center justify-center text-white font-black text-xs ring-4 ring-teal-100/90">A</div>`,
+  `<div class="w-8 h-8 rounded-full bg-[#14213D] border-2 border-white shadow-e2 flex items-center justify-center text-white font-serif font-bold text-xs ring-2 ring-[#14213D]/20">A</div>`,
   '',
   [32, 32]
 );
 
+// Destination: Peacock pin with contrasting white border
 const destinationIcon = createCustomMarkerIcon(
-  `<div class="w-8 h-8 rounded-full bg-[#E11D48] border-2 border-white shadow-float flex items-center justify-center text-white font-black text-xs ring-4 ring-rose-100/90">B</div>`,
+  `<div class="w-8 h-8 rounded-full bg-[#0E7C86] border-2 border-white shadow-e2 flex items-center justify-center text-white font-serif font-bold text-xs ring-2 ring-[#0E7C86]/20">B</div>`,
   '',
   [32, 32]
 );
@@ -87,13 +91,13 @@ const destinationIcon = createCustomMarkerIcon(
 function getStreetlightIcon(status: string) {
   if (status === 'working' || status === 'resolved') {
     return createCustomMarkerIcon(
-      `<div class="w-7 h-7 rounded-full bg-white border border-amber-200 shadow-card flex items-center justify-center text-xs ring-2 ring-amber-100">💡</div>`,
+      `<div class="w-7 h-7 rounded-full bg-white border border-[#E3DCCD] shadow-e1 flex items-center justify-center text-xs text-[#1B6B4A]">💡</div>`,
       '',
       [28, 28]
     );
   }
   return createCustomMarkerIcon(
-    `<div class="w-7 h-7 rounded-full bg-white border border-rose-200 shadow-card flex items-center justify-center text-xs animate-pulse ring-2 ring-rose-100">⚠️</div>`,
+    `<div class="w-7 h-7 rounded-full bg-[#FDF1E0] border border-[#B25E00] shadow-e1 flex items-center justify-center text-xs text-[#B25E00]">⚠️</div>`,
     '',
     [28, 28]
   );
@@ -101,35 +105,22 @@ function getStreetlightIcon(status: string) {
 
 function getFacilityIcon(category: string) {
   let emoji = '🏢';
-  let ring = 'ring-teal-100';
-  let border = 'border-teal-200';
+  let border = 'border-[#E3DCCD]';
   if (category === 'womens_restroom') {
     emoji = '🚺';
-    ring = 'ring-pink-100';
-    border = 'border-pink-200';
   } else if (category === 'public_toilet') {
     emoji = '🚻';
-    ring = 'ring-cyan-100';
-    border = 'border-cyan-200';
   } else if (category === 'pharmacy') {
     emoji = '💊';
-    ring = 'ring-emerald-100';
-    border = 'border-emerald-200';
   } else if (category === 'hospital') {
     emoji = '🏥';
-    ring = 'ring-rose-100';
-    border = 'border-rose-200';
   } else if (category === 'police_station') {
-    emoji = '👮';
-    ring = 'ring-blue-100';
-    border = 'border-blue-200';
+    emoji = '🛡️';
   } else if (category === 'help_point') {
     emoji = 'ℹ️';
-    ring = 'ring-amber-100';
-    border = 'border-amber-200';
   }
   return createCustomMarkerIcon(
-    `<div class="w-7 h-7 rounded-full bg-white border ${border} shadow-card flex items-center justify-center text-xs ring-2 ${ring}">${emoji}</div>`,
+    `<div class="w-7 h-7 rounded-full bg-white border ${border} shadow-e1 flex items-center justify-center text-xs text-[#14213D]">${emoji}</div>`,
     '',
     [28, 28]
   );
@@ -137,7 +128,7 @@ function getFacilityIcon(category: string) {
 
 function getDisturbanceIcon(category: string) {
   return createCustomMarkerIcon(
-    `<div class="w-7 h-7 rounded-full bg-white border border-rose-300 shadow-card flex items-center justify-center text-xs ring-4 ring-rose-100/90 animate-bounce">⚡</div>`,
+    `<div class="w-7 h-7 rounded-full bg-[#FBE9EA] border border-[#A4161A] shadow-e1 flex items-center justify-center text-xs text-[#A4161A]">⚠️</div>`,
     '',
     [28, 28]
   );
@@ -146,7 +137,7 @@ function getDisturbanceIcon(category: string) {
 function getTransportIcon(type: string) {
   const emoji = type === 'metro_station' ? '🚇' : type === 'railway_station' ? '🚆' : '🚌';
   return createCustomMarkerIcon(
-    `<div class="w-7 h-7 rounded-full bg-white border border-softblue-200 shadow-card flex items-center justify-center text-xs ring-2 ring-softblue-100">${emoji}</div>`,
+    `<div class="w-7 h-7 rounded-full bg-white border border-[#1D5FA8]/30 shadow-e1 flex items-center justify-center text-xs text-[#1D5FA8]">${emoji}</div>`,
     '',
     [28, 28]
   );
@@ -170,22 +161,22 @@ function MapBoundsController({
     if (routes.length > 0 && routes[selectedRouteIndex]?.coordinates?.length > 0) {
       const coords = routes[selectedRouteIndex].coordinates;
       const bounds = L.latLngBounds(coords.map(([lat, lng]) => [lat, lng]));
-      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 16 });
+      map.fitBounds(bounds, { padding: [60, 60], maxZoom: 16 });
     } else if (origin && destination) {
       const bounds = L.latLngBounds([
         [origin.lat, origin.lng],
         [destination.lat, destination.lng],
       ]);
-      map.fitBounds(bounds, { padding: [60, 60], maxZoom: 15 });
+      map.fitBounds(bounds, { padding: [70, 70], maxZoom: 15 });
     } else if (origin) {
-      map.setView([origin.lat, origin.lng], 15);
+      map.panTo([origin.lat, origin.lng]);
     }
-  }, [routes, selectedRouteIndex, origin, destination, map]);
+  }, [map, routes, selectedRouteIndex, origin, destination]);
 
   return null;
 }
 
-// Click event listener on map
+// Map Click Listener
 function MapClickHandler({ onMapClick }: { onMapClick?: (coords: Coordinates) => void }) {
   useMapEvents({
     click(e) {
@@ -197,23 +188,24 @@ function MapClickHandler({ onMapClick }: { onMapClick?: (coords: Coordinates) =>
   return null;
 }
 
-// Floating crystal map controls (Zoom in, Zoom out, Recenter)
+// Consolidate zoom and re-center controls at bottom-right (≥44px targets)
 function CustomMapControls({ center }: { center: Coordinates }) {
   const map = useMap();
   return (
-    <div className="leaflet-bottom leaflet-right !mb-32 lg:!mb-20 !mr-4 z-[990] flex flex-col gap-2 pointer-events-auto">
-      {/* Zoom In & Out Stack */}
-      <div className="flex flex-col rounded-2xl glass-crystal border border-white/95 shadow-glass-crystal overflow-hidden">
+    <div className="leaflet-bottom leaflet-right !mb-28 lg:!mb-8 !mr-4 z-[990] flex flex-col gap-2 pointer-events-auto">
+      {/* Zoom In & Out Stack (44px touch targets) */}
+      <div className="flex flex-col rounded-lg bg-white border border-border shadow-e2 overflow-hidden">
         <button
           type="button"
           onClick={(e) => {
             e.stopPropagation();
             map.zoomIn();
           }}
-          className="w-10 h-10 flex items-center justify-center text-brand-text hover:bg-white/80 active:scale-95 transition-all border-b border-brand-border/60 text-lg font-bold"
-          title="Zoom In"
+          className="w-11 h-11 flex items-center justify-center text-ink hover:bg-paper active:bg-raised transition-colors border-b border-border text-base font-bold focus-ring-peacock"
+          title="Zoom in"
+          aria-label="Zoom in"
         >
-          +
+          <Plus className="w-4 h-4 text-ink" />
         </button>
         <button
           type="button"
@@ -221,24 +213,26 @@ function CustomMapControls({ center }: { center: Coordinates }) {
             e.stopPropagation();
             map.zoomOut();
           }}
-          className="w-10 h-10 flex items-center justify-center text-brand-text hover:bg-white/80 active:scale-95 transition-all text-lg font-bold"
-          title="Zoom Out"
+          className="w-11 h-11 flex items-center justify-center text-ink hover:bg-paper active:bg-raised transition-colors text-base font-bold focus-ring-peacock"
+          title="Zoom out"
+          aria-label="Zoom out"
         >
-          −
+          <Minus className="w-4 h-4 text-ink" />
         </button>
       </div>
 
-      {/* Re-center / GPS Location Tool */}
+      {/* Re-center / GPS Location Tool (44px target) */}
       <button
         type="button"
         onClick={(e) => {
           e.stopPropagation();
           map.setView([center.lat, center.lng], 15, { animate: true });
         }}
-        className="w-10 h-10 rounded-2xl glass-crystal border border-white/95 shadow-glass-crystal flex items-center justify-center text-teal-700 hover:text-teal-900 hover:bg-white active:scale-95 transition-all group"
-        title="Re-center on Corridor"
+        className="w-11 h-11 rounded-lg bg-white border border-border shadow-e2 flex items-center justify-center text-ink hover:bg-paper active:bg-raised transition-colors focus-ring-peacock"
+        title="Re-center map"
+        aria-label="Re-center map"
       >
-        <Crosshair className="w-4 h-4 text-teal-600 group-hover:rotate-45 transition-transform" />
+        <Crosshair className="w-4 h-4 text-peacock" />
       </button>
     </div>
   );
@@ -297,11 +291,11 @@ export const LeafletInnerMap: React.FC<LeafletInnerMapProps> = ({
         <Marker position={[origin.lat, origin.lng]} icon={originIcon}>
           <Popup className="herpath-popup">
             <div className="p-1">
-              <span className="text-[10px] uppercase font-bold text-emerald-600 tracking-wider">
-                Origin / Start
+              <span className="text-[10px] uppercase font-bold text-ink tracking-wider">
+                Starting Point (A)
               </span>
-              <h4 className="font-bold text-sm text-brand-text mt-0.5">{originName || 'Starting Point'}</h4>
-              <p className="text-[11px] text-brand-text-secondary font-mono mt-0.5">
+              <h4 className="font-serif font-bold text-sm text-ink mt-0.5">{originName || 'Starting Point'}</h4>
+              <p className="text-[11px] text-text-secondary font-mono mt-0.5">
                 {origin.lat.toFixed(4)}, {origin.lng.toFixed(4)}
               </p>
             </div>
@@ -314,11 +308,11 @@ export const LeafletInnerMap: React.FC<LeafletInnerMapProps> = ({
         <Marker position={[destination.lat, destination.lng]} icon={destinationIcon}>
           <Popup className="herpath-popup">
             <div className="p-1">
-              <span className="text-[10px] uppercase font-bold text-danger-600 tracking-wider">
-                Destination
+              <span className="text-[10px] uppercase font-bold text-peacock-dark tracking-wider">
+                Destination (B)
               </span>
-              <h4 className="font-bold text-sm text-brand-text mt-0.5">{destinationName || 'Destination Point'}</h4>
-              <p className="text-[11px] text-brand-text-secondary font-mono mt-0.5">
+              <h4 className="font-serif font-bold text-sm text-ink mt-0.5">{destinationName || 'Destination'}</h4>
+              <p className="text-[11px] text-text-secondary font-mono mt-0.5">
                 {destination.lat.toFixed(4)}, {destination.lng.toFixed(4)}
               </p>
             </div>
@@ -329,36 +323,31 @@ export const LeafletInnerMap: React.FC<LeafletInnerMapProps> = ({
       {/* Render Routes */}
       {routes.map((route, idx) => {
         const isSelected = idx === selectedRouteIndex;
-        // Styling based on perspective (Royal Soft Glass palette)
-        let color = '#94A3B8'; // soft slate
-        if (isSelected) {
-          if (route.perspective === 'better_supported') color = '#159F91'; // Royal Teal
-          else if (route.perspective === 'fastest') color = '#7C3AED'; // Royal Purple
-          else color = '#2563EB'; // Royal Blue
-        }
+        const isSynthetic = (route as any).source === 'synthetic_fallback' || route.steps.some((s) => s.instruction.includes('thoroughfare'));
 
         return (
           <React.Fragment key={route.id}>
-            {/* Outer halo outline for selected route */}
+            {/* White halo casing for separation (selected route) */}
             {isSelected && (
               <Polyline
                 positions={route.coordinates}
                 pathOptions={{
                   color: '#FFFFFF',
-                  weight: 9,
+                  weight: 10,
                   opacity: 0.95,
                   lineCap: 'round',
                   lineJoin: 'round',
                 }}
               />
             )}
+            {/* Route Polyline: Peacock #0E7C86 for selected, Slate #55607A for alternates */}
             <Polyline
               positions={route.coordinates}
               pathOptions={{
-                color: color,
-                weight: isSelected ? 5.5 : 3.5,
-                opacity: isSelected ? 1 : 0.65,
-                dashArray: isSelected ? undefined : '5, 8',
+                color: isSelected ? '#0E7C86' : '#55607A',
+                weight: isSelected ? 6 : 3.5,
+                opacity: isSelected ? 1 : 0.55,
+                dashArray: isSynthetic ? '8, 8' : undefined,
                 lineCap: 'round',
                 lineJoin: 'round',
               }}
@@ -367,25 +356,18 @@ export const LeafletInnerMap: React.FC<LeafletInnerMapProps> = ({
               }}
             >
               <Popup className="herpath-popup">
-                <div className="p-1 max-w-xs">
-                  <span className="text-[10px] uppercase font-bold text-teal-600 tracking-wider">
+                <div className="p-1 space-y-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-peacock-dark">
                     {route.name}
                   </span>
-                  <div className="text-sm font-bold text-brand-text mt-0.5">{route.summary}</div>
-                  <div className="text-xs text-brand-text-secondary mt-1 flex gap-3 font-medium">
-                    <span>⏱️ {Math.round(route.durationSeconds / 60)} min</span>
-                    <span>📏 {(route.distanceMeters / 1000).toFixed(1)} km</span>
+                  <div className="font-serif font-bold text-sm text-ink">{route.summary}</div>
+                  <div className="text-xs text-text-secondary">
+                    {Math.round(route.durationSeconds / 60)} min · {(route.distanceMeters / 1000).toFixed(1)} km
                   </div>
-                  <p className="text-[11px] text-brand-text-secondary mt-1.5 leading-relaxed">
-                    {route.relativeScoreDescription}
-                  </p>
-                  {!isSelected && (
-                    <button
-                      onClick={() => onSelectRouteIndex(idx)}
-                      className="mt-2.5 w-full py-1.5 px-3 text-xs font-bold bg-teal-500 hover:bg-teal-600 text-white rounded-xl transition-colors shadow-sm"
-                    >
-                      Select this Route
-                    </button>
+                  {isSynthetic && (
+                    <div className="text-[10px] text-text-secondary bg-paper px-1.5 py-0.5 rounded border border-border inline-block">
+                      Approximate path model
+                    </div>
                   )}
                 </div>
               </Popup>
@@ -394,7 +376,7 @@ export const LeafletInnerMap: React.FC<LeafletInnerMapProps> = ({
         );
       })}
 
-      {/* Streetlights Layer */}
+      {/* Streetlight Markers Layer */}
       {activeLayers.streetlights &&
         streetlights.map((sl) => (
           <Marker
@@ -403,23 +385,22 @@ export const LeafletInnerMap: React.FC<LeafletInnerMapProps> = ({
             icon={getStreetlightIcon(sl.status)}
           >
             <Popup className="herpath-popup">
-              <div className="p-1 space-y-1.5 min-w-[210px]">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-[10px] uppercase font-bold text-brand-text-muted">Streetlight</span>
+              <div className="p-1 space-y-1.5 min-w-[200px]">
+                <div className="flex items-center justify-between">
                   <StreetlightStatusBadge status={sl.status} />
-                </div>
-                <h4 className="font-bold text-sm text-brand-text leading-snug">{sl.segmentName}</h4>
-                <div className="text-xs text-brand-text-secondary">{sl.notes || 'Infrastructure pole record'}</div>
-                <div className="pt-1.5 border-t border-brand-border flex items-center justify-between text-[11px] text-brand-text-secondary">
                   <DataSourceBadge source={sl.reportedSource} />
-                  <span>{formatRelativeTime(sl.lastReportedAt)}</span>
+                </div>
+                <h4 className="font-bold text-xs text-ink">{sl.segmentName}</h4>
+                {sl.notes && <p className="text-[11px] text-text-secondary">{sl.notes}</p>}
+                <div className="text-[10px] text-text-secondary pt-1 border-t border-border">
+                  Reported {formatRelativeTime(sl.lastReportedAt)}
                 </div>
               </div>
             </Popup>
           </Marker>
         ))}
 
-      {/* Facilities Layer */}
+      {/* Facility Markers Layer */}
       {activeLayers.facilities &&
         facilities.map((fac) => (
           <Marker
@@ -428,37 +409,28 @@ export const LeafletInnerMap: React.FC<LeafletInnerMapProps> = ({
             icon={getFacilityIcon(fac.category)}
           >
             <Popup className="herpath-popup">
-              <div className="p-1 space-y-1.5 min-w-[220px]">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-[10px] uppercase font-bold text-teal-600">
+              <div className="p-1 space-y-2 min-w-[220px]">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] uppercase font-bold text-peacock-dark">
                     {fac.category.replace(/_/g, ' ')}
                   </span>
                   <DataSourceBadge source={fac.source} />
                 </div>
-                <h4 className="font-bold text-sm text-brand-text leading-tight">{fac.name}</h4>
-                <div className="text-xs text-brand-text-secondary">{fac.address}</div>
-                {fac.openingHours && (
-                  <div className="text-xs text-brand-text-secondary font-mono">🕒 {fac.openingHours}</div>
-                )}
-                <div className="flex flex-wrap gap-1 mt-1 text-[11px]">
-                  {fac.isAccessible && (
-                    <span className="px-2 py-0.5 rounded-full bg-teal-50 text-teal-700 font-semibold border border-teal-200">
-                      ♿ Accessible
-                    </span>
-                  )}
-                  {fac.hasFemaleStaff && (
-                    <span className="px-2 py-0.5 rounded-full bg-pink-50 text-pink-700 font-semibold border border-pink-200">
-                      👩 Female Staff On Duty
-                    </span>
-                  )}
+                <div>
+                  <h4 className="font-serif font-bold text-sm text-ink">{fac.name}</h4>
+                  <p className="text-[11px] text-text-secondary mt-0.5">{fac.address}</p>
+                </div>
+                <div className="text-[11px] text-text-secondary">
+                  <strong>Hours:</strong> {fac.openingHours || 'Hours not listed'}
                 </div>
                 {onSetAsDestination && (
                   <button
+                    type="button"
                     onClick={() => onSetAsDestination(fac.coordinates, fac.name)}
-                    className="mt-2.5 w-full py-1.5 px-3 text-xs font-bold bg-teal-500 hover:bg-teal-600 text-white rounded-xl transition-colors flex items-center justify-center gap-1.5 shadow-sm"
+                    className="w-full btn-ink py-1.5 px-3 text-xs flex items-center justify-center gap-1.5"
                   >
-                    <Navigation className="w-3.5 h-3.5" />
-                    <span>Get Directions Here</span>
+                    <Navigation className="w-3 h-3 text-peacock-tint" />
+                    <span>Get Directions</span>
                   </button>
                 )}
               </div>
@@ -466,10 +438,10 @@ export const LeafletInnerMap: React.FC<LeafletInnerMapProps> = ({
           </Marker>
         ))}
 
-      {/* Community Reports Layer */}
+      {/* Community Disturbance Markers Layer */}
       {activeLayers.reports &&
         reports
-          .filter((rep) => rep.status !== 'resolved')
+          .filter((r) => r.status !== 'resolved')
           .map((rep) => (
             <Marker
               key={rep.id}
@@ -477,46 +449,45 @@ export const LeafletInnerMap: React.FC<LeafletInnerMapProps> = ({
               icon={getDisturbanceIcon(rep.category)}
             >
               <Popup className="herpath-popup">
-                <div className="p-1 space-y-2 min-w-[240px]">
-                  <div className="flex items-center justify-between gap-1">
+                <div className="p-1 space-y-2 min-w-[220px]">
+                  <div className="flex items-center justify-between">
                     <DisturbanceCategoryLabel category={rep.category} />
-                    <DataSourceBadge source={rep.source} />
+                    <span className="text-[10px] text-text-secondary">
+                      {formatRelativeTime(rep.createdAt)}
+                    </span>
                   </div>
-                  <h4 className="font-bold text-sm text-brand-text leading-tight">
-                    {rep.locationName}
-                  </h4>
-                  <p className="text-xs text-brand-text-secondary italic bg-brand-bg p-2 rounded-xl border border-brand-border">
-                    "{rep.description}"
-                  </p>
-                  <div className="flex items-center justify-between text-xs text-brand-text-secondary pt-1.5 border-t border-brand-border">
-                    <span>{formatRelativeTime(rep.createdAt)}</span>
-                    <div className="flex items-center gap-2">
-                      {onUpvoteReport && (
-                        <button
-                          onClick={() => onUpvoteReport(rep.id)}
-                          className="px-2 py-1 rounded-lg bg-brand-bg hover:bg-brand-bg-secondary text-brand-text text-xs font-semibold border border-brand-border transition-colors"
-                          title="Corroborate report"
-                        >
-                          👍 {rep.upvotes}
-                        </button>
-                      )}
-                      {onResolveReport && (
-                        <button
-                          onClick={() => onResolveReport(rep.id)}
-                          className="px-2.5 py-1 rounded-lg bg-teal-50 hover:bg-teal-100 text-teal-700 text-xs font-bold transition-colors"
-                          title="Mark resolved"
-                        >
-                          Clear
-                        </button>
-                      )}
-                    </div>
+                  <div>
+                    <h4 className="font-bold text-xs text-ink">{rep.locationName}</h4>
+                    <p className="text-[11px] text-text-secondary mt-0.5">{rep.description}</p>
+                  </div>
+                  {/* Community Corroboration Actions */}
+                  <div className="flex gap-2 pt-1 border-t border-border">
+                    {onUpvoteReport && (
+                      <button
+                        type="button"
+                        onClick={() => onUpvoteReport(rep.id)}
+                        className="btn-secondary flex-1 py-1 px-2 text-[11px]"
+                      >
+                        Still an issue ({rep.upvotes})
+                      </button>
+                    )}
+                    {onFlagReport && (
+                      <button
+                        type="button"
+                        onClick={() => onFlagReport(rep.id)}
+                        className="btn-secondary py-1 px-2 text-[11px] text-text-secondary"
+                        title="Flag inaccurate report"
+                      >
+                        Flag
+                      </button>
+                    )}
                   </div>
                 </div>
               </Popup>
             </Marker>
           ))}
 
-      {/* Public Transport Layer */}
+      {/* Transport Stops Layer */}
       {activeLayers.transport &&
         transportStops.map((trn) => (
           <Marker
@@ -525,32 +496,24 @@ export const LeafletInnerMap: React.FC<LeafletInnerMapProps> = ({
             icon={getTransportIcon(trn.type)}
           >
             <Popup className="herpath-popup">
-              <div className="p-1 space-y-1.5 min-w-[210px]">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-[10px] uppercase font-bold text-softblue-500">
+              <div className="p-1 space-y-1.5 min-w-[200px]">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] uppercase font-bold text-info">
                     {trn.type.replace(/_/g, ' ')}
                   </span>
                   <DataSourceBadge source={trn.source} />
                 </div>
-                <h4 className="font-bold text-sm text-brand-text leading-tight">{trn.name}</h4>
-                <div className="text-xs text-brand-text-secondary">
-                  Lines: {trn.lines.join(', ') || 'Regional Transit'}
-                </div>
-                <div className="flex flex-wrap gap-1 mt-1 text-[11px]">
-                  {trn.hasWomensCoach && (
-                    <span className="px-2 py-0.5 rounded-full bg-pink-50 text-pink-700 font-semibold border border-pink-200">
-                      🚺 Women's Coach Available
-                    </span>
-                  )}
-                  {trn.hasCCTV && (
-                    <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-semibold border border-blue-200">
-                      📹 CCTV Monitored
-                    </span>
-                  )}
-                </div>
-                <p className="text-[10px] text-brand-text-muted italic pt-1">
-                  *Static mapped location. Live real-time arrivals unverified.
-                </p>
+                <h4 className="font-bold text-xs text-ink">{trn.name}</h4>
+                {trn.hasWomensCoach && (
+                  <div className="text-[10px] font-semibold text-peacock-dark bg-peacock-tint px-2 py-0.5 rounded">
+                    Designated Women’s Coach Available
+                  </div>
+                )}
+                {trn.lines.length > 0 && (
+                  <div className="text-[11px] text-text-secondary">
+                    Lines: {trn.lines.join(', ')}
+                  </div>
+                )}
               </div>
             </Popup>
           </Marker>

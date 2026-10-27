@@ -12,6 +12,10 @@ import {
   Phone,
   Share2,
   Check,
+  Clock,
+  Shield,
+  Eye,
+  Info,
 } from 'lucide-react';
 
 interface FamilyTripsViewProps {
@@ -33,194 +37,229 @@ export const FamilyTripsView: React.FC<FamilyTripsViewProps> = ({
 
   const handleShare = () => {
     if (!activeJourney) return;
-    const url = `${window.location.origin}?journey=${activeJourney.shareToken}`;
+    const url = `${typeof window !== 'undefined' ? window.location.origin : ''}?journey=${activeJourney.shareToken}`;
     navigator.clipboard.writeText(
-      `Following my journey to ${activeJourney.destinationName}. Live link: ${url}`
+      `Following my journey to ${activeJourney.destinationName}. Local demo link: ${url}`
     );
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   return (
-    <div className="flex flex-col h-full bg-brand-bg text-brand-text overflow-y-auto w-full">
+    <div className="flex flex-col h-full bg-paper text-ink overflow-y-auto w-full">
       {/* Header */}
-      <div className="p-3.5 sm:p-5 border-b border-brand-border/70 glass-pearl flex items-center justify-between">
+      <div className="p-4 sm:p-5 border-b border-border bg-white shadow-e1 flex items-center justify-between">
         <div>
-          <h2 className="text-base sm:text-lg font-black text-brand-text flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center border border-teal-200/90 shadow-xs ring-1 ring-champagne-300/60">
-              <Users className="w-4 h-4 text-teal-600" />
-            </div>
-            <span>Family Journey Companion</span>
-          </h2>
-          <p className="text-[11px] sm:text-xs text-brand-text-secondary mt-1 font-medium leading-relaxed">
-            Explicit, consent-based trip sharing for peace of mind
+          <h2 className="font-serif text-xl font-bold text-ink">Family Journey Companion</h2>
+          <p className="text-xs text-text-secondary mt-0.5">
+            Explicit, user-controlled trip sharing with trusted contacts.
           </p>
         </div>
         {!activeJourney && (
           <button
+            type="button"
             onClick={onOpenStartJourneyModal}
-            className="flex items-center gap-1.5 py-2 px-3.5 rounded-full bg-gradient-to-r from-teal-500 to-teal-700 hover:from-teal-600 hover:to-teal-800 text-white font-bold text-xs uppercase tracking-wider shadow-xs transition-all active:scale-95"
+            className="btn-ink py-2 px-3.5 text-xs font-semibold flex items-center gap-1.5 shadow-e1"
           >
-            <Compass className="w-3.5 h-3.5" />
-            <span>Start Trip</span>
+            <Compass className="w-3.5 h-3.5 text-peacock-tint" />
+            <span>Start a trip</span>
           </button>
         )}
       </div>
 
-      <div className="p-3.5 sm:p-5 space-y-4 sm:space-y-5 pb-24 lg:pb-8">
+      <div className="p-4 sm:p-5 space-y-4 pb-24 lg:pb-8">
+        {/* Trusted Contacts Section (Always Displayed Above the Fold) */}
+        <section aria-labelledby="trusted-contacts-heading" className="space-y-2.5">
+          <div className="flex items-center justify-between">
+            <h3 id="trusted-contacts-heading" className="font-serif text-base font-bold text-ink">
+              Trusted Contacts
+            </h3>
+            <button
+              type="button"
+              onClick={onOpenAddContact}
+              className="text-peacock-dark hover:text-ink text-xs font-semibold flex items-center gap-1"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Add contact</span>
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            {trustedContacts.map((contact) => (
+              <div
+                key={contact.id}
+                className="surface-card p-3 flex items-center justify-between gap-3 shadow-e1"
+              >
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <h4 className="font-bold text-sm text-ink truncate">{contact.name}</h4>
+                    {contact.isEmergencyAlertContact && (
+                      <span className="text-[10px] font-semibold text-danger bg-danger-tint px-1.5 py-0.2 rounded border border-danger/30">
+                        SOS
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-text-secondary mt-0.5">
+                    {contact.relation} · {contact.phone}
+                  </p>
+                  <div className="text-[10px] text-text-muted mt-1">
+                    Delivery state: <span className="font-medium">Device local / Unknown</span>
+                  </div>
+                </div>
+
+                <a
+                  href={`tel:${contact.phone.replace(/[^0-9+]/g, '')}`}
+                  className="btn-secondary min-h-[44px] min-w-[44px] px-3.5 flex items-center justify-center gap-1.5 text-xs font-semibold shrink-0"
+                  aria-label={`Call ${contact.name}`}
+                >
+                  <Phone className="w-3.5 h-3.5 text-ink" />
+                  <span>Call</span>
+                </a>
+              </div>
+            ))}
+          </div>
+        </section>
+
         {/* Active Journey Card or Empty State */}
         {activeJourney ? (
-          <div className="p-5 rounded-royal glass-pearl border border-teal-200/90 shadow-glass-pearl space-y-4">
+          <section aria-labelledby="active-trip-heading" className="surface-card p-5 space-y-4 shadow-e1">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] uppercase font-bold tracking-wider px-3 py-1 rounded-full bg-teal-50 border border-teal-200 text-teal-700 shadow-xs flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-teal-500 ring-2 ring-teal-200 animate-pulse" />
-                Live Trip Active
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold bg-peacock-tint text-peacock-dark border border-peacock/30">
+                <span className="w-2 h-2 rounded-full bg-peacock" />
+                Trip Sharing Active
               </span>
-              <span className="text-xs text-brand-text-secondary font-medium">
-                Created {formatRelativeTime(activeJourney.createdAt)}
+              <span className="text-xs text-text-secondary font-medium">
+                Started {formatRelativeTime(activeJourney.createdAt)}
               </span>
             </div>
 
             <div>
-              <div className="text-xs text-brand-text-muted font-bold uppercase tracking-wider">
+              <div className="text-xs font-semibold text-text-secondary uppercase tracking-wider">
                 Destination
               </div>
-              <h3 className="text-xl font-black text-brand-text leading-tight mt-0.5">
+              <h3 id="active-trip-heading" className="font-serif text-xl font-bold text-ink mt-0.5">
                 {activeJourney.destinationName}
               </h3>
-              <p className="text-xs text-brand-text-secondary mt-0.5 font-medium">
-                From: {activeJourney.originName}
+              <p className="text-xs text-text-secondary mt-0.5">
+                Starting from: {activeJourney.originName}
               </p>
             </div>
 
-            {/* Checkpoints Timeline */}
-            <div className="pt-3 border-t border-brand-border/70">
-              <div className="text-xs font-bold uppercase tracking-wider text-brand-text-muted mb-2.5">
+            {/* Explicit Breakdown of What's Shared & Privacy Scope */}
+            <div className="p-3.5 rounded-lg bg-raised border border-border text-xs space-y-2">
+              <h4 className="font-bold text-xs text-ink flex items-center gap-1.5">
+                <Eye className="w-3.5 h-3.5 text-peacock" />
+                <span>What information is shared</span>
+              </h4>
+              <ul className="space-y-1 text-text-secondary">
+                <li className="flex items-start gap-1.5">
+                  <span className="text-ink font-bold">•</span>
+                  <span><strong>Viewer:</strong> {activeJourney.trustedContact?.name || 'Trusted Contact'} ({activeJourney.trustedContact?.phone || 'No phone recorded'})</span>
+                </li>
+                <li className="flex items-start gap-1.5">
+                  <span className="text-ink font-bold">•</span>
+                  <span><strong>Shared data:</strong> Destination name, planned corridor, and periodic check-in status</span>
+                </li>
+                <li className="flex items-start gap-1.5">
+                  <span className="text-ink font-bold">•</span>
+                  <span><strong>Check-in frequency:</strong> Every {activeJourney.checkInIntervalMinutes} minutes</span>
+                </li>
+                <li className="flex items-start gap-1.5">
+                  <span className="text-ink font-bold">•</span>
+                  <span><strong>Sharing expires:</strong> Automatically upon marked safe arrival or when stopped below</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Checkpoints Audit Log */}
+            <div className="pt-3 border-t border-border">
+              <div className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-2">
                 Check-in Audit Log ({activeJourney.checkIns.length} recorded)
               </div>
-              <div className="space-y-2">
-                {activeJourney.checkIns.map((chk) => (
+              <div className="space-y-1.5">
+                {activeJourney.checkIns.slice(0, 4).map((chk) => (
                   <div
                     key={chk.id}
-                    className="flex items-start gap-2.5 p-3 rounded-2xl bg-white/80 border border-brand-border/80 text-xs shadow-xs"
+                    className="flex items-center justify-between p-2 rounded-md bg-paper border border-border text-xs"
                   >
-                    <CheckCircle2 className="w-4 h-4 text-teal-600 shrink-0 mt-0.5" />
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-brand-text">
-                          {chk.status === 'arrived' ? 'Arrived at Destination' : 'Checkpoint Confirmed Safe'}
-                        </span>
-                        <span className="text-[10px] text-brand-text-muted font-medium">
-                          {formatRelativeTime(chk.timestamp)}
-                        </span>
-                      </div>
-                      {chk.note && (
-                        <p className="text-[11px] text-brand-text-secondary mt-0.5 font-medium">
-                          {chk.note}
-                        </p>
-                      )}
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-verified" />
+                      <span className="font-semibold text-ink">
+                        {chk.status === 'arrived' ? 'Arrived Safely' : 'Periodic Confirmation'}
+                      </span>
                     </div>
+                    <span className="text-text-secondary text-[11px]">
+                      {new Date(chk.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Actions */}
-            <div className="pt-3 border-t border-brand-border/70 flex items-center justify-between gap-2">
-              <button
-                onClick={handleShare}
-                className="py-2 px-3.5 rounded-full bg-white/80 hover:bg-white text-xs font-bold text-brand-text flex items-center gap-1.5 border border-brand-border transition-colors shadow-xs active:scale-95"
-              >
-                {copied ? <Check className="w-3.5 h-3.5 text-teal-600" /> : <Share2 className="w-3.5 h-3.5" />}
-                <span>{copied ? 'Link Copied' : 'Share Link'}</span>
-              </button>
-
-              <button
-                onClick={onEndJourney}
-                className="py-2 px-4 rounded-full bg-danger-50 hover:bg-danger-100 text-xs font-bold text-danger-700 border border-danger-200 transition-colors active:scale-95"
-              >
-                End & Stop Sharing
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="p-8 rounded-royal surface-pearl border border-dashed border-brand-border/80 text-center space-y-3 shadow-card">
-            <div className="w-14 h-14 rounded-2xl bg-teal-50 text-teal-600 mx-auto flex items-center justify-center border border-teal-200 shadow-xs ring-1 ring-champagne-300/60">
-              <Compass className="w-7 h-7 stroke-1 text-teal-600" />
-            </div>
-            <div>
-              <h3 className="font-bold text-sm text-brand-text">No Active Journey Sharing</h3>
-              <p className="text-xs text-brand-text-secondary max-w-xs mx-auto mt-1 leading-relaxed">
-                Plan a route and start a family companion trip to share automated check-ins and
-                expected arrival reminders with trusted contacts.
+            {/* Sharing Link & Honest Notice */}
+            <div className="p-3 rounded-lg bg-paper border border-border text-xs space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-ink">Journey Access Link</span>
+                <button
+                  type="button"
+                  onClick={handleShare}
+                  className="btn-secondary py-1 px-2.5 text-xs flex items-center gap-1"
+                >
+                  {copied ? <Check className="w-3.5 h-3.5 text-peacock" /> : <Share2 className="w-3.5 h-3.5" />}
+                  <span>{copied ? 'Link Copied' : 'Copy Link'}</span>
+                </button>
+              </div>
+              <p className="text-[11px] text-text-secondary leading-relaxed">
+                *Link copied. In this local evaluation environment, data is persisted in browser storage and is not transmitted over an SMS or cloud server.
               </p>
             </div>
+
+            {/* Stop Sharing Button (Always visible and accessible) */}
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={onEndJourney}
+                className="w-full py-2.5 px-4 rounded-lg bg-white border-2 border-danger text-xs font-bold text-danger hover:bg-danger-tint transition-colors focus-ring-peacock"
+              >
+                Stop sharing journey
+              </button>
+            </div>
+          </section>
+        ) : (
+          /* Empty State: Restrained clay illustration + explanation + Start Trip */
+          <div className="surface-card p-6 text-center space-y-4 shadow-e1">
+            {/* Inline SVG Isometric/Hand-authored illustration in Clay + Ink style */}
+            <div className="w-24 h-24 mx-auto flex items-center justify-center">
+              <svg width="80" height="80" viewBox="0 0 80 80" fill="none" aria-hidden="true">
+                <rect x="15" y="25" width="50" height="40" rx="8" fill="#F8F4EC" stroke="#14213D" strokeWidth="2" />
+                <path d="M15 45L40 32L65 45" stroke="#D8A58E" strokeWidth="2.5" strokeLinecap="round" />
+                <circle cx="40" cy="32" r="5" fill="#0E7C86" stroke="#FFFFFF" strokeWidth="1.5" />
+                <circle cx="28" cy="52" r="3" fill="#D8A58E" />
+                <circle cx="52" cy="52" r="3" fill="#14213D" />
+                <path d="M28 52H52" stroke="#B9AF99" strokeWidth="1.5" strokeDasharray="3 3" />
+              </svg>
+            </div>
+            <p className="text-[10px] uppercase font-bold text-text-muted tracking-wider">
+              Illustration, not a map record
+            </p>
+
+            <div>
+              <h3 className="font-serif text-lg font-bold text-ink">No Journey Currently Running</h3>
+              <p className="text-xs text-text-secondary mt-1 max-w-sm mx-auto leading-relaxed">
+                When you depart, start a journey to share your route and check-in timeline with trusted contacts. You control who sees your trip and can stop sharing anytime.
+              </p>
+            </div>
+
             <button
+              type="button"
               onClick={onOpenStartJourneyModal}
-              className="py-2.5 px-5 rounded-full bg-gradient-to-r from-teal-500 to-teal-700 hover:from-teal-600 hover:to-teal-800 text-white font-bold text-xs uppercase tracking-wider shadow-xs transition-all active:scale-95"
+              className="btn-ink py-2.5 px-6 text-xs font-bold shadow-e1 inline-flex items-center gap-2"
             >
-              Start New Journey
+              <Compass className="w-4 h-4 text-peacock-tint" />
+              <span>Start a trip</span>
             </button>
           </div>
         )}
-
-        {/* Trusted Contacts Management */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-brand-text-muted">
-              Configured Trusted Contacts ({trustedContacts.length})
-            </h3>
-            <button
-              onClick={onOpenAddContact}
-              className="text-[11px] text-teal-800 hover:text-teal-900 font-bold flex items-center gap-1 bg-teal-50 px-3 py-1 rounded-full border border-teal-200/80 shadow-xs"
-            >
-              <Plus className="w-3 h-3 text-teal-600" />
-              <span>Add Contact</span>
-            </button>
-          </div>
-
-          <div className="space-y-2">
-            {trustedContacts.map((contact) => (
-              <div
-                key={contact.id}
-                className="p-3.5 rounded-royal surface-pearl border border-brand-border/80 shadow-card flex items-center justify-between text-xs"
-              >
-                <div>
-                  <div className="font-bold text-brand-text flex items-center gap-2">
-                    <span>{contact.name}</span>
-                    {contact.isEmergencyAlertContact && (
-                      <span className="px-2 py-0.5 rounded-full text-[10px] bg-danger-50 text-danger-700 border border-danger-200 font-bold">
-                        Primary SOS
-                      </span>
-                    )}
-                  </div>
-                  <div className="text-[11px] text-brand-text-secondary mt-0.5 font-medium">
-                    {contact.relation} • {contact.phone}
-                  </div>
-                </div>
-                <a
-                  href={`tel:${contact.phone.replace(/[^0-9+]/g, '')}`}
-                  className="p-2.5 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-700 border border-teal-200/80 transition-colors shadow-xs"
-                  title="Call contact"
-                >
-                  <Phone className="w-4 h-4 text-teal-600" />
-                </a>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Privacy & Anti-surveillance statement */}
-        <div className="p-4 rounded-royal bg-teal-50/70 border border-teal-100 text-[11px] text-teal-900 space-y-1 font-medium shadow-xs">
-          <div className="flex items-center gap-1.5 text-teal-800 font-bold">
-            <ShieldCheck className="w-4 h-4 text-teal-600" />
-            <span>Anti-Surveillance Guarantee</span>
-          </div>
-          <p className="leading-relaxed">
-            HERPATH only shares location data intentionally and during active trips. We never track
-            movements silently in the background or sell location history to commercial brokers.
-          </p>
-        </div>
       </div>
     </div>
   );

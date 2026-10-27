@@ -2,131 +2,188 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* Brand & Structural */
+  --ink: #14213D;
+  --peacock: #0E7C86;
+  --peacock-dark: #0B6169;
+  --peacock-tint: #DCEFF0;
+  --clay: #D8A58E;
+  --paper: #F8F4EC;
+  --white: #FFFFFF;
+  --raised: #F1EBDD;
+  --border: #E3DCCD;
+  --border-strong: #B9AF99;
+  --text: #14213D;
+  --text-secondary: #55607A;
+
+  /* Semantic */
+  --emergency: #C41230;
+  --danger: #A4161A;
+  --danger-tint: #FBE9EA;
+  --caution: #B25E00;
+  --caution-dark: #8A4800;
+  --caution-tint: #FDF1E0;
+  --verified: #1B6B4A;
+  --verified-tint: #E4F2EB;
+  --info: #1D5FA8;
+  --disabled-text: #6D6A63;
+
+  /* Shadows */
+  --shadow-e1: 0 1px 2px rgba(20, 33, 61, 0.08);
+  --shadow-e2: 0 4px 12px rgba(20, 33, 61, 0.10);
+  --shadow-e3: 0 10px 24px rgba(20, 33, 61, 0.14);
+
+  /* Motion Tokens */
+  --dur-micro: 150ms;
+  --dur-card: 220ms;
+  --dur-scene: 400ms;
+  --dur-route: 800ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --ease-emphasis: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 @layer base {
   html, body {
     @apply w-full max-w-full overflow-x-hidden;
-    background-color: #FBFAF7;
+    background-color: var(--paper);
+    color: var(--text);
   }
   body {
-    @apply text-brand-text antialiased selection:bg-teal-500 selection:text-white font-sans;
-    background: radial-gradient(circle at 15% 15%, #FBFAF7 0%, #F4F7FA 50%, #FBFAF7 100%);
+    @apply antialiased font-sans selection:bg-peacock selection:text-white;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+  h1, h2, h3, .font-serif-title {
+    font-family: var(--font-source-serif), "Source Serif 4", Georgia, serif;
   }
 }
 
 /* =========================================================================
-   HERPATH ROYAL SOFT GLASS × DREAMY CUTE DESIGN SYSTEM
-   Pearl White Translucent Glass + Champagne Accents + Iridescent Depth
+   INK & PEACOCK SURFACE & COMPONENT SYSTEM
+   Warm paper surfaces, restrained ink outlines, quiet peacock accents
    ========================================================================= */
 
-/* 1. Pearl Glass (Primary floating search & detail panels) */
-.glass-pearl {
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(20px) saturate(145%);
-  -webkit-backdrop-filter: blur(20px) saturate(145%);
-  border: 1px solid rgba(255, 255, 255, 0.95);
-  box-shadow: 0 10px 32px -4px rgba(56, 143, 132, 0.08), 0 3px 10px -2px rgba(38, 48, 68, 0.03), inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.95);
+/* Primary Surface Card */
+.surface-card {
+  background-color: #FFFFFF;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-e1);
 }
 
-/* 2. Crystal Glass (Compact floating map tools, zoom buttons, GPS pills) */
-.glass-crystal {
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(16px) saturate(140%);
-  -webkit-backdrop-filter: blur(16px) saturate(140%);
-  border: 1px solid rgba(255, 255, 255, 0.95);
-  box-shadow: 0 6px 20px -2px rgba(38, 48, 68, 0.06), inset 0 1px 1px 0 rgba(255, 255, 255, 0.9);
+/* Secondary Raised Surface */
+.surface-raised {
+  background-color: var(--raised);
+  border: 1px solid var(--border);
+  border-radius: 12px;
 }
 
-/* 3. Frosted Glass (High-readability lists and safety explanation cards) */
-.glass-frosted {
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(18px) saturate(135%);
-  -webkit-backdrop-filter: blur(18px) saturate(135%);
-  border: 1px solid rgba(231, 234, 240, 0.9);
-  box-shadow: 0 4px 18px -2px rgba(38, 48, 68, 0.04);
+/* Interactive Card with restrained lift */
+.card-interactive {
+  background-color: #FFFFFF;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-e1);
+  transition: transform 180ms var(--ease-standard), box-shadow 180ms var(--ease-standard), border-color 180ms var(--ease-standard);
 }
 
-/* 4. Solid Pearl (Dense text forms & modal contents) */
-.surface-pearl {
-  background: rgba(255, 255, 255, 0.97);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(231, 234, 240, 0.95);
-  box-shadow: 0 4px 20px -2px rgba(38, 48, 68, 0.03);
-}
-
-/* 5. Signature Floating Bottom Glass Dock */
-.glass-dock {
-  background: rgba(255, 255, 255, 0.84);
-  backdrop-filter: blur(28px) saturate(160%);
-  -webkit-backdrop-filter: blur(28px) saturate(160%);
-  border: 1px solid rgba(255, 255, 255, 0.95);
-  box-shadow: 0 16px 42px -6px rgba(38, 48, 68, 0.10), 0 4px 14px -2px rgba(38, 48, 68, 0.04), inset 0 1px 2px 0 rgba(255, 255, 255, 1);
-}
-
-/* 6. Mobile Bottom Sheet Glass (Dreamy frosted with gentle pearl glow) */
-.glass-sheet {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.90) 0%, rgba(251, 250, 247, 0.93) 100%);
-  backdrop-filter: blur(24px) saturate(150%);
-  -webkit-backdrop-filter: blur(24px) saturate(150%);
-  border-top: 1px solid rgba(255, 255, 255, 0.95);
-  box-shadow: 0 -10px 38px -6px rgba(38, 48, 68, 0.08), inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.95);
-}
-
-/* 7. Champagne Gold Luxury Detail */
-.glass-royal-accent {
-  border: 1px solid rgba(198, 166, 107, 0.32);
-  box-shadow: 0 4px 16px -1px rgba(198, 166, 107, 0.14), inset 0 1px 1px 0 rgba(255, 255, 255, 0.9);
-}
-
-/* Graceful Fallbacks for Devices/Browsers Lacking Backdrop-Filter Support */
-@supports not ((-webkit-backdrop-filter: blur(10px)) or (backdrop-filter: blur(10px))) {
-  .glass-pearl,
-  .glass-crystal,
-  .glass-frosted,
-  .glass-dock,
-  .glass-sheet {
-    background: #FFFFFF !important;
-    border: 1px solid #E7EAF0 !important;
-    box-shadow: 0 4px 20px -2px rgba(32, 40, 58, 0.08) !important;
+@media (hover: hover) and (pointer: fine) {
+  .card-interactive:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-e2);
+    border-color: var(--border-strong);
   }
 }
 
-/* Backwards-compatibility helpers */
-.glass-surface {
-  @apply glass-pearl;
+.card-interactive:active {
+  transform: translateY(0);
 }
-.glass-surface-subtle {
-  @apply glass-crystal;
+
+/* Selected Card State */
+.card-selected {
+  background-color: var(--peacock-tint) !important;
+  border: 2px solid var(--peacock) !important;
+  box-shadow: var(--shadow-e1) !important;
+  transform: none !important;
+}
+
+/* Visible Keyboard Focus */
+.focus-ring-peacock:focus-visible {
+  outline: 2px solid var(--peacock);
+  outline-offset: 2px;
+}
+
+/* Buttons */
+.btn-ink {
+  background-color: var(--ink);
+  color: #FFFFFF;
+  border-radius: 12px;
+  font-weight: 600;
+  transition: background-color var(--dur-micro) var(--ease-standard), transform var(--dur-micro) var(--ease-standard);
+}
+.btn-ink:hover {
+  background-color: #0D1629;
+}
+.btn-ink:active {
+  transform: scale(0.98);
+}
+
+.btn-secondary {
+  background-color: #FFFFFF;
+  color: var(--ink);
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  font-weight: 600;
+  transition: background-color var(--dur-micro) var(--ease-standard), border-color var(--dur-micro) var(--ease-standard);
+}
+.btn-secondary:hover {
+  background-color: var(--raised);
+  border-color: var(--ink);
+}
+
+/* SOS Control */
+.btn-emergency-sos {
+  background-color: var(--emergency);
+  color: #FFFFFF;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-radius: 12px;
+  transition: background-color var(--dur-micro) var(--ease-standard);
+}
+.btn-emergency-sos:hover {
+  background-color: #A80D27;
 }
 
 /* =========================================================================
-   MAP TILE STYLING & POPUP ENHANCEMENTS
+   MAP TILE STYLING & LEAFLET CANVAS
+   Calm, desaturated warm porcelain tone without destroying road clarity
    ========================================================================= */
 
 .leaflet-container {
-  background-color: #FAF9F6 !important;
+  background-color: var(--paper) !important;
   font-family: inherit !important;
 }
 
-/* Soften OpenStreetMap saturation for a calm porcelain tone */
+/* Mute OpenStreetMap saturation for a calm porcelain tone */
 .leaflet-tile-pane {
-  filter: contrast(98%) brightness(101%) saturate(92%);
+  filter: saturate(0.55) sepia(0.12) brightness(1.02);
 }
 
+/* Clean, crisp popups */
 .herpath-popup .leaflet-popup-content-wrapper {
-  background: rgba(255, 255, 255, 0.96) !important;
-  color: #20283A !important;
-  border-radius: 22px !important;
-  border: 1px solid rgba(231, 234, 240, 0.95) !important;
-  box-shadow: 0 16px 40px -6px rgba(32, 40, 58, 0.12), 0 4px 14px -2px rgba(32, 40, 58, 0.04) !important;
-  padding: 6px !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
+  background: #FFFFFF !important;
+  color: var(--text) !important;
+  border-radius: 16px !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: var(--shadow-e3) !important;
+  padding: 4px !important;
 }
 
 .herpath-popup .leaflet-popup-tip {
-  background: rgba(255, 255, 255, 0.96) !important;
-  border: 1px solid rgba(231, 234, 240, 0.95) !important;
+  background: #FFFFFF !important;
+  border: 1px solid var(--border) !important;
 }
 
 .herpath-popup .leaflet-popup-content {
@@ -135,14 +192,14 @@
 }
 
 .herpath-popup a.leaflet-popup-close-button {
-  color: #8992A4 !important;
+  color: var(--text-secondary) !important;
   padding: 8px !important;
-  top: 8px !important;
-  right: 8px !important;
+  top: 6px !important;
+  right: 6px !important;
 }
 
 .herpath-popup a.leaflet-popup-close-button:hover {
-  color: #20283A !important;
+  color: var(--ink) !important;
 }
 
 /* Custom DivIcons */
@@ -151,81 +208,99 @@
   border: none !important;
 }
 
+/* Marker selection lift animation (Matrix #4) */
+.marker-selected {
+  transform: scale(1.15) translateY(-4px) !important;
+  transition: transform 180ms var(--ease-emphasis);
+  filter: drop-shadow(0 6px 12px rgba(20, 33, 61, 0.22));
+  z-index: 9999 !important;
+}
+
+/* Animated route stroke (Matrix #1) */
+@keyframes routeStrokeAnim {
+  from {
+    stroke-dashoffset: 1000;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.route-drawn-active {
+  stroke-dasharray: 1000;
+  animation: routeStrokeAnim var(--dur-route) var(--ease-emphasis) forwards;
+}
+
 /* =========================================================================
-   ANIMATIONS & MICRO-INTERACTIONS
+   ANIMATIONS & REDUCED MOTION SPECIFICATION
    ========================================================================= */
 
-@keyframes fadeIn {
+@keyframes fadeInCard {
   from {
     opacity: 0;
-    transform: scale(0.98);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes slideInRight {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(0);
-  }
-}
-
-@keyframes slideUpSheet {
-  from {
-    transform: translateY(100%);
-  }
-  to {
     transform: translateY(0);
   }
 }
 
-.animate-fadeIn {
-  animation: fadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+.animate-fade-in {
+  animation: fadeInCard var(--dur-card) var(--ease-standard) forwards;
 }
 
-.animate-slideIn {
-  animation: slideInRight 0.26s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.animate-slideUp {
-  animation: slideUpSheet 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-@keyframes pulseSubtle {
-  0%, 100% {
+/* Modal scale */
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
     opacity: 1;
     transform: scale(1);
   }
-  50% {
-    opacity: 0.88;
-    transform: scale(1.02);
+}
+
+.animate-modal {
+  animation: modalIn var(--dur-scene) var(--ease-standard) forwards;
+}
+
+/* Reduced motion compliance */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .card-interactive:hover {
+    transform: none !important;
+  }
+  .marker-selected {
+    transform: none !important;
+  }
+  .route-drawn-active {
+    stroke-dasharray: none !important;
+    animation: none !important;
   }
 }
 
-.animate-pulse-subtle {
-  animation: pulseSubtle 3s ease-in-out infinite;
-}
-
-/* Sleek custom scrollbars */
+/* Restrained Editorial Scrollbar */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: var(--paper);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #E2E8F0;
+  background: var(--border-strong);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #CBD5E1;
+  background: var(--text-secondary);
 }

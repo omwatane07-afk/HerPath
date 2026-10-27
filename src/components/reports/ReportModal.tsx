@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 import {
   DisturbanceCategory,
@@ -14,6 +16,9 @@ import {
   Send,
   ShieldCheck,
   CheckCircle2,
+  ChevronRight,
+  ChevronLeft,
+  PhoneCall,
 } from 'lucide-react';
 
 interface ReportModalProps {
@@ -22,59 +27,47 @@ interface ReportModalProps {
   defaultCoords: Coordinates;
   onSubmitReport: (report: CommunityReport) => void;
   onSubmitStreetlight?: (streetlight: StreetlightSegment) => void;
+  onOpenEmergency?: () => void;
 }
 
-const CATEGORIES: { id: DisturbanceCategory; label: string; icon: string; description: string }[] =
-  [
-    {
-      id: 'streetlight_issue',
-      label: 'Streetlight Outage',
-      icon: '💡',
-      description: 'Lamps off, flickering, or severe shadow area',
-    },
-    {
-      id: 'harassment',
-      label: 'Harassment / Loitering',
-      icon: '⚠️',
-      description: 'Catcalling, stalking, or intimidating behaviour observed',
-    },
-    {
-      id: 'disruptive_group',
-      label: 'Disruptive Group',
-      icon: '👥',
-      description: 'Aggressive crowd or corridor obstruction',
-    },
-    {
-      id: 'broken_footpath',
-      label: 'Broken Footpath',
-      icon: '🚧',
-      description: 'Deep pavement holes, debris, or non-navigable walkway',
-    },
-    {
-      id: 'suspected_intoxication',
-      label: 'Intoxication Concern',
-      icon: '🚨',
-      description: 'Disturbance from visibly intoxicated individuals',
-    },
-    {
-      id: 'transport_disruption',
-      label: 'Transit Disruption',
-      icon: '🚌',
-      description: 'Station entrance barricaded, bus cancelled, or unlit stop',
-    },
-    {
-      id: 'facility_unavailable',
-      label: 'Facility Closed / Broken',
-      icon: '🚻',
-      description: 'Restroom locked, pharmacy closed, or desk unmanned',
-    },
-    {
-      id: 'other_concern',
-      label: 'General Travel Concern',
-      icon: 'ℹ️',
-      description: 'Other infrastructure or environment safety issue',
-    },
-  ];
+const CATEGORIES: { id: DisturbanceCategory; label: string; icon: string; description: string }[] = [
+  {
+    id: 'streetlight_issue',
+    label: 'Streetlight Outage',
+    icon: '💡',
+    description: 'Lamps off, dark stretch, or flickering luminaires',
+  },
+  {
+    id: 'harassment',
+    label: 'Harassment Concern',
+    icon: '⚠️',
+    description: 'Intimidation, following, or aggressive behavior',
+  },
+  {
+    id: 'disruptive_group',
+    label: 'Disruptive Group',
+    icon: '👥',
+    description: 'Corridor obstruction or confrontational group',
+  },
+  {
+    id: 'broken_footpath',
+    label: 'Broken Footpath',
+    icon: '🚧',
+    description: 'Uneven surface, construction debris, or missing walkway',
+  },
+  {
+    id: 'transport_disruption',
+    label: 'Transit Disruption',
+    icon: '🚌',
+    description: 'Barricaded stop, unlit shelter, or cancelled service',
+  },
+  {
+    id: 'facility_unavailable',
+    label: 'Facility Closed / Defect',
+    icon: '🚻',
+    description: 'Locked restroom, closed pharmacy, or unattended desk',
+  },
+];
 
 export const ReportModal: React.FC<ReportModalProps> = ({
   isOpen,
@@ -82,11 +75,12 @@ export const ReportModal: React.FC<ReportModalProps> = ({
   defaultCoords,
   onSubmitReport,
   onSubmitStreetlight,
+  onOpenEmergency,
 }) => {
+  const [step, setStep] = useState<1 | 2 | 3>(1);
   const [category, setCategory] = useState<DisturbanceCategory>('streetlight_issue');
   const [locationName, setLocationName] = useState('');
   const [description, setDescription] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [validationError, setValidationError] = useState('');
 
@@ -95,32 +89,28 @@ export const ReportModal: React.FC<ReportModalProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!locationName.trim()) {
-      setValidationError('Please specify a location or street name.');
-      return;
-    }
-    if (!description.trim() || description.trim().length < 5) {
-      setValidationError('Please enter a brief description (at least 5 characters).');
+      setValidationError('Please specify a street or landmark name.');
+      setStep(2);
       return;
     }
 
-    setIsSubmitting(true);
-    setValidationError('');
-
+    const now = new Date();
     const newReport: CommunityReport = {
       id: generateId('rep'),
       category,
       coordinates: defaultCoords,
       locationName: locationName.trim(),
-      description: description.trim(),
+      description: description.trim() || 'Observed condition reported by community commuter.',
       status: 'pending',
       source: 'community',
       upvotes: 1,
       flagCount: 0,
-      createdAt: new Date().toISOString(),
-      expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 48).toISOString(),
+      createdAt: now.toISOString(),
+      expiresAt: new Date(now.getTime() + 48 * 3600 * 1000).toISOString(),
     };
 
-    // If it's a streetlight issue, also record in streetlight infrastructure layer
+    onSubmitReport(newReport);
+
     if (category === 'streetlight_issue' && onSubmitStreetlight) {
       const newStreetlight: StreetlightSegment = {
         id: generateId('sl'),
@@ -129,170 +119,232 @@ export const ReportModal: React.FC<ReportModalProps> = ({
         status: 'malfunctioning',
         reportedSource: 'community',
         verificationStatus: 'unverified',
-        lastReportedAt: new Date().toISOString(),
-        notes: description.trim(),
+        lastReportedAt: now.toISOString(),
+        notes: description.trim() || 'Community-reported streetlight outage',
       };
       onSubmitStreetlight(newStreetlight);
     }
 
-    onSubmitReport(newReport);
-
+    setSubmitted(true);
     setTimeout(() => {
-      setIsSubmitting(false);
-      setSubmitted(true);
-      setTimeout(() => {
-        setSubmitted(false);
-        onClose();
-      }, 1500);
-    }, 400);
+      setSubmitted(false);
+      setStep(1);
+      setLocationName('');
+      setDescription('');
+      onClose();
+    }, 1500);
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-brand-text/30 backdrop-blur-md animate-fadeIn">
-      <div className="surface-pearl border border-white/95 rounded-sheet max-w-lg w-full p-6 text-brand-text shadow-glass-floating relative overflow-hidden">
-        {submitted ? (
-          <div className="py-8 text-center space-y-3">
-            <div className="w-16 h-16 rounded-full bg-teal-50 border border-teal-200 text-teal-600 mx-auto flex items-center justify-center shadow-sm">
-              <CheckCircle2 className="w-9 h-9" />
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-ink/40 backdrop-blur-sm animate-fade-in"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="report-modal-title"
+    >
+      <div className="surface-card max-w-lg w-full p-6 text-ink shadow-e3 relative overflow-hidden">
+        {/* Modal Header */}
+        <div className="flex items-start justify-between pb-4 border-b border-border">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-xs font-semibold uppercase tracking-wider text-peacock-dark">
+                Step {step} of 3
+              </span>
+              <span className="text-xs text-text-secondary">· Community Contribution</span>
             </div>
-            <h3 className="text-xl font-black text-brand-text">Report Submitted</h3>
-            <p className="text-xs text-brand-text-secondary max-w-sm mx-auto leading-relaxed">
-              Thank you for contributing to collective safety awareness. Your report is now pinned to
-              the map and visible to fellow commuters.
+            <h3 id="report-modal-title" className="font-serif text-xl font-bold text-ink">
+              {step === 1 && 'What did you observe?'}
+              {step === 2 && 'Where did it happen?'}
+              {step === 3 && 'Details & confirmation'}
+            </h3>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-text-secondary hover:text-ink p-2 rounded-lg bg-paper hover:bg-raised transition-colors focus-ring-peacock"
+            aria-label="Close dialog"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Emergency disclaimer banner with SOS entry point */}
+        <div className="my-3 p-3 rounded-lg bg-raised border border-border text-xs flex items-center justify-between gap-3">
+          <p className="text-text-secondary leading-snug">
+            <strong className="text-ink font-semibold">Public Notice:</strong> Community reports do not notify emergency dispatch.
+          </p>
+          {onOpenEmergency && (
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                onOpenEmergency();
+              }}
+              className="btn-emergency-sos py-1 px-2.5 text-[11px] font-bold shrink-0 shadow-e1"
+            >
+              SOS Dispatch
+            </button>
+          )}
+        </div>
+
+        {submitted ? (
+          <div className="py-12 flex flex-col items-center justify-center text-center space-y-3 animate-fade-in">
+            <div className="w-12 h-12 rounded-full bg-verified-tint text-verified flex items-center justify-center border border-verified/30">
+              <CheckCircle2 className="w-7 h-7" />
+            </div>
+            <h4 className="font-serif text-lg font-bold text-ink">Report Submitted</h4>
+            <p className="text-xs text-text-secondary max-w-xs">
+              Thank you for keeping commuters informed. Your report has been saved to the community map feed.
             </p>
           </div>
         ) : (
-          <>
-            {/* Header */}
-            <div className="flex items-center justify-between mb-4 pb-3 border-b border-brand-border">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-danger-50 border border-danger-200 flex items-center justify-center text-danger-500 shadow-sm">
-                  <AlertTriangle className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-brand-text">Submit Community Observation</h3>
-                  <p className="text-xs text-brand-text-secondary">
-                    Transparent reporting for infrastructure and road conditions
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={onClose}
-                className="text-brand-text-secondary hover:text-brand-text p-2 rounded-xl bg-brand-bg hover:bg-brand-bg-secondary transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Category Selection Grid */}
-              <div>
-                <label className="block text-[11px] font-bold text-brand-text-muted uppercase tracking-wider mb-2">
-                  Select Category
-                </label>
-                <div className="grid grid-cols-2 gap-2 max-h-44 overflow-y-auto pr-1">
+          <form onSubmit={handleSubmit} className="space-y-4 my-2">
+            {/* Step 1: What happened? (Category selection) */}
+            {step === 1 && (
+              <div className="space-y-2">
+                <p className="text-xs text-text-secondary">
+                  Select the category that best describes the road or infrastructure condition:
+                </p>
+                <div className="grid grid-cols-2 gap-2">
                   {CATEGORIES.map((cat) => (
                     <button
                       key={cat.id}
                       type="button"
                       onClick={() => setCategory(cat.id)}
-                      className={`p-2.5 rounded-2xl border text-left transition-all flex items-start gap-2.5 ${
+                      className={`p-3 rounded-lg border text-left transition-colors focus-ring-peacock ${
                         category === cat.id
-                          ? 'bg-teal-50 border-teal-500 text-teal-900 ring-2 ring-teal-500/20 shadow-xs'
-                          : 'bg-brand-bg border-brand-border text-brand-text hover:border-brand-border-light hover:bg-brand-bg-secondary'
+                          ? 'bg-peacock-tint border-2 border-peacock shadow-e1'
+                          : 'bg-white border-border hover:border-border-strong hover:bg-paper'
                       }`}
                     >
-                      <span className="text-lg">{cat.icon}</span>
-                      <div className="leading-tight">
-                        <div className="text-xs font-bold text-brand-text">{cat.label}</div>
-                        <div className="text-[10px] text-brand-text-secondary mt-0.5 line-clamp-1 font-medium">
-                          {cat.description}
-                        </div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-base">{cat.icon}</span>
+                        <span className="font-bold text-xs text-ink">{cat.label}</span>
                       </div>
+                      <p className="text-[11px] text-text-secondary leading-snug">
+                        {cat.description}
+                      </p>
                     </button>
                   ))}
                 </div>
               </div>
+            )}
 
-              {/* Location Name */}
-              <div>
-                <label className="block text-[11px] font-bold text-brand-text-muted uppercase tracking-wider mb-1">
-                  Street / Landmark Name
-                </label>
-                <div className="relative">
+            {/* Step 2: Where did it happen? (Location) */}
+            {step === 2 && (
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-semibold text-ink mb-1">
+                    Street, Intersection, or Landmark Name *
+                  </label>
                   <input
                     type="text"
                     value={locationName}
-                    onChange={(e) => setLocationName(e.target.value)}
-                    placeholder="e.g. Near Janpath Gate 2, Outer Circle alleyway"
-                    className="w-full py-2.5 pl-9 pr-3 text-xs rounded-2xl bg-brand-bg border border-brand-border focus:border-teal-500 focus:bg-white focus:ring-2 focus:ring-teal-100 outline-none text-brand-text placeholder-brand-text-muted font-medium transition-all"
+                    onChange={(e) => {
+                      setLocationName(e.target.value);
+                      setValidationError('');
+                    }}
+                    placeholder="e.g. Tolstoy Road near Janpath junction"
+                    className="w-full text-xs font-medium bg-paper rounded-lg px-3 py-2.5 border border-border focus:border-peacock focus-ring-peacock text-ink placeholder:text-text-muted"
+                    required
                   />
-                  <MapPin className="w-4 h-4 text-danger-500 absolute left-3 top-3" />
+                  {validationError && (
+                    <p className="text-[11px] text-danger mt-1 font-medium">{validationError}</p>
+                  )}
                 </div>
-                <div className="text-[10px] text-brand-text-muted mt-1 font-mono">
-                  Coordinates: {defaultCoords.lat.toFixed(4)}, {defaultCoords.lng.toFixed(4)}
+
+                <div className="p-3 rounded-lg bg-paper border border-border text-xs text-text-secondary">
+                  <div className="flex items-center gap-1.5 font-semibold text-ink mb-1">
+                    <MapPin className="w-3.5 h-3.5 text-peacock" />
+                    <span>Selected Map Position</span>
+                  </div>
+                  <div className="font-mono text-[11px]">
+                    Lat: {defaultCoords.lat.toFixed(5)}, Lng: {defaultCoords.lng.toFixed(5)}
+                  </div>
+                  <p className="text-[11px] text-text-muted mt-1">
+                    Point was placed at the current center of your map view.
+                  </p>
                 </div>
               </div>
+            )}
 
-              {/* Description */}
-              <div>
-                <label className="block text-[11px] font-bold text-brand-text-muted uppercase tracking-wider mb-1">
-                  Specific Observation Details
-                </label>
-                <textarea
-                  rows={3}
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Describe what you observed (e.g. lights completely unlit, dark sidewalk stretch, group blocking entrance)..."
-                  className="w-full p-3 text-xs rounded-2xl bg-brand-bg border border-brand-border focus:border-teal-500 focus:bg-white focus:ring-2 focus:ring-teal-100 outline-none text-brand-text placeholder-brand-text-muted resize-none font-medium transition-all"
-                />
-              </div>
-
-              {/* Validation error if present */}
-              {validationError && (
-                <div className="p-2.5 rounded-xl bg-danger-50 border border-danger-100 text-danger-700 text-xs font-semibold">
-                  {validationError}
+            {/* Step 3: Details & Confirmation */}
+            {step === 3 && (
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-semibold text-ink mb-1">
+                    Description & Helpful Commuter Details (Optional)
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Provide context (e.g. 2 streetlights out between bus stop and market gate)..."
+                    className="w-full text-xs font-medium bg-paper rounded-lg p-3 border border-border focus:border-peacock focus-ring-peacock text-ink placeholder:text-text-muted"
+                  />
                 </div>
-              )}
 
-              {/* Abuse prevention / emergency notice */}
-              <div className="p-3 rounded-2xl bg-brand-bg border border-brand-border text-[11px] text-brand-text-secondary space-y-1 font-medium">
-                <div className="flex items-center gap-1.5 text-teal-700 font-bold">
-                  <ShieldCheck className="w-4 h-4 text-teal-600" />
-                  <span>Privacy & Verification Policy</span>
+                <div className="p-3 rounded-lg bg-paper border border-border text-xs space-y-1.5">
+                  <div className="font-semibold text-ink">Summary of Report</div>
+                  <div className="text-text-secondary">
+                    <strong>Category:</strong> {CATEGORIES.find((c) => c.id === category)?.label}
+                  </div>
+                  <div className="text-text-secondary">
+                    <strong>Location:</strong> {locationName || 'Location not specified yet'}
+                  </div>
+                  <div className="text-[11px] text-text-muted pt-1 border-t border-border">
+                    Report will remain active for 48 hours for community corroboration.
+                  </div>
                 </div>
-                <p>
-                  Your identity is kept private. Reports expire after 48 hours unless corroborated. If
-                  you are in immediate distress, dial emergency services directly.
-                </p>
               </div>
+            )}
 
-              {/* Submit Button */}
-              <div className="flex items-center justify-end gap-3 pt-2">
+            {/* Modal Step Navigation Footer */}
+            <div className="pt-3 border-t border-border flex items-center justify-between">
+              {step > 1 ? (
+                <button
+                  type="button"
+                  onClick={() => setStep((s) => (s - 1) as any)}
+                  className="btn-secondary py-2 px-3 text-xs flex items-center gap-1"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                  <span>Back</span>
+                </button>
+              ) : (
                 <button
                   type="button"
                   onClick={onClose}
-                  className="py-2.5 px-4 rounded-full text-xs font-bold text-brand-text-secondary hover:text-brand-text transition-colors"
+                  className="btn-secondary py-2 px-3 text-xs"
                 >
                   Cancel
                 </button>
+              )}
+
+              {step < 3 ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (step === 2 && !locationName.trim()) {
+                      setValidationError('Please enter a location name.');
+                      return;
+                    }
+                    setStep((s) => (s + 1) as any);
+                  }}
+                  className="btn-ink py-2 px-4 text-xs font-bold flex items-center gap-1 shadow-e1"
+                >
+                  <span>Continue</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              ) : (
                 <button
                   type="submit"
-                  disabled={isSubmitting}
-                  className="py-2.5 px-6 rounded-full bg-teal-500 hover:bg-teal-600 active:scale-95 text-white font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-md shadow-teal-500/20 transition-all disabled:opacity-50"
+                  className="btn-ink py-2 px-5 text-xs font-bold flex items-center gap-1.5 shadow-e1"
                 >
-                  {isSubmitting ? (
-                    <span>Submitting...</span>
-                  ) : (
-                    <>
-                      <Send className="w-3.5 h-3.5" />
-                      <span>Post Report</span>
-                    </>
-                  )}
+                  <Send className="w-3.5 h-3.5 text-peacock-tint" />
+                  <span>Publish Report</span>
                 </button>
-              </div>
-            </form>
-          </>
+              )}
+            </div>
+          </form>
         )}
       </div>
     </div>

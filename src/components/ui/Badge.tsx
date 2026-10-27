@@ -1,6 +1,6 @@
 import React from 'react';
 import { DataSourceType, StreetlightStatus, DisturbanceCategory } from '../../types';
-import { Shield, Users, Radio, CheckCircle, AlertTriangle, Clock, HelpCircle, Sparkles } from 'lucide-react';
+import { Shield, Users, Radio, CheckCircle, AlertTriangle, Clock, HelpCircle, Sparkles, AlertCircle } from 'lucide-react';
 
 interface DataSourceBadgeProps {
   source: DataSourceType;
@@ -17,10 +17,10 @@ export const DataSourceBadge: React.FC<DataSourceBadgeProps> = ({
     case 'live_feed':
       return (
         <span
-          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-teal-50 text-teal-700 border border-teal-200/90 shadow-xs ${className}`}
+          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-peacock-tint text-peacock-dark border border-peacock/25 shadow-e1 ${className}`}
           title="Direct automated telemetry from connected sensor or municipal feed"
         >
-          {showIcon && <Radio className="w-3 h-3 animate-pulse text-teal-600" />}
+          {showIcon && <Radio className="w-3 h-3 text-peacock" />}
           Live Telemetry
         </span>
       );
@@ -28,20 +28,20 @@ export const DataSourceBadge: React.FC<DataSourceBadgeProps> = ({
     case 'verified':
       return (
         <span
-          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-powder-100 text-blue-800 border border-powder-200 shadow-xs ${className}`}
+          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-verified-tint text-verified border border-verified/25 shadow-e1 ${className}`}
           title="Information verified by official civic source or municipality"
         >
-          {showIcon && <Shield className="w-3 h-3 text-blue-600" />}
+          {showIcon && <Shield className="w-3 h-3 text-verified" />}
           Verified Civic
         </span>
       );
     case 'community':
       return (
         <span
-          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-lavender-100 text-purple-800 border border-lavender-200 shadow-xs ${className}`}
-          title="Observed and reported by verified community members"
+          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-raised text-text border border-border-strong shadow-e1 ${className}`}
+          title="Observed and reported by community members"
         >
-          {showIcon && <Users className="w-3 h-3 text-purple-600" />}
+          {showIcon && <Users className="w-3 h-3 text-text-secondary" />}
           Community Report
         </span>
       );
@@ -49,30 +49,30 @@ export const DataSourceBadge: React.FC<DataSourceBadgeProps> = ({
     case 'outdated':
       return (
         <span
-          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-brand-pearl text-brand-text-secondary border border-brand-border shadow-xs ${className}`}
+          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-raised text-text-secondary border border-border shadow-e1 ${className}`}
           title="Report is older than 24-48 hours and may no longer reflect current conditions"
         >
-          {showIcon && <Clock className="w-3 h-3 text-brand-text-muted" />}
+          {showIcon && <Clock className="w-3 h-3 text-text-secondary" />}
           Outdated (&gt;24h)
         </span>
       );
     case 'unverified':
       return (
         <span
-          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-warning-50 text-warning-700 border border-warning-100 shadow-xs ${className}`}
+          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-caution-tint text-caution-dark border border-caution/30 shadow-e1 ${className}`}
           title="Report received but awaiting corroboration from other users or civic staff"
         >
-          {showIcon && <AlertTriangle className="w-3 h-3 text-warning-600" />}
+          {showIcon && <AlertTriangle className="w-3 h-3 text-caution" />}
           Unverified
         </span>
       );
     case 'demo':
       return (
         <span
-          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-champagne-50 text-champagne-700 border border-champagne-200 shadow-xs ${className}`}
-          title="Simulated demonstration data for system evaluation"
+          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-raised text-text-secondary border border-border shadow-e1 ${className}`}
+          title="Demonstration preset for system evaluation"
         >
-          {showIcon && <Sparkles className="w-3 h-3 text-champagne-500" />}
+          {showIcon && <Sparkles className="w-3 h-3 text-clay" />}
           Demo Preset
         </span>
       );
@@ -80,11 +80,11 @@ export const DataSourceBadge: React.FC<DataSourceBadgeProps> = ({
     default:
       return (
         <span
-          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-brand-pearl text-brand-text-muted border border-brand-border shadow-xs ${className}`}
+          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-paper text-text-secondary border border-border shadow-e1 ${className}`}
           title="No recent verified observations recorded for this point"
         >
-          {showIcon && <HelpCircle className="w-3 h-3 text-brand-text-muted" />}
-          Status Unknown
+          {showIcon && <HelpCircle className="w-3 h-3 text-text-secondary" />}
+          No Data
         </span>
       );
   }
@@ -94,36 +94,37 @@ export const StreetlightStatusBadge: React.FC<{ status: StreetlightStatus }> = (
   switch (status) {
     case 'working':
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-teal-50 text-teal-700 border border-teal-200/90 shadow-xs">
-          <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse"></span>
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-verified-tint text-verified border border-verified/25 shadow-e1">
+          <span className="w-1.5 h-1.5 rounded-full bg-verified"></span>
           Illuminated
         </span>
       );
     case 'malfunctioning':
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-danger-50 text-danger-700 border border-danger-100 shadow-xs">
-          <span className="w-1.5 h-1.5 rounded-full bg-danger-500"></span>
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-danger-tint text-danger border border-danger/25 shadow-e1">
+          <span className="w-1.5 h-1.5 rounded-full bg-danger"></span>
           Light Off
         </span>
       );
     case 'partial_outage':
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-warning-50 text-warning-700 border border-warning-100 shadow-xs">
-          <span className="w-1.5 h-1.5 rounded-full bg-warning-500"></span>
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-caution-tint text-caution-dark border border-caution/30 shadow-e1">
+          <span className="w-1.5 h-1.5 rounded-full bg-caution"></span>
           Partial Dimming
         </span>
       );
     case 'resolved':
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-sage-50 text-emerald-700 border border-emerald-200/80 shadow-xs">
-          <CheckCircle className="w-3 h-3 text-emerald-600" />
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-verified-tint text-verified border border-verified/25 shadow-e1">
+          <CheckCircle className="w-3 h-3 text-verified" />
           Resolved
         </span>
       );
     default:
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-brand-pearl text-brand-text-muted border border-brand-border">
-          Unknown
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-paper text-text-secondary border border-border">
+          <HelpCircle className="w-3 h-3 text-text-secondary" />
+          No Data
         </span>
       );
   }
@@ -132,52 +133,66 @@ export const StreetlightStatusBadge: React.FC<{ status: StreetlightStatus }> = (
 export const DisturbanceCategoryLabel: React.FC<{ category: DisturbanceCategory }> = ({
   category,
 }) => {
-  const map: Record<DisturbanceCategory, { label: string; color: string }> = {
+  const map: Record<DisturbanceCategory, { label: string; style: string; icon: React.ReactNode }> = {
     harassment: {
       label: 'Harassment Concern',
-      color: 'bg-danger-50 text-danger-700 border-danger-100',
+      style: 'bg-danger-tint text-danger border-danger/30',
+      icon: <AlertCircle className="w-3 h-3 text-danger" />,
     },
     disruptive_group: {
       label: 'Disruptive Group',
-      color: 'bg-warning-50 text-warning-700 border-warning-100',
+      style: 'bg-caution-tint text-caution-dark border-caution/30',
+      icon: <AlertTriangle className="w-3 h-3 text-caution" />,
     },
     suspected_intoxication: {
       label: 'Intoxication Disturbance',
-      color: 'bg-orange-50 text-orange-700 border-orange-100',
+      style: 'bg-caution-tint text-caution-dark border-caution/30',
+      icon: <AlertTriangle className="w-3 h-3 text-caution" />,
     },
     streetlight_issue: {
       label: 'Streetlight Outage',
-      color: 'bg-champagne-50 text-champagne-700 border-champagne-200',
+      style: 'bg-caution-tint text-caution-dark border-caution/30',
+      icon: <AlertTriangle className="w-3 h-3 text-caution" />,
     },
     broken_footpath: {
       label: 'Broken Footpath',
-      color: 'bg-stone-50 text-stone-700 border-stone-200',
+      style: 'bg-raised text-text border-border-strong',
+      icon: <AlertTriangle className="w-3 h-3 text-text-secondary" />,
     },
     blocked_road: {
       label: 'Blocked Way',
-      color: 'bg-danger-50 text-danger-700 border-danger-100',
+      style: 'bg-danger-tint text-danger border-danger/30',
+      icon: <AlertCircle className="w-3 h-3 text-danger" />,
     },
     transport_disruption: {
       label: 'Transit Disruption',
-      color: 'bg-powder-50 text-blue-700 border-powder-200',
+      style: 'bg-info/10 text-info border-info/30',
+      icon: <AlertTriangle className="w-3 h-3 text-info" />,
     },
     facility_unavailable: {
       label: 'Facility Unavailable',
-      color: 'bg-brand-pearl text-brand-text-secondary border-brand-border',
+      style: 'bg-raised text-text border-border-strong',
+      icon: <AlertTriangle className="w-3 h-3 text-text-secondary" />,
     },
     other_concern: {
       label: 'Travel Concern',
-      color: 'bg-lavender-50 text-purple-700 border-lavender-100',
+      style: 'bg-raised text-text border-border-strong',
+      icon: <AlertTriangle className="w-3 h-3 text-text-secondary" />,
     },
   };
 
-  const item = map[category] || { label: category, color: 'bg-brand-pearl text-brand-text-secondary border-brand-border' };
+  const item = map[category] || {
+    label: category.replace(/_/g, ' '),
+    style: 'bg-raised text-text border-border',
+    icon: <AlertTriangle className="w-3 h-3 text-text-secondary" />,
+  };
 
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold border shadow-xs ${item.color}`}
+      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border shadow-e1 ${item.style}`}
     >
-      {item.label}
+      {item.icon}
+      <span>{item.label}</span>
     </span>
   );
 };

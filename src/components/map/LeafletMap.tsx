@@ -17,18 +17,18 @@ import {
   Bus,
   AlertTriangle,
   Plus,
+  Check,
 } from 'lucide-react';
 
-// Dynamic import with ssr: false for Leaflet
 const LeafletInnerMap = dynamic(
   () => import('./LeafletInnerMap').then((mod) => mod.LeafletInnerMap),
   {
     ssr: false,
     loading: () => (
-      <div className="w-full h-full bg-brand-bg flex flex-col items-center justify-center text-brand-text-secondary gap-3">
-        <div className="w-9 h-9 border-3 border-teal-500 border-t-transparent rounded-full animate-spin" />
-        <span className="text-xs font-semibold tracking-wide text-brand-text">
-          Loading Royal Map Canvas...
+      <div className="w-full h-full bg-paper flex flex-col items-center justify-center text-text-secondary gap-3">
+        <div className="w-8 h-8 border-3 border-peacock border-t-transparent rounded-full animate-spin" />
+        <span className="text-xs font-semibold tracking-wide text-ink">
+          Loading Map Canvas...
         </span>
       </div>
     ),
@@ -70,97 +70,112 @@ export const LeafletMap: React.FC<LeafletMapProps> = (props) => {
     setActiveLayers((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
+  const activeCount = Object.values(activeLayers).filter(Boolean).length;
+
   return (
-    <div className="relative w-full h-full overflow-hidden bg-brand-bg">
+    <div className="relative w-full h-full overflow-hidden bg-paper">
       <LeafletInnerMap {...props} activeLayers={activeLayers} />
 
-      {/* Floating Layer Controls (Top Right - Crystal Glass) */}
+      {/* Floating Consolidated Layers Control (Top Right) */}
       <div className="absolute top-4 right-4 z-[1000] flex flex-col items-end gap-2">
         <button
+          type="button"
           onClick={() => setLayersOpen(!layersOpen)}
-          className={`flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-bold transition-all ${
+          className={`flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-xs font-semibold shadow-e2 transition-all focus-ring-peacock ${
             layersOpen
-              ? 'bg-teal-500 text-white shadow-md shadow-teal-600/30 ring-2 ring-champagne-300'
-              : 'glass-crystal text-brand-text hover:border-teal-300'
+              ? 'bg-ink text-white'
+              : 'bg-white text-ink border border-border hover:border-border-strong'
           }`}
-          title="Toggle Map Data Layers"
+          title="Toggle map infrastructure layers"
+          aria-expanded={layersOpen}
+          aria-label="Toggle map layers"
         >
-          <Layers className="w-4 h-4" />
-          <span className="hidden sm:inline">Map Overlays</span>
+          <Layers className="w-4 h-4 text-peacock" />
+          <span className="font-sans">Layers</span>
+          <span
+            className={`w-5 h-5 rounded-full text-[11px] font-bold flex items-center justify-center ${
+              layersOpen ? 'bg-peacock text-white' : 'bg-paper text-ink border border-border'
+            }`}
+          >
+            {activeCount}
+          </span>
         </button>
 
         {layersOpen && (
-          <div className="glass-pearl border border-white/95 rounded-royal p-4 shadow-glass-floating text-xs text-brand-text w-60 space-y-2.5 animate-fadeIn">
-            <div className="font-black text-[11px] uppercase tracking-wider text-teal-800 border-b border-brand-border/70 pb-2 flex items-center justify-between">
-              <span>Telemetry Layers</span>
-              <span className="text-[10px] text-brand-text-muted lowercase font-normal">toggle on/off</span>
+          <div className="bg-white border border-border rounded-card p-3 shadow-e3 text-xs text-ink w-64 space-y-1.5 animate-fade-in">
+            <div className="font-serif font-bold text-sm text-ink pb-2 border-b border-border flex items-center justify-between">
+              <span>Map Layers</span>
+              <span className="text-[11px] font-sans font-normal text-text-secondary">
+                {activeCount} of 4 visible
+              </span>
             </div>
 
-            <label className="flex items-center justify-between p-2 rounded-xl hover:bg-white/80 cursor-pointer transition-colors">
-              <span className="flex items-center gap-2.5 text-brand-text font-semibold">
-                <Lightbulb className="w-4 h-4 text-amber-500" />
+            <label className="flex items-center justify-between p-2 rounded-md hover:bg-paper cursor-pointer transition-colors">
+              <span className="flex items-center gap-2.5 text-ink font-medium">
+                <Lightbulb className="w-4 h-4 text-caution" />
                 <span>Streetlights</span>
               </span>
               <input
                 type="checkbox"
                 checked={activeLayers.streetlights}
                 onChange={() => toggleLayer('streetlights')}
-                className="rounded text-teal-600 focus:ring-teal-400 h-4 w-4 border-brand-border"
+                className="rounded border-border text-peacock focus:ring-peacock h-4 w-4"
               />
             </label>
 
-            <label className="flex items-center justify-between p-2 rounded-xl hover:bg-white/80 cursor-pointer transition-colors">
-              <span className="flex items-center gap-2.5 text-brand-text font-semibold">
-                <Building2 className="w-4 h-4 text-pink-500" />
+            <label className="flex items-center justify-between p-2 rounded-md hover:bg-paper cursor-pointer transition-colors">
+              <span className="flex items-center gap-2.5 text-ink font-medium">
+                <Building2 className="w-4 h-4 text-peacock" />
                 <span>Facilities</span>
               </span>
               <input
                 type="checkbox"
                 checked={activeLayers.facilities}
                 onChange={() => toggleLayer('facilities')}
-                className="rounded text-teal-600 focus:ring-teal-400 h-4 w-4 border-brand-border"
+                className="rounded border-border text-peacock focus:ring-peacock h-4 w-4"
               />
             </label>
 
-            <label className="flex items-center justify-between p-2 rounded-xl hover:bg-white/80 cursor-pointer transition-colors">
-              <span className="flex items-center gap-2.5 text-brand-text font-semibold">
-                <AlertTriangle className="w-4 h-4 text-danger-500" />
-                <span>Disturbances</span>
+            <label className="flex items-center justify-between p-2 rounded-md hover:bg-paper cursor-pointer transition-colors">
+              <span className="flex items-center gap-2.5 text-ink font-medium">
+                <AlertTriangle className="w-4 h-4 text-danger" />
+                <span>Community Reports</span>
               </span>
               <input
                 type="checkbox"
                 checked={activeLayers.reports}
                 onChange={() => toggleLayer('reports')}
-                className="rounded text-teal-600 focus:ring-teal-400 h-4 w-4 border-brand-border"
+                className="rounded border-border text-peacock focus:ring-peacock h-4 w-4"
               />
             </label>
 
-            <label className="flex items-center justify-between p-2 rounded-xl hover:bg-white/80 cursor-pointer transition-colors">
-              <span className="flex items-center gap-2.5 text-brand-text font-semibold">
-                <Bus className="w-4 h-4 text-blue-500" />
+            <label className="flex items-center justify-between p-2 rounded-md hover:bg-paper cursor-pointer transition-colors">
+              <span className="flex items-center gap-2.5 text-ink font-medium">
+                <Bus className="w-4 h-4 text-info" />
                 <span>Public Transit</span>
               </span>
               <input
                 type="checkbox"
                 checked={activeLayers.transport}
                 onChange={() => toggleLayer('transport')}
-                className="rounded text-teal-600 focus:ring-teal-400 h-4 w-4 border-brand-border"
+                className="rounded border-border text-peacock focus:ring-peacock h-4 w-4"
               />
             </label>
           </div>
         )}
       </div>
 
-      {/* Quick Report Floating Action Button (Bottom Right) */}
+      {/* Quick Report Floating Action Button */}
       {props.onRequestSubmitReportAtCenter && (
         <div className="absolute bottom-24 lg:bottom-6 right-4 z-[1000] flex flex-col gap-2">
           <button
+            type="button"
             onClick={props.onRequestSubmitReportAtCenter}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-full glass-pearl border border-champagne-200/90 hover:border-champagne-300 text-teal-900 font-bold text-xs shadow-glass-pearl hover:shadow-glass-floating active:scale-95 transition-all group"
-            title="Report a condition at map position"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white border border-border hover:border-border-strong text-ink font-semibold text-xs shadow-e2 active:scale-95 transition-all focus-ring-peacock"
+            title="Report a condition at current map position"
           >
-            <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform text-teal-600" />
-            <span className="font-bold">Report Issue</span>
+            <Plus className="w-4 h-4 text-peacock" />
+            <span>Report Issue</span>
           </button>
         </div>
       )}

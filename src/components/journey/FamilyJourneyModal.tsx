@@ -13,8 +13,9 @@ import {
   X,
   Users,
   Clock,
-  Sparkles,
   UserPlus,
+  Shield,
+  CheckCircle,
 } from 'lucide-react';
 
 interface FamilyJourneyModalProps {
@@ -104,10 +105,10 @@ export const FamilyJourneyModal: React.FC<FamilyJourneyModalProps> = ({
           timestamp: now.toISOString(),
           coordinates: origin,
           status: 'ok',
-          note: 'Journey started from origin',
+          note: 'Journey started from origin point',
         },
       ],
-      isDemoMode: true, // Transparent disclaimer for prototype
+      isDemoMode: true,
     };
 
     onStartJourney(journey);
@@ -115,197 +116,200 @@ export const FamilyJourneyModal: React.FC<FamilyJourneyModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-brand-text/30 backdrop-blur-md animate-fadeIn">
-      <div className="surface-pearl border border-white/95 rounded-sheet max-w-lg w-full p-6 text-brand-text shadow-glass-floating relative overflow-hidden">
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-ink/40 backdrop-blur-sm animate-fade-in"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="journey-modal-title"
+    >
+      <div className="surface-card max-w-lg w-full p-6 text-ink shadow-e3 relative overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between mb-4 pb-3 border-b border-brand-border">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-teal-50 border border-teal-200 flex items-center justify-center text-teal-600 shadow-sm">
-              <Compass className="w-5 h-5" />
+        <div className="flex items-start justify-between pb-4 border-b border-border">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-xs font-semibold uppercase tracking-wider text-peacock-dark">
+                Consent-Based Companion
+              </span>
             </div>
-            <div>
-              <h3 className="text-base font-bold text-brand-text">Family Journey Companion</h3>
-              <p className="text-xs text-brand-text-secondary">
-                Share live checkpoints and arrival confirmations with loved ones
-              </p>
-            </div>
+            <h3 id="journey-modal-title" className="font-serif text-xl font-bold text-ink">
+              Start Family Journey
+            </h3>
           </div>
           <button
             onClick={onClose}
-            className="text-brand-text-secondary hover:text-brand-text p-2 rounded-xl bg-brand-bg hover:bg-brand-bg-secondary transition-colors"
+            className="text-text-secondary hover:text-ink p-2 rounded-lg bg-paper hover:bg-raised transition-colors focus-ring-peacock"
+            aria-label="Close dialog"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Route Summary */}
-        <div className="p-3.5 rounded-2xl bg-brand-bg border border-brand-border space-y-2 mb-4">
-          <div className="flex items-center gap-2 text-xs font-medium">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-            <span className="text-brand-text-secondary">From:</span>
-            <span className="text-brand-text font-bold truncate">{originName || 'Current Location'}</span>
-          </div>
-          <div className="flex items-center gap-2 text-xs font-medium">
-            <span className="w-2.5 h-2.5 rounded-full bg-danger-500" />
-            <span className="text-brand-text-secondary">To:</span>
-            <span className="text-brand-text font-bold truncate">{destinationName || 'Destination'}</span>
-          </div>
-          {selectedRoute && (
-            <div className="text-[11px] text-teal-700 font-semibold pt-1 border-t border-brand-border">
-              Using route: {selectedRoute.name} ({Math.round(selectedRoute.durationSeconds / 60)} min walking)
+        <div className="space-y-4 my-4 max-h-[70vh] overflow-y-auto pr-1">
+          {/* Trip Summary Card */}
+          <div className="p-3.5 rounded-lg bg-raised border border-border text-xs space-y-1">
+            <div className="font-semibold text-ink">Selected Trip</div>
+            <div className="text-text-secondary">
+              <span className="font-medium text-ink">Destination:</span> {destinationName || 'Destination Point'}
             </div>
-          )}
-        </div>
-
-        {/* Journey Configuration Form */}
-        <div className="space-y-4">
-          {/* Estimated Travel Time */}
-          <div>
-            <label className="block text-[11px] font-bold text-brand-text-muted uppercase tracking-wider mb-1.5 flex items-center justify-between">
-              <span>Expected Journey Duration</span>
-              <span className="text-teal-600 font-mono font-bold">{durationMinutes} minutes</span>
-            </label>
-            <div className="flex gap-2">
-              {[15, 25, 40, 60].map((mins) => (
-                <button
-                  key={mins}
-                  type="button"
-                  onClick={() => setDurationMinutes(mins)}
-                  className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-all ${
-                    durationMinutes === mins
-                      ? 'bg-teal-500 text-white border-teal-500 shadow-sm'
-                      : 'bg-brand-bg border-brand-border text-brand-text hover:bg-white'
-                  }`}
-                >
-                  {mins} min
-                </button>
-              ))}
+            <div className="text-text-secondary">
+              <span className="font-medium text-ink">Origin:</span> {originName || 'Starting Point'}
             </div>
-          </div>
-
-          {/* Check-in Interval */}
-          <div>
-            <label className="block text-[11px] font-bold text-brand-text-muted uppercase tracking-wider mb-1.5 flex items-center justify-between">
-              <span>Safety Check-In Frequency</span>
-              <span className="text-teal-600 font-mono font-bold">Every {checkInInterval} mins</span>
-            </label>
-            <div className="flex gap-2">
-              {[5, 10, 15, 20].map((mins) => (
-                <button
-                  key={mins}
-                  type="button"
-                  onClick={() => setCheckInInterval(mins)}
-                  className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-all ${
-                    checkInInterval === mins
-                      ? 'bg-teal-500 text-white border-teal-500 shadow-sm'
-                      : 'bg-brand-bg border-brand-border text-brand-text hover:bg-white'
-                  }`}
-                >
-                  {mins} min
-                </button>
-              ))}
-            </div>
-            <p className="text-[10px] text-brand-text-secondary mt-1 font-medium">
-              HERPATH will prompt you to tap "I'm OK" at each interval. If check-in passes, your contact is notified.
-            </p>
+            {selectedRoute && (
+              <div className="text-text-secondary">
+                <span className="font-medium text-ink">Route perspective:</span> {selectedRoute.name} ({Math.round(selectedRoute.durationSeconds / 60)} min)
+              </div>
+            )}
           </div>
 
           {/* Trusted Contact Picker */}
           <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="text-[11px] font-bold text-brand-text-muted uppercase tracking-wider">
-                Select Trusted Contact
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-xs font-semibold text-ink">
+                Share With Trusted Contact
               </label>
               <button
                 type="button"
                 onClick={() => setShowAddContact(!showAddContact)}
-                className="text-[11px] text-teal-700 hover:text-teal-800 flex items-center gap-1 font-bold"
+                className="text-peacock-dark hover:text-ink text-xs font-semibold flex items-center gap-1"
               >
                 <UserPlus className="w-3.5 h-3.5" />
-                <span>{showAddContact ? 'Cancel' : 'Add New'}</span>
+                <span>{showAddContact ? 'Cancel' : 'Add New Contact'}</span>
               </button>
             </div>
 
             {showAddContact ? (
-              <form
-                onSubmit={handleAddNewContact}
-                className="p-3.5 rounded-2xl bg-brand-bg border border-brand-border space-y-2 mb-2 animate-fadeIn"
-              >
-                <input
-                  type="text"
-                  placeholder="Full name or relation"
-                  value={newContactName}
-                  onChange={(e) => setNewContactName(e.target.value)}
-                  className="w-full p-2.5 text-xs rounded-xl bg-white border border-brand-border text-brand-text outline-none font-medium"
-                  required
-                />
-                <input
-                  type="tel"
-                  placeholder="Mobile telephone number"
-                  value={newContactPhone}
-                  onChange={(e) => setNewContactPhone(e.target.value)}
-                  className="w-full p-2.5 text-xs rounded-xl bg-white border border-brand-border text-brand-text outline-none font-medium"
-                  required
-                />
-                <button
-                  type="submit"
-                  className="w-full py-2 px-3 rounded-full bg-teal-500 hover:bg-teal-600 text-xs font-bold text-white shadow-xs"
-                >
-                  Save & Select Contact
+              <form onSubmit={handleAddNewContact} className="p-3.5 rounded-lg bg-paper border border-border space-y-2.5">
+                <div className="font-serif font-bold text-xs text-ink">New Trusted Contact</div>
+                <div>
+                  <input
+                    type="text"
+                    value={newContactName}
+                    onChange={(e) => setNewContactName(e.target.value)}
+                    placeholder="Full name (e.g. Maya Sharma)"
+                    className="w-full text-xs bg-white rounded-md p-2 border border-border text-ink"
+                    required
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <input
+                    type="tel"
+                    value={newContactPhone}
+                    onChange={(e) => setNewContactPhone(e.target.value)}
+                    placeholder="Phone number (+91...)"
+                    className="w-full text-xs bg-white rounded-md p-2 border border-border text-ink"
+                    required
+                  />
+                  <select
+                    value={newContactRelation}
+                    onChange={(e) => setNewContactRelation(e.target.value)}
+                    className="w-full text-xs bg-white rounded-md p-2 border border-border text-ink"
+                  >
+                    <option value="Mother">Mother</option>
+                    <option value="Father">Father</option>
+                    <option value="Sister">Sister</option>
+                    <option value="Brother">Brother</option>
+                    <option value="Partner">Partner</option>
+                    <option value="Friend">Friend</option>
+                    <option value="Colleague">Colleague</option>
+                  </select>
+                </div>
+                <button type="submit" className="btn-ink py-1.5 px-3 text-xs w-full">
+                  Save Contact
                 </button>
               </form>
             ) : (
-              <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-1.5">
                 {trustedContacts.map((contact) => (
-                  <button
+                  <label
                     key={contact.id}
-                    type="button"
-                    onClick={() => setSelectedContactId(contact.id)}
-                    className={`p-3 rounded-2xl border text-left transition-all ${
+                    className={`flex items-center justify-between p-2.5 rounded-lg border cursor-pointer transition-colors ${
                       selectedContactId === contact.id
-                        ? 'bg-teal-50 border-teal-500 text-teal-950 ring-2 ring-teal-500/20 shadow-xs'
-                        : 'bg-brand-bg border-brand-border text-brand-text hover:bg-white'
+                        ? 'bg-peacock-tint border-peacock'
+                        : 'bg-white border-border hover:bg-paper'
                     }`}
                   >
-                    <div className="text-xs font-bold truncate">{contact.name}</div>
-                    <div className="text-[10px] text-brand-text-secondary mt-0.5 truncate font-medium">
-                      {contact.relation} • {contact.phone}
+                    <div className="flex items-center gap-2.5">
+                      <input
+                        type="radio"
+                        name="trustedContact"
+                        checked={selectedContactId === contact.id}
+                        onChange={() => setSelectedContactId(contact.id)}
+                        className="text-peacock focus:ring-peacock h-4 w-4"
+                      />
+                      <div>
+                        <div className="text-xs font-bold text-ink">{contact.name}</div>
+                        <div className="text-[11px] text-text-secondary">
+                          {contact.relation} · {contact.phone}
+                        </div>
+                      </div>
                     </div>
-                  </button>
+                  </label>
                 ))}
               </div>
             )}
           </div>
 
-          {/* Transparent Demo Notice */}
-          <div className="p-3.5 rounded-2xl bg-brand-bg border border-brand-border text-[11px] text-brand-text-secondary flex items-start gap-2.5 font-medium">
-            <Sparkles className="w-4 h-4 text-teal-600 shrink-0 mt-0.5" />
-            <p className="leading-relaxed">
-              <strong className="text-brand-text font-bold">Demo Prototype Mode:</strong> Journey updates are
-              tracked locally in this session. When deployed with connected Supabase and SMS/push credentials,
-              checkpoints are broadcast live to your selected contact.
-            </p>
+          {/* Check-In Frequency & Estimated Duration */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-ink mb-1">
+                Check-in Frequency
+              </label>
+              <select
+                value={checkInInterval}
+                onChange={(e) => setCheckInInterval(Number(e.target.value))}
+                className="w-full text-xs bg-paper rounded-lg p-2.5 border border-border text-ink font-medium"
+              >
+                <option value={5}>Every 5 minutes</option>
+                <option value={10}>Every 10 minutes</option>
+                <option value={15}>Every 15 minutes</option>
+                <option value={20}>Every 20 minutes</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-ink mb-1">
+                Trip Duration (ETA)
+              </label>
+              <select
+                value={durationMinutes}
+                onChange={(e) => setDurationMinutes(Number(e.target.value))}
+                className="w-full text-xs bg-paper rounded-lg p-2.5 border border-border text-ink font-medium"
+              >
+                <option value={15}>15 minutes</option>
+                <option value={25}>25 minutes</option>
+                <option value={35}>35 minutes</option>
+                <option value={45}>45 minutes</option>
+                <option value={60}>1 hour</option>
+              </select>
+            </div>
           </div>
 
-          {/* Action buttons */}
-          <div className="flex items-center justify-end gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="py-2.5 px-4 rounded-full text-xs font-bold text-brand-text-secondary hover:text-brand-text transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              onClick={handleStart}
-              disabled={!origin || !destination}
-              className="py-3 px-6 rounded-full bg-teal-500 hover:bg-teal-600 active:scale-95 text-white font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-md shadow-teal-500/20 transition-all disabled:opacity-50"
-            >
-              <Compass className="w-4 h-4" />
-              <span>Start Journey Sharing</span>
-            </button>
+          {/* Honest Demo Mode Disclaimer */}
+          <div className="p-3 rounded-lg bg-paper border border-border text-[11px] text-text-secondary leading-relaxed">
+            <strong className="text-ink font-semibold">Evaluation Environment Notice:</strong> Journey tracking is held in your local browser state. In a production release, periodic check-ins trigger automated SMS/push broadcasts to your selected contact.
           </div>
+        </div>
+
+        {/* Modal Footer */}
+        <div className="pt-3 border-t border-border flex items-center justify-between">
+          <button
+            type="button"
+            onClick={onClose}
+            className="btn-secondary py-2 px-3 text-xs"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="button"
+            onClick={handleStart}
+            disabled={!origin || !destination || !selectedContactId}
+            className="btn-ink py-2 px-5 text-xs font-bold flex items-center gap-1.5 shadow-e1 disabled:opacity-50"
+          >
+            <Compass className="w-3.5 h-3.5 text-peacock-tint" />
+            <span>Begin Journey</span>
+          </button>
         </div>
       </div>
     </div>

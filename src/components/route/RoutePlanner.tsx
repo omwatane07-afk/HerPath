@@ -12,8 +12,9 @@ import {
   ChevronDown,
   ChevronUp,
   Crosshair,
-  Compass,
-  Sparkles,
+  AlertCircle,
+  Footprints,
+  Bus,
 } from 'lucide-react';
 
 interface RoutePlannerProps {
@@ -34,17 +35,13 @@ interface RoutePlannerProps {
   onStartJourneyWithRoute: (route: RouteOption) => void;
 }
 
-// Preset demonstration locations for Delhi NCR
-const DEMO_PRESET_ORIGINS = [
-  { id: 'rajiv_chowk', name: 'Rajiv Chowk Metro Station', coordinates: { lat: 28.6328, lng: 77.2197 }, displayName: 'Gate 2, Connaught Place' },
-  { id: 'patel_chowk', name: 'Patel Chowk Metro', coordinates: { lat: 28.6232, lng: 77.2142 }, displayName: 'Ashoka Road Exit' },
-  { id: 'janpath', name: 'Janpath Market Entry', coordinates: { lat: 28.6275, lng: 77.2190 }, displayName: 'Tolstoy Road Corner' },
-];
-
-const DEMO_PRESET_DESTINATIONS = [
-  { id: 'mandi_house', name: 'Mandi House Cultural Center', coordinates: { lat: 28.6258, lng: 77.2345 }, displayName: 'Sikandra Road, New Delhi' },
-  { id: 'bengali_market', name: 'Bengali Market Circle', coordinates: { lat: 28.6290, lng: 77.2310 }, displayName: 'Tansen Marg' },
-  { id: 'parliament_st', name: 'Parliament Street Kiosk', coordinates: { lat: 28.6240, lng: 77.2120 }, displayName: 'Sansad Marg' },
+const PRESET_PLACES = [
+  { id: 'rajiv_chowk', name: 'Rajiv Chowk Metro Station', coordinates: { lat: 28.6328, lng: 77.2197 }, detail: 'Connaught Place Gate 2' },
+  { id: 'patel_chowk', name: 'Patel Chowk Metro', coordinates: { lat: 28.6232, lng: 77.2142 }, detail: 'Ashoka Road' },
+  { id: 'janpath', name: 'Janpath Market Entry', coordinates: { lat: 28.6275, lng: 77.2190 }, detail: 'Tolstoy Road Corner' },
+  { id: 'mandi_house', name: 'Mandi House Cultural Center', coordinates: { lat: 28.6258, lng: 77.2345 }, detail: 'Sikandra Road' },
+  { id: 'bengali_market', name: 'Bengali Market Circle', coordinates: { lat: 28.6290, lng: 77.2310 }, detail: 'Tansen Marg' },
+  { id: 'parliament_st', name: 'Parliament Street Kiosk', coordinates: { lat: 28.6240, lng: 77.2120 }, detail: 'Sansad Marg' },
 ];
 
 export const RoutePlanner: React.FC<RoutePlannerProps> = ({
@@ -72,6 +69,7 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
   const [showDestDropdown, setShowDestDropdown] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
+  const [isFormCollapsed, setIsFormCollapsed] = useState(false);
 
   useEffect(() => {
     setOriginInput(originName);
@@ -81,18 +79,13 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
     setDestInput(destinationName);
   }, [destinationName]);
 
-  // Autocomplete suggestions
-  const originSuggestions = DEMO_PRESET_ORIGINS.filter(
-    (item) =>
-      item.name.toLowerCase().includes(originInput.toLowerCase()) ||
-      item.displayName.toLowerCase().includes(originInput.toLowerCase())
-  );
-
-  const destSuggestions = DEMO_PRESET_DESTINATIONS.filter(
-    (item) =>
-      item.name.toLowerCase().includes(destInput.toLowerCase()) ||
-      item.displayName.toLowerCase().includes(destInput.toLowerCase())
-  );
+  const handleSwapPoints = () => {
+    if (!origin || !destination) return;
+    const prevOrigin = origin;
+    const prevOriginName = originName;
+    onSetOrigin(destination, destinationName);
+    onSetDestination(prevOrigin, prevOriginName);
+  };
 
   const handleUseCurrentLocation = () => {
     if (!navigator.geolocation) {
@@ -110,405 +103,306 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
         setOriginInput('Current GPS Location');
         setIsLocating(false);
       },
-      () => {
+      (err) => {
         setIsLocating(false);
-        const fallback = DEMO_PRESET_ORIGINS[0];
-        onSetOrigin(fallback.coordinates, `${fallback.name} (Simulated GPS)`);
-        setOriginInput(`${fallback.name} (Simulated GPS)`);
+        // Honest error handling per truthfulness rules: never silently substitute a fake demo location!
+        setLocationError(
+          err.code === 1
+            ? 'Location permission was denied. Please select a starting point from the list below.'
+            : 'Could not acquire GPS fix. Please select a starting place manually.'
+        );
       },
-      { timeout: 7000 }
+      { timeout: 8000 }
     );
   };
 
-  const handleSwap = () => {
-    if (!origin || !destination) return;
-    const tempCoords = origin;
-    const tempName = originName;
-    onSetOrigin(destination, destinationName);
-    onSetDestination(tempCoords, tempName);
-  };
+  const activePrioritiesCount = [
+    preferences.preferWellLit,
+    preferences.preferPublicTransport,
+    preferences.preferEssentialFacilities,
+    preferences.wheelchairAccessible,
+  ].filter(Boolean).length;
 
   return (
-    <div className="w-full text-brand-text space-y-3.5">
-      {/* Search & Planner Card Container */}
-      <div className="space-y-3.5">
-        {/* Title / Header */}
-        <div>
-          <h2 className="text-base sm:text-lg font-black text-brand-text flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-teal-50 to-teal-100 text-teal-700 flex items-center justify-center border border-teal-200/90 shadow-xs ring-1 ring-champagne-300/60 shrink-0">
-              <Navigation className="w-4 h-4 text-teal-600" />
-            </div>
-            <span>Plan Your Safe Route</span>
-          </h2>
-          <p className="text-[11px] sm:text-xs text-brand-text-secondary mt-1 font-medium leading-relaxed">
-            Compare verified streetlights, transport hubs, and community observations
-          </p>
+    <div className="flex flex-col h-full bg-paper text-ink overflow-y-auto">
+      {/* Header section with Walk / Transit control */}
+      <div className="p-4 sm:p-5 border-b border-border bg-white sticky top-0 z-10 shadow-e1">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-serif text-xl font-bold text-ink">Plan Route</h2>
+          
+          {/* Walk / Transit Segmented Control */}
+          <div className="inline-flex p-0.5 rounded-lg bg-paper border border-border text-xs font-semibold" role="tablist">
+            <button
+              type="button"
+              onClick={() => setTravelMode('walk')}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-md transition-colors focus-ring-peacock ${
+                travelMode === 'walk'
+                  ? 'bg-white text-ink font-bold shadow-e1'
+                  : 'text-text-secondary hover:text-ink'
+              }`}
+              role="tab"
+              aria-selected={travelMode === 'walk'}
+            >
+              <Footprints className="w-3.5 h-3.5" />
+              <span>Walk</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setTravelMode('transit')}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-md transition-colors focus-ring-peacock ${
+                travelMode === 'transit'
+                  ? 'bg-white text-ink font-bold shadow-e1'
+                  : 'text-text-secondary hover:text-ink'
+              }`}
+              role="tab"
+              aria-selected={travelMode === 'transit'}
+            >
+              <Bus className="w-3.5 h-3.5" />
+              <span>Transit</span>
+            </button>
+          </div>
         </div>
 
-        {/* Floating Route Search Surface (Royal Soft Glass) */}
-        <div className="p-4 rounded-royal glass-pearl border border-white/95 shadow-glass-pearl space-y-3.5 relative">
-          {/* Travel Mode Segmented Control (Google Maps Usability Benchmark) */}
-          <div className="flex p-1 rounded-2xl bg-white/75 border border-brand-border/80 shadow-inner-glass text-xs font-semibold gap-1">
-            <button
-              type="button"
-              onClick={() => {
-                setTravelMode('walk');
-                onUpdatePreferences({ ...preferences, preferPublicTransport: false });
-              }}
-              className={`flex-1 py-1.5 px-2 rounded-xl transition-all flex items-center justify-center gap-1.5 ${
-                travelMode === 'walk'
-                  ? 'bg-gradient-to-r from-teal-500 to-teal-600 text-white shadow-sm font-bold'
-                  : 'text-brand-text-secondary hover:text-brand-text hover:bg-white/50'
-              }`}
-            >
-              <span>🚶</span>
-              <span>Walk Focus</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setTravelMode('transit');
-                onUpdatePreferences({ ...preferences, preferPublicTransport: true });
-              }}
-              className={`flex-1 py-1.5 px-2 rounded-xl transition-all flex items-center justify-center gap-1.5 ${
-                travelMode === 'transit'
-                  ? 'bg-gradient-to-r from-teal-500 to-teal-600 text-white shadow-sm font-bold'
-                  : 'text-brand-text-secondary hover:text-brand-text hover:bg-white/50'
-              }`}
-            >
-              <span>🚇</span>
-              <span>Transit Hubs</span>
-            </button>
-          </div>
-
-          {/* Unified Journey Track: Origin & Destination */}
-          <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-brand-border/80 shadow-inner-glass p-3 space-y-2 relative">
-            {/* Absolute Centered Swap Jewel Button */}
-            <button
-              type="button"
-              onClick={handleSwap}
-              disabled={!origin || !destination}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 z-20 w-7 h-7 rounded-full glass-crystal hover:border-teal-400 text-teal-700 hover:text-teal-900 border border-champagne-300/90 shadow-glass-crystal flex items-center justify-center transition-all active:scale-90 disabled:opacity-40 hover:rotate-180 duration-300"
-              title="Swap Origin and Destination"
-              aria-label="Swap Origin and Destination"
-            >
-              <ArrowUpDown className="w-3.5 h-3.5" />
-            </button>
-
-            {/* Origin row */}
-            <div className="relative flex items-start gap-2.5 pr-8">
-              <div className="pt-2 shrink-0">
-                <div className="w-5 h-5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center ring-2 ring-emerald-200/80 shadow-xs">
-                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                </div>
+        {/* Connected Origin & Destination Card */}
+        <div className="surface-card p-3 relative">
+          <div className="flex items-stretch gap-2.5">
+            {/* Visual connector line A to B */}
+            <div className="flex flex-col items-center justify-between py-2 shrink-0 select-none">
+              <div className="w-6 h-6 rounded-full bg-ink text-white font-bold text-xs flex items-center justify-center">
+                A
               </div>
+              <div className="w-0.5 flex-1 bg-border-strong my-1" />
+              <div className="w-6 h-6 rounded-full bg-peacock text-white font-bold text-xs flex items-center justify-center">
+                B
+              </div>
+            </div>
 
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between mb-0.5">
-                  <label className="text-[10px] font-bold text-teal-900 uppercase tracking-wider">
-                    Origin (Start)
-                  </label>
-                  <button
-                    onClick={handleUseCurrentLocation}
-                    disabled={isLocating}
-                    className="text-[9px] text-teal-700 hover:text-teal-900 bg-teal-50 hover:bg-teal-100/90 px-2 py-0.5 rounded-full font-bold border border-teal-200/80 flex items-center gap-1 transition-all disabled:opacity-50 shadow-xs shrink-0"
-                  >
-                    <Crosshair className={`w-2.5 h-2.5 ${isLocating ? 'animate-spin text-teal-600' : ''}`} />
-                    <span>{isLocating ? 'Locating...' : 'GPS'}</span>
-                  </button>
-                </div>
+            {/* Inputs */}
+            <div className="flex-1 space-y-2 min-w-0">
+              {/* Origin Input */}
+              <div className="relative">
+                <input
+                  type="text"
+                  value={originInput}
+                  onChange={(e) => {
+                    setOriginInput(e.target.value);
+                    setShowOriginDropdown(true);
+                  }}
+                  onFocus={() => setShowOriginDropdown(true)}
+                  placeholder="Starting point or GPS location..."
+                  className="w-full text-xs font-medium bg-paper rounded-lg px-3 py-2 border border-border focus:border-peacock focus-ring-peacock text-ink placeholder:text-text-muted"
+                  aria-label="Starting location"
+                />
 
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={originInput}
-                    onChange={(e) => {
-                      setOriginInput(e.target.value);
-                      setShowOriginDropdown(true);
-                    }}
-                    onFocus={() => setShowOriginDropdown(true)}
-                    placeholder="Search starting location..."
-                    className="w-full py-1.5 px-2.5 text-xs rounded-xl bg-white/85 border border-brand-border/80 focus:border-teal-500 focus:bg-white focus:ring-2 focus:ring-teal-100 outline-none text-brand-text placeholder-brand-text-muted transition-all font-semibold shadow-inner-glass"
-                  />
-                </div>
-
-                {/* Origin Autocomplete Dropdown */}
-                {showOriginDropdown && originSuggestions.length > 0 && (
-                  <div className="absolute top-full left-0 right-0 z-50 mt-1 surface-pearl border border-brand-border rounded-2xl shadow-float-lg overflow-hidden max-h-48 overflow-y-auto">
-                    {originSuggestions.map((item) => (
+                {showOriginDropdown && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-border rounded-lg shadow-e2 z-30 max-h-48 overflow-y-auto">
+                    <button
+                      type="button"
+                      onClick={handleUseCurrentLocation}
+                      disabled={isLocating}
+                      className="w-full text-left px-3 py-2 text-xs font-semibold text-peacock-dark hover:bg-peacock-tint flex items-center gap-2 border-b border-border"
+                    >
+                      <Crosshair className={`w-3.5 h-3.5 ${isLocating ? 'animate-spin' : ''}`} />
+                      <span>{isLocating ? 'Locating device...' : 'Use current location'}</span>
+                    </button>
+                    {PRESET_PLACES.map((place) => (
                       <button
-                        key={item.id}
+                        key={place.id}
+                        type="button"
                         onClick={() => {
-                          onSetOrigin(item.coordinates, item.name);
-                          setOriginInput(item.name);
+                          onSetOrigin(place.coordinates, place.name);
+                          setOriginInput(place.name);
                           setShowOriginDropdown(false);
+                          setLocationError(null);
                         }}
-                        className="w-full text-left p-2.5 hover:bg-teal-50/50 transition-colors border-b border-brand-border/60 last:border-b-0 text-xs"
+                        className="w-full text-left px-3 py-2 text-xs hover:bg-paper border-b border-border/50 last:border-b-0"
                       >
-                        <div className="font-bold text-brand-text">{item.name}</div>
-                        <div className="text-[10px] text-brand-text-secondary truncate">{item.displayName}</div>
+                        <div className="font-semibold text-ink">{place.name}</div>
+                        <div className="text-[11px] text-text-secondary">{place.detail}</div>
                       </button>
                     ))}
                   </div>
                 )}
               </div>
-            </div>
 
-            {/* Connecting Visual Rail Line */}
-            <div className="pl-4 -my-1">
-              <div className="w-0.5 h-3 border-l-2 border-dashed border-champagne-300" />
-            </div>
+              {/* Destination Input */}
+              <div className="relative">
+                <input
+                  type="text"
+                  value={destInput}
+                  onChange={(e) => {
+                    setDestInput(e.target.value);
+                    setShowDestDropdown(true);
+                  }}
+                  onFocus={() => setShowDestDropdown(true)}
+                  placeholder="Where would you like to walk?..."
+                  className="w-full text-xs font-medium bg-paper rounded-lg px-3 py-2 border border-border focus:border-peacock focus-ring-peacock text-ink placeholder:text-text-muted"
+                  aria-label="Destination location"
+                />
 
-            {/* Destination row */}
-            <div className="relative flex items-start gap-2.5 pr-8">
-              <div className="pt-2 shrink-0">
-                <div className="w-5 h-5 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center ring-2 ring-rose-200/80 shadow-xs">
-                  <MapPin className="w-3 h-3 text-rose-500" />
-                </div>
-              </div>
-
-              <div className="flex-1 min-w-0">
-                <label className="block text-[10px] font-bold text-rose-700 uppercase tracking-wider mb-0.5">
-                  Destination
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={destInput}
-                    onChange={(e) => {
-                      setDestInput(e.target.value);
-                      setShowDestDropdown(true);
-                    }}
-                    onFocus={() => setShowDestDropdown(true)}
-                    placeholder="Search destination..."
-                    className="w-full py-1.5 px-2.5 text-xs rounded-xl bg-white/85 border border-brand-border/80 focus:border-rose-400 focus:bg-white focus:ring-2 focus:ring-rose-100 outline-none text-brand-text placeholder-brand-text-muted transition-all font-semibold shadow-inner-glass"
-                  />
-                </div>
-
-                {/* Destination Autocomplete Dropdown */}
-                {showDestDropdown && destSuggestions.length > 0 && (
-                  <div className="absolute top-full left-0 right-0 z-50 mt-1 surface-pearl border border-brand-border rounded-2xl shadow-float-lg overflow-hidden max-h-48 overflow-y-auto">
-                    {destSuggestions.map((item) => (
+                {showDestDropdown && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-border rounded-lg shadow-e2 z-30 max-h-48 overflow-y-auto">
+                    {PRESET_PLACES.map((place) => (
                       <button
-                        key={item.id}
+                        key={place.id}
+                        type="button"
                         onClick={() => {
-                          onSetDestination(item.coordinates, item.name);
-                          setDestInput(item.name);
+                          onSetDestination(place.coordinates, place.name);
+                          setDestInput(place.name);
                           setShowDestDropdown(false);
                         }}
-                        className="w-full text-left p-2.5 hover:bg-teal-50/50 transition-colors border-b border-brand-border/60 last:border-b-0 text-xs"
+                        className="w-full text-left px-3 py-2 text-xs hover:bg-paper border-b border-border/50 last:border-b-0"
                       >
-                        <div className="font-bold text-brand-text">{item.name}</div>
-                        <div className="text-[10px] text-brand-text-secondary truncate">{item.displayName}</div>
+                        <div className="font-semibold text-ink">{place.name}</div>
+                        <div className="text-[11px] text-text-secondary">{place.detail}</div>
                       </button>
                     ))}
                   </div>
                 )}
               </div>
             </div>
-          </div>
 
-          {/* Location Error Notice */}
-          {locationError && (
-            <p className="text-[11px] text-danger-700 bg-danger-50 p-2.5 rounded-xl border border-danger-100">
-              {locationError}
-            </p>
-          )}
-
-          {/* Presets Quick Picker */}
-          <div className="pt-2">
-            <span className="text-[10px] uppercase font-bold text-brand-text-muted tracking-wider block mb-1.5 flex items-center gap-1">
-              <Sparkles className="w-3 h-3 text-champagne-500" />
-              <span>Popular Demo Destinations</span>
-            </span>
-            <div className="flex flex-wrap gap-1.5">
-              {DEMO_PRESET_DESTINATIONS.map((preset) => (
-                <button
-                  key={preset.id}
-                  onClick={() => {
-                    if (!origin) {
-                      onSetOrigin(DEMO_PRESET_ORIGINS[0].coordinates, DEMO_PRESET_ORIGINS[0].name);
-                    }
-                    onSetDestination(preset.coordinates, preset.name);
-                  }}
-                  className="px-3 py-1.5 rounded-full bg-white/70 hover:bg-champagne-50/80 border border-champagne-200/70 text-[11px] font-semibold text-brand-text hover:text-teal-800 transition-all shadow-xs"
-                >
-                  📍 {preset.name.split(' ')[0]}
-                </button>
-              ))}
+            {/* Swap Button */}
+            <div className="flex items-center shrink-0">
+              <button
+                type="button"
+                onClick={handleSwapPoints}
+                className="p-2 rounded-lg bg-paper hover:bg-raised text-text-secondary hover:text-ink border border-border transition-colors focus-ring-peacock"
+                title="Swap starting point and destination"
+                aria-label="Swap starting point and destination"
+              >
+                <ArrowUpDown className="w-4 h-4" />
+              </button>
             </div>
           </div>
 
-          {/* Preferences Accordion Toggle */}
-          <div className="pt-1 border-t border-brand-border/70">
-            <button
-              onClick={() => setShowPreferences(!showPreferences)}
-              className="w-full flex items-center justify-between text-xs font-semibold text-brand-text-secondary hover:text-brand-text py-1 transition-colors"
-            >
-              <span className="flex items-center gap-1.5 text-teal-800 font-bold">
-                <SlidersHorizontal className="w-3.5 h-3.5 text-teal-600" />
-                <span>Route Preferences & Priorities</span>
-              </span>
-              {showPreferences ? (
-                <ChevronUp className="w-3.5 h-3.5 text-brand-text-muted" />
-              ) : (
-                <ChevronDown className="w-3.5 h-3.5 text-brand-text-muted" />
-              )}
-            </button>
+          {/* Location Error Notice if GPS failed */}
+          {locationError && (
+            <div className="mt-2.5 p-2 rounded bg-danger-tint border border-danger/30 text-danger text-[11px] flex items-start gap-1.5 font-medium">
+              <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+              <span>{locationError}</span>
+            </div>
+          )}
+        </div>
 
-            {showPreferences && (
-              <div className="mt-2.5 p-3 rounded-2xl bg-white/80 border border-brand-border/90 space-y-2 text-xs text-brand-text animate-fadeIn font-medium">
-                <label className="flex items-center justify-between cursor-pointer">
-                  <span>Prefer well-lit illuminated stretches</span>
-                  <input
-                    type="checkbox"
-                    checked={preferences.preferWellLit}
-                    onChange={(e) =>
-                      onUpdatePreferences({ ...preferences, preferWellLit: e.target.checked })
-                    }
-                    className="rounded text-teal-600 focus:ring-teal-400 h-3.5 w-3.5 border-brand-border"
-                  />
-                </label>
-
-                <label className="flex items-center justify-between cursor-pointer">
-                  <span>Prioritise routes near public transport</span>
-                  <input
-                    type="checkbox"
-                    checked={preferences.preferPublicTransport}
-                    onChange={(e) =>
-                      onUpdatePreferences({
-                        ...preferences,
-                        preferPublicTransport: e.target.checked,
-                      })
-                    }
-                    className="rounded text-teal-600 focus:ring-teal-400 h-3.5 w-3.5 border-brand-border"
-                  />
-                </label>
-
-                <label className="flex items-center justify-between cursor-pointer">
-                  <span>Include mapped essential support points</span>
-                  <input
-                    type="checkbox"
-                    checked={preferences.preferEssentialFacilities}
-                    onChange={(e) =>
-                      onUpdatePreferences({
-                        ...preferences,
-                        preferEssentialFacilities: e.target.checked,
-                      })
-                    }
-                    className="rounded text-teal-600 focus:ring-teal-400 h-3.5 w-3.5 border-brand-border"
-                  />
-                </label>
-
-                <label className="flex items-center justify-between cursor-pointer">
-                  <span>Reduce exposure to documented isolated paths</span>
-                  <input
-                    type="checkbox"
-                    checked={preferences.reduceIsolatedSegments}
-                    onChange={(e) =>
-                      onUpdatePreferences({
-                        ...preferences,
-                        reduceIsolatedSegments: e.target.checked,
-                      })
-                    }
-                    className="rounded text-teal-600 focus:ring-teal-400 h-3.5 w-3.5 border-brand-border"
-                  />
-                </label>
-
-                <label className="flex items-center justify-between cursor-pointer">
-                  <span>Step-free / Wheelchair accessible</span>
-                  <input
-                    type="checkbox"
-                    checked={preferences.wheelchairAccessible}
-                    onChange={(e) =>
-                      onUpdatePreferences({
-                        ...preferences,
-                        wheelchairAccessible: e.target.checked,
-                      })
-                    }
-                    className="rounded text-teal-600 focus:ring-teal-400 h-3.5 w-3.5 border-brand-border"
-                  />
-                </label>
-              </div>
-            )}
-          </div>
-
-          {/* Find Routes Trigger Button (Royal Teal Gradient) */}
+        {/* Compact Priorities Toggle */}
+        <div className="mt-3 flex items-center justify-between">
           <button
-            onClick={onFetchRoutes}
-            disabled={!origin || !destination || isLoadingRoutes}
-            className="w-full mt-2 py-3.5 px-4 rounded-full bg-gradient-to-r from-teal-500 via-teal-600 to-teal-700 hover:from-teal-600 hover:to-teal-800 active:scale-98 disabled:opacity-40 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md shadow-teal-600/25 transition-all"
+            type="button"
+            onClick={() => setShowPreferences(!showPreferences)}
+            className="flex items-center gap-1.5 text-xs font-semibold text-text-secondary hover:text-ink focus-ring-peacock rounded px-1.5 py-1"
           >
-            {isLoadingRoutes ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                <span>Evaluating Infrastructure Corridors...</span>
-              </>
-            ) : (
-              <>
-                <Search className="w-4 h-4" />
-                <span>Calculate Safety-Aware Routes</span>
-              </>
+            <SlidersHorizontal className="w-3.5 h-3.5 text-peacock" />
+            <span>Priorities & Accessibility</span>
+            {activePrioritiesCount > 0 && (
+              <span className="w-4 h-4 rounded-full bg-peacock-tint text-peacock-dark text-[10px] font-bold flex items-center justify-center">
+                {activePrioritiesCount}
+              </span>
             )}
+            <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showPreferences ? 'rotate-180' : ''}`} />
+          </button>
+
+          {/* Primary Action Button */}
+          <button
+            type="button"
+            onClick={onFetchRoutes}
+            disabled={isLoadingRoutes || !origin || !destination}
+            className="btn-ink px-4 py-2 text-xs font-bold shadow-e1 disabled:opacity-50 flex items-center gap-1.5"
+          >
+            <Navigation className="w-3.5 h-3.5 text-peacock-tint" />
+            <span>{isLoadingRoutes ? 'Calculating...' : 'Find routes'}</span>
           </button>
         </div>
 
-        {/* Routes List Section */}
-        <div className="space-y-3">
-          {isLoadingRoutes ? (
-            <div className="p-6 rounded-royal glass-pearl border border-white/95 shadow-glass-pearl text-center space-y-3 animate-pulse">
-              <div className="w-12 h-12 rounded-2xl bg-teal-50 border border-teal-200 text-teal-600 mx-auto flex items-center justify-center ring-2 ring-champagne-200">
-                <Compass className="w-6 h-6 animate-spin-slow text-teal-600" />
-              </div>
-              <div className="text-xs font-bold text-brand-text">Evaluating Corridor Infrastructure...</div>
-              <p className="text-[11px] text-brand-text-secondary max-w-xs mx-auto font-medium">
-                Scanning verified streetlights, open essential facilities, and active community reports along paths.
-              </p>
+        {/* Collapsible Priorities Panel */}
+        {showPreferences && (
+          <div className="mt-3 p-3 rounded-lg bg-raised border border-border text-xs space-y-2 animate-fade-in">
+            <div className="font-semibold text-ink text-[11px] uppercase tracking-wider mb-1">
+              Active Routing Factors
             </div>
-          ) : routes.length > 0 ? (
-            <>
-              <div className="flex items-center justify-between pt-1">
-                <span className="text-xs font-bold uppercase tracking-wider text-brand-text-muted">
-                  Route Alternatives ({routes.length} options)
-                </span>
-                <span className="text-[11px] text-teal-700 font-bold">Tap card to select</span>
-              </div>
+            
+            <label className="flex items-center justify-between cursor-pointer">
+              <span className="text-text font-medium">Better street lighting</span>
+              <input
+                type="checkbox"
+                checked={preferences.preferWellLit}
+                onChange={(e) => onUpdatePreferences({ ...preferences, preferWellLit: e.target.checked })}
+                className="rounded border-border text-peacock focus:ring-peacock h-4 w-4"
+              />
+            </label>
 
-              <div className="space-y-3">
-                {routes.map((route, idx) => (
-                  <RouteCard
-                    key={route.id}
-                    route={route}
-                    isSelected={idx === selectedRouteIndex}
-                    onSelect={() => onSelectRouteIndex(idx)}
-                    onOpenDetails={() => onOpenRouteDetails(route)}
-                  />
-                ))}
-              </div>
+            <label className="flex items-center justify-between cursor-pointer">
+              <span className="text-text font-medium">Busier streets & transit access</span>
+              <input
+                type="checkbox"
+                checked={preferences.preferPublicTransport}
+                onChange={(e) => onUpdatePreferences({ ...preferences, preferPublicTransport: e.target.checked })}
+                className="rounded border-border text-peacock focus:ring-peacock h-4 w-4"
+              />
+            </label>
 
-              {/* Quick Action to Launch Family Companion with Selected Route */}
-              {routes[selectedRouteIndex] && (
-                <div className="pt-2 pb-6 lg:pb-2">
-                  <button
-                    onClick={() => onStartJourneyWithRoute(routes[selectedRouteIndex])}
-                    className="w-full py-3.5 px-4 rounded-full glass-pearl border border-champagne-200/90 hover:border-champagne-300 text-teal-900 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-glass-pearl group active:scale-98"
-                  >
-                    <Compass className="w-4 h-4 text-teal-600 group-hover:rotate-45 transition-transform" />
-                    <span>Track with Family Companion</span>
-                  </button>
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="h-44 flex flex-col items-center justify-center text-center p-6 text-brand-text-secondary border border-dashed border-brand-border/80 rounded-royal bg-white/50 backdrop-blur-md">
-              <Compass className="w-8 h-8 text-brand-text-muted mb-2 stroke-1" />
-              <h4 className="font-bold text-brand-text text-sm">No Routes Calculated</h4>
-              <p className="text-xs text-brand-text-secondary mt-1 max-w-xs font-medium">
-                Select an origin and destination above or tap one of the preset chips to compare corridor perspectives.
-              </p>
-            </div>
-          )}
+            <label className="flex items-center justify-between cursor-pointer">
+              <span className="text-text font-medium">Proximity to open essential facilities</span>
+              <input
+                type="checkbox"
+                checked={preferences.preferEssentialFacilities}
+                onChange={(e) => onUpdatePreferences({ ...preferences, preferEssentialFacilities: e.target.checked })}
+                className="rounded border-border text-peacock focus:ring-peacock h-4 w-4"
+              />
+            </label>
+
+            <label className="flex items-center justify-between cursor-pointer">
+              <span className="text-text font-medium">Step-free wheelchair accessibility</span>
+              <input
+                type="checkbox"
+                checked={preferences.wheelchairAccessible}
+                onChange={(e) => onUpdatePreferences({ ...preferences, wheelchairAccessible: e.target.checked })}
+                className="rounded border-border text-peacock focus:ring-peacock h-4 w-4"
+              />
+            </label>
+          </div>
+        )}
+      </div>
+
+      {/* Route Results Section */}
+      <div className="p-4 sm:p-5 space-y-3">
+        <div className="flex items-center justify-between text-xs text-text-secondary px-0.5">
+          <span className="font-semibold uppercase tracking-wider text-[11px] text-text-secondary">
+            {routes.length} Route Alternatives
+          </span>
+          <span className="text-[11px]">Sorted by travel context</span>
         </div>
+
+        {isLoadingRoutes ? (
+          <div className="space-y-3 py-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="surface-card p-4 space-y-3 animate-pulse">
+                <div className="h-4 bg-raised rounded w-1/3" />
+                <div className="h-6 bg-raised rounded w-2/3" />
+                <div className="h-3 bg-raised rounded w-full" />
+              </div>
+            ))}
+          </div>
+        ) : routes.length > 0 ? (
+          <div className="space-y-3" role="region" aria-label="Route comparison results">
+            {routes.map((route, idx) => (
+              <RouteCard
+                key={route.id}
+                route={route}
+                isSelected={idx === selectedRouteIndex}
+                onSelect={() => onSelectRouteIndex(idx)}
+                onOpenDetails={() => onOpenRouteDetails(route)}
+                onStartTrip={() => onStartJourneyWithRoute(route)}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="surface-card p-6 text-center text-text-secondary space-y-2">
+            <MapPin className="w-8 h-8 text-border-strong mx-auto" />
+            <p className="text-sm font-semibold text-ink">No routes computed yet</p>
+            <p className="text-xs">Select your origin and destination above to compare transparent walking corridors.</p>
+          </div>
+        )}
       </div>
     </div>
   );

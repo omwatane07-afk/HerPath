@@ -38,14 +38,46 @@ import { ActiveJourneyBanner } from '@/components/journey/ActiveJourneyBanner';
 import { EmergencyModal } from '@/components/emergency/EmergencyModal';
 import { CivicInsightsView } from '@/components/civic/CivicInsightsView';
 import { SettingsModal } from '@/components/settings/SettingsModal';
-import { ChevronDown, ChevronUp, MapPin, Navigation } from 'lucide-react';
+import { ExploreControls } from '@/components/map/ExploreControls';
+import { ChevronDown, ChevronUp, ChevronRight, Navigation, ChevronsUpDown } from 'lucide-react';
+
+export type MobileSheetSnap = 'peek' | 'half' | 'full';
 
 export default function HerPathHome() {
-  // Navigation State
+  // Navigation State with URL sync
   const [activeTab, setActiveTab] = useState<ActiveTab>('route');
 
-  // Mobile Sheet Expanded / Collapsed State
-  const [isMobileSheetMinimized, setIsMobileSheetMinimized] = useState<boolean>(false);
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const tabParam = params.get('tab') as ActiveTab;
+      if (tabParam && ['route', 'map', 'facilities', 'reports', 'family', 'civic'].includes(tabParam)) {
+        setActiveTab(tabParam);
+      }
+    }
+  }, []);
+
+  const handleSelectTab = (tab: ActiveTab) => {
+    setActiveTab(tab);
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.set('tab', tab);
+      window.history.replaceState(null, '', url.toString());
+    }
+    // Snap to half when switching modules on mobile
+    setSheetSnap('half');
+  };
+
+  // Mobile Bottom Sheet 3-Snap Height State (peek ~80px, half ~50vh, full ~88vh)
+  const [sheetSnap, setSheetSnap] = useState<MobileSheetSnap>('half');
+
+  const cycleSheetSnap = () => {
+    setSheetSnap((prev) => {
+      if (prev === 'peek') return 'half';
+      if (prev === 'half') return 'full';
+      return 'peek';
+    });
+  };
 
   // Map and Route Coordinates (defaulted to Connaught Place demo hub)
   const [mapCenter, setMapCenter] = useState<Coordinates>({ lat: 28.6328, lng: 77.2197 });
@@ -72,7 +104,7 @@ export default function HerPathHome() {
     StorageRepository.getPreferences()
   );
 
-  // Routing State (pre-initialized with high-speed evaluated corridors for immediate interactivity)
+  // Routing State
   const [routes, setRoutes] = useState<RouteOption[]>(() => {
     try {
       const initialRaw = generateSyntheticRouteAlternatives(
@@ -126,7 +158,7 @@ export default function HerPathHome() {
           setCurrentLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
         },
         () => {
-          // Graceful fallback to demo coordinates without alerts
+          // Graceful handling without alert
         },
         { timeout: 5000 }
       );
@@ -162,13 +194,6 @@ export default function HerPathHome() {
     }
   }, [origin, destination, preferences]);
 
-  // Compute initial routes on first mount only if not already loaded
-  useEffect(() => {
-    if (routes.length === 0) {
-      handleCalculateRoutes();
-    }
-  }, [handleCalculateRoutes, routes.length]);
-
   // Map Click Handler
   const handleMapClick = (coords: Coordinates) => {
     setReportModalCoords(coords);
@@ -178,9 +203,7 @@ export default function HerPathHome() {
   const handleSetFacilityAsDestination = (coords: Coordinates, name: string) => {
     setDestination(coords);
     setDestinationName(name);
-    setActiveTab('route');
-    setIsMobileSheetMinimized(false);
-    // Recalculate routes immediately
+    handleSelectTab('route');
     setTimeout(() => {
       handleCalculateRoutes();
     }, 100);
@@ -247,14 +270,11 @@ export default function HerPathHome() {
   };
 
   return (
-    <div className="flex flex-col h-screen w-full max-w-full overflow-hidden bg-brand-bg font-sans">
-      {/* 1. Light-Mode Glass Header */}
+    <div className="flex flex-col h-screen w-full max-w-full overflow-hidden bg-paper text-ink font-sans">
+      {/* 1. Global Header */}
       <Header
         activeTab={activeTab}
-        onSelectTab={(tab) => {
-          setActiveTab(tab);
-          setIsMobileSheetMinimized(false);
-        }}
+        onSelectTab={handleSelectTab}
         onOpenEmergency={() => setIsEmergencyModalOpen(true)}
         onOpenReportModal={() => {
           setReportModalCoords(mapCenter);
@@ -264,10 +284,10 @@ export default function HerPathHome() {
         hasActiveJourney={Boolean(activeJourney && activeJourney.status !== 'arrived')}
       />
 
-      {/* 2. Educational Transparency Banner */}
+      {/* 2. Educational Transparency Banner (Dismissible first-use) */}
       <TrustBanner />
 
-      {/* 3. Active Family Journey Companion Banner (if a trip is running) */}
+      {/* 3. Active Family Journey Companion Banner */}
       {activeJourney && (
         <ActiveJourneyBanner
           journey={activeJourney}
@@ -278,251 +298,210 @@ export default function HerPathHome() {
 
       {/* 4. Main Body: Split Desktop & Floating Mobile Experience */}
       <div className="flex-1 flex overflow-hidden relative">
-        {/* Desktop Left Drawer (Visible on lg+) */}
-        <aside className="hidden lg:flex w-[460px] xl:w-[480px] h-full flex-col z-20 shrink-0 glass-pearl border-r border-white/80 shadow-glass-pearl overflow-hidden">
-          {activeTab === 'route' && (
-            <RoutePlanner
-              origin={origin}
-              destination={destination}
-              originName={originName}
-              destinationName={destinationName}
-              onSetOrigin={(c, name) => {
-                setOrigin(c);
-                setOriginName(name);
-              }}
-              onSetDestination={(c, name) => {
-                setDestination(c);
-                setDestinationName(name);
-              }}
-              routes={routes}
-              selectedRouteIndex={selectedRouteIndex}
-              onSelectRouteIndex={setSelectedRouteIndex}
-              isLoadingRoutes={isLoadingRoutes}
-              onFetchRoutes={handleCalculateRoutes}
-              preferences={preferences}
-              onUpdatePreferences={(p) => {
-                setPreferences(p);
-                StorageRepository.savePreferences(p);
-              }}
-              onOpenRouteDetails={setInspectedRoute}
-              onStartJourneyWithRoute={(r) => {
-                setInspectedRoute(null);
-                setIsJourneyModalOpen(true);
-              }}
-            />
-          )}
-
-          {activeTab === 'facilities' && (
-            <FacilitiesView
-              facilities={facilities}
-              currentLocation={currentLocation || origin}
-              onSetAsDestination={handleSetFacilityAsDestination}
-            />
-          )}
-
-          {activeTab === 'reports' && (
-            <ReportList
-              reports={reports}
-              onUpvoteReport={handleUpvoteReport}
-              onFlagReport={handleFlagReport}
-              onResolveReport={handleResolveReport}
-              onOpenReportModal={() => {
-                setReportModalCoords(mapCenter);
-                setIsReportModalOpen(true);
-              }}
-            />
-          )}
-
-          {activeTab === 'family' && (
-            <FamilyTripsView
-              activeJourney={activeJourney}
-              trustedContacts={trustedContacts}
-              onOpenStartJourneyModal={() => setIsJourneyModalOpen(true)}
-              onEndJourney={handleEndJourney}
-              onOpenAddContact={() => setIsJourneyModalOpen(true)}
-            />
-          )}
-
-          {activeTab === 'civic' && (
-            <CivicInsightsView
-              streetlights={streetlights}
-              reports={reports}
-              facilities={facilities}
-              transportStops={transportStops}
-              onSelectCoordinate={(coords) => {
-                setMapCenter(coords);
-                setActiveTab('map');
-              }}
-            />
-          )}
-
-          {activeTab === 'map' && (
-            <div className="p-6 flex flex-col h-full bg-brand-bg text-brand-text space-y-4">
-              <div className="p-4 rounded-2xl bg-white border border-brand-border shadow-card space-y-2">
-                <span className="text-[11px] font-bold text-teal-600 uppercase tracking-wider">
-                  Full Canvas Map Mode
-                </span>
-                <h3 className="font-black text-base text-brand-text">Explore Ground Telemetry</h3>
-                <p className="text-xs text-brand-text-secondary leading-relaxed font-medium">
-                  Use the floating layer controls in the top right corner of the map to toggle
-                  Streetlight status, Community Reports, Facilities, and Transit Stops.
-                </p>
-              </div>
-
-              <button
-                onClick={() => setActiveTab('route')}
-                className="py-3 px-5 rounded-full bg-teal-500 hover:bg-teal-600 text-white font-bold text-xs uppercase tracking-wider shadow-sm transition-all"
-              >
-                Return to Route Planner
-              </button>
-            </div>
-          )}
-        </aside>
-
-        {/* Mobile Floating Sheet (Visible on <lg when activeTab !== 'map') */}
+        {/* Desktop Left Contextual Sidebar (~400px wide, hidden in full-canvas 'map' mode) */}
         {activeTab !== 'map' && (
-          <div
-            className={`lg:hidden fixed left-0 right-0 z-30 transition-all duration-300 ease-out flex flex-col ${
-              isMobileSheetMinimized
-                ? 'bottom-24 h-13 mx-3.5 rounded-full glass-crystal border border-white/95 shadow-glass-floating justify-center overflow-hidden'
-                : 'bottom-0 max-h-[82vh] h-auto glass-sheet rounded-t-[32px] shadow-glass-floating border-t border-x border-white/95'
+          <aside className="hidden lg:flex w-[400px] xl:w-[420px] h-full flex-col z-20 shrink-0 bg-paper border-r border-border shadow-e1 overflow-hidden">
+            {activeTab === 'route' && (
+              <RoutePlanner
+                origin={origin}
+                destination={destination}
+                originName={originName}
+                destinationName={destinationName}
+                onSetOrigin={(c, name) => {
+                  setOrigin(c);
+                  setOriginName(name);
+                }}
+                onSetDestination={(c, name) => {
+                  setDestination(c);
+                  setDestinationName(name);
+                }}
+                routes={routes}
+                selectedRouteIndex={selectedRouteIndex}
+                onSelectRouteIndex={setSelectedRouteIndex}
+                isLoadingRoutes={isLoadingRoutes}
+                onFetchRoutes={handleCalculateRoutes}
+                preferences={preferences}
+                onUpdatePreferences={(p) => {
+                  setPreferences(p);
+                  StorageRepository.savePreferences(p);
+                }}
+                onOpenRouteDetails={setInspectedRoute}
+                onStartJourneyWithRoute={(r) => {
+                  setInspectedRoute(null);
+                  setIsJourneyModalOpen(true);
+                }}
+              />
+            )}
+
+            {activeTab === 'facilities' && (
+              <FacilitiesView
+                facilities={facilities}
+                currentLocation={currentLocation || origin}
+                onSetAsDestination={handleSetFacilityAsDestination}
+              />
+            )}
+
+            {activeTab === 'reports' && (
+              <ReportList
+                reports={reports}
+                onUpvoteReport={handleUpvoteReport}
+                onFlagReport={handleFlagReport}
+                onResolveReport={handleResolveReport}
+                onOpenReportModal={() => {
+                  setReportModalCoords(mapCenter);
+                  setIsReportModalOpen(true);
+                }}
+              />
+            )}
+
+            {activeTab === 'family' && (
+              <FamilyTripsView
+                activeJourney={activeJourney}
+                trustedContacts={trustedContacts}
+                onOpenStartJourneyModal={() => setIsJourneyModalOpen(true)}
+                onEndJourney={handleEndJourney}
+                onOpenAddContact={() => setIsJourneyModalOpen(true)}
+              />
+            )}
+
+            {activeTab === 'civic' && (
+              <CivicInsightsView
+                streetlights={streetlights}
+                reports={reports}
+                facilities={facilities}
+                transportStops={transportStops}
+                onSelectCoordinate={(coords) => {
+                  setMapCenter(coords);
+                  handleSelectTab('map');
+                }}
+              />
+            )}
+          </aside>
+        )}
+
+        {/* Mobile 3-Snap Bottom Sheet (Visible on <lg when activeTab !== 'map') */}
+        {activeTab !== 'map' && (
+          <section
+            aria-label="Module Content Sheet"
+            className={`lg:hidden fixed left-0 right-0 z-30 transition-all duration-280 ease-standard flex flex-col bg-white border-t border-border shadow-e3 ${
+              sheetSnap === 'peek'
+                ? 'bottom-[68px] h-20 rounded-t-[20px] overflow-hidden'
+                : sheetSnap === 'half'
+                ? 'bottom-[68px] h-[52vh] rounded-t-[20px]'
+                : 'bottom-[68px] h-[86vh] rounded-t-[20px]'
             }`}
           >
-            {/* When Minimized: Compact Pill */}
-            {isMobileSheetMinimized ? (
-              <div
-                onClick={() => setIsMobileSheetMinimized(false)}
-                className="w-full h-full flex items-center justify-between px-4 cursor-pointer hover:bg-white/80 transition-colors"
-              >
-                <div className="flex items-center gap-2 min-w-0">
-                  <div className="w-6 h-6 rounded-full bg-teal-50 text-teal-600 flex items-center justify-center border border-teal-200 shrink-0">
-                    <Navigation className="w-3.5 h-3.5 text-teal-600" />
-                  </div>
-                  <span className="text-xs font-bold text-brand-text truncate">
-                    {activeTab === 'route' &&
-                      (originName
-                        ? `${originName.split(' ')[0]} → ${destinationName ? destinationName.split(' ')[0] : 'Destination'}`
-                        : 'Plan Safe Journey')}
-                    {activeTab === 'facilities' && 'Browse Nearby Facilities'}
-                    {activeTab === 'reports' && 'Community Observations'}
-                    {activeTab === 'family' && 'Family Companion Status'}
-                    {activeTab === 'civic' && 'Civic Ward Telemetry'}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1 text-[11px] font-bold text-teal-700 bg-teal-50 px-2.5 py-0.5 rounded-full border border-teal-200/80 shrink-0 shadow-xs">
-                  <span>Open Planner</span>
-                  <ChevronUp className="w-3.5 h-3.5" />
-                </div>
-              </div>
-            ) : (
-              <>
-                {/* Sheet Drag / Toggle Handle */}
-                <div
-                  onClick={() => setIsMobileSheetMinimized(true)}
-                  className="w-full pt-3 pb-2 flex flex-col items-center justify-center cursor-pointer select-none shrink-0 group"
+            {/* Sheet Handle & Height Controls (touch + keyboard accessible) */}
+            <div
+              onClick={cycleSheetSnap}
+              className="w-full pt-2.5 pb-2 flex flex-col items-center justify-center cursor-pointer select-none shrink-0 border-b border-border/60 bg-paper/60 hover:bg-paper transition-colors"
+            >
+              <div className="w-10 h-1.5 rounded-full bg-border-strong mb-1.5" />
+              <div className="flex items-center justify-between w-full px-4">
+                <span className="text-xs font-serif font-bold text-ink flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-peacock" />
+                  {activeTab === 'route' && 'Plan Route'}
+                  {activeTab === 'facilities' && 'Nearby Facilities'}
+                  {activeTab === 'reports' && 'Community Reports'}
+                  {activeTab === 'family' && 'Family Journey'}
+                  {activeTab === 'civic' && 'Civic Infrastructure'}
+                </span>
+
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    cycleSheetSnap();
+                  }}
+                  className="p-1 rounded-md text-text-secondary hover:text-ink flex items-center gap-1 text-[11px] font-medium"
+                  aria-label="Toggle sheet height"
                 >
-                  <div className="w-12 h-1.5 rounded-full bg-slate-300/80 mb-1 group-hover:bg-teal-500 transition-colors" />
-                  <div className="flex items-center justify-between w-full px-5 pt-0.5">
-                    <span className="text-xs font-black text-brand-text uppercase tracking-wider flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse" />
-                      {activeTab === 'route' && 'Safe Journey Planner'}
-                      {activeTab === 'facilities' && 'Nearby Essential Facilities'}
-                      {activeTab === 'reports' && 'Verified Community Reports'}
-                      {activeTab === 'family' && 'Family Journey Companion'}
-                      {activeTab === 'civic' && 'Civic Infrastructure Insights'}
-                    </span>
-                    <button
-                      type="button"
-                      className="text-brand-text-secondary p-1 rounded-full hover:bg-teal-50/80 transition-colors"
-                      aria-label="Minimize sheet"
-                    >
-                      <ChevronDown className="w-4 h-4 text-brand-text-muted" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Mobile Sheet Content */}
-                <div className="flex-1 overflow-y-auto overscroll-contain pb-24 px-3 sm:px-5">
-                {activeTab === 'route' && (
-                  <RoutePlanner
-                    origin={origin}
-                    destination={destination}
-                    originName={originName}
-                    destinationName={destinationName}
-                    onSetOrigin={(c, name) => {
-                      setOrigin(c);
-                      setOriginName(name);
-                    }}
-                    onSetDestination={(c, name) => {
-                      setDestination(c);
-                      setDestinationName(name);
-                    }}
-                    routes={routes}
-                    selectedRouteIndex={selectedRouteIndex}
-                    onSelectRouteIndex={setSelectedRouteIndex}
-                    isLoadingRoutes={isLoadingRoutes}
-                    onFetchRoutes={handleCalculateRoutes}
-                    preferences={preferences}
-                    onUpdatePreferences={(p) => {
-                      setPreferences(p);
-                      StorageRepository.savePreferences(p);
-                    }}
-                    onOpenRouteDetails={setInspectedRoute}
-                    onStartJourneyWithRoute={(r) => {
-                      setInspectedRoute(null);
-                      setIsJourneyModalOpen(true);
-                    }}
-                  />
-                )}
-
-                {activeTab === 'facilities' && (
-                  <FacilitiesView
-                    facilities={facilities}
-                    currentLocation={currentLocation || origin}
-                    onSetAsDestination={handleSetFacilityAsDestination}
-                  />
-                )}
-
-                {activeTab === 'reports' && (
-                  <ReportList
-                    reports={reports}
-                    onUpvoteReport={handleUpvoteReport}
-                    onFlagReport={handleFlagReport}
-                    onResolveReport={handleResolveReport}
-                    onOpenReportModal={() => {
-                      setReportModalCoords(mapCenter);
-                      setIsReportModalOpen(true);
-                    }}
-                  />
-                )}
-
-                {activeTab === 'family' && (
-                  <FamilyTripsView
-                    activeJourney={activeJourney}
-                    trustedContacts={trustedContacts}
-                    onOpenStartJourneyModal={() => setIsJourneyModalOpen(true)}
-                    onEndJourney={handleEndJourney}
-                    onOpenAddContact={() => setIsJourneyModalOpen(true)}
-                  />
-                )}
-
-                {activeTab === 'civic' && (
-                  <CivicInsightsView
-                    streetlights={streetlights}
-                    reports={reports}
-                    facilities={facilities}
-                    transportStops={transportStops}
-                    onSelectCoordinate={(coords) => {
-                      setMapCenter(coords);
-                      setActiveTab('map');
-                    }}
-                  />
-                )}
+                  <span>{sheetSnap === 'peek' ? 'Expand' : sheetSnap === 'half' ? 'Full view' : 'Minimize'}</span>
+                  <ChevronsUpDown className="w-3.5 h-3.5" />
+                </button>
               </div>
-            </>
-          )}
-        </div>
-      )}
+            </div>
+
+            {/* Mobile Sheet Content */}
+            <div className="flex-1 overflow-y-auto overscroll-contain pb-6 px-3 sm:px-4">
+              {activeTab === 'route' && (
+                <RoutePlanner
+                  origin={origin}
+                  destination={destination}
+                  originName={originName}
+                  destinationName={destinationName}
+                  onSetOrigin={(c, name) => {
+                    setOrigin(c);
+                    setOriginName(name);
+                  }}
+                  onSetDestination={(c, name) => {
+                    setDestination(c);
+                    setDestinationName(name);
+                  }}
+                  routes={routes}
+                  selectedRouteIndex={selectedRouteIndex}
+                  onSelectRouteIndex={setSelectedRouteIndex}
+                  isLoadingRoutes={isLoadingRoutes}
+                  onFetchRoutes={handleCalculateRoutes}
+                  preferences={preferences}
+                  onUpdatePreferences={(p) => {
+                    setPreferences(p);
+                    StorageRepository.savePreferences(p);
+                  }}
+                  onOpenRouteDetails={setInspectedRoute}
+                  onStartJourneyWithRoute={(r) => {
+                    setInspectedRoute(null);
+                    setIsJourneyModalOpen(true);
+                  }}
+                />
+              )}
+
+              {activeTab === 'facilities' && (
+                <FacilitiesView
+                  facilities={facilities}
+                  currentLocation={currentLocation || origin}
+                  onSetAsDestination={handleSetFacilityAsDestination}
+                />
+              )}
+
+              {activeTab === 'reports' && (
+                <ReportList
+                  reports={reports}
+                  onUpvoteReport={handleUpvoteReport}
+                  onFlagReport={handleFlagReport}
+                  onResolveReport={handleResolveReport}
+                  onOpenReportModal={() => {
+                    setReportModalCoords(mapCenter);
+                    setIsReportModalOpen(true);
+                  }}
+                />
+              )}
+
+              {activeTab === 'family' && (
+                <FamilyTripsView
+                  activeJourney={activeJourney}
+                  trustedContacts={trustedContacts}
+                  onOpenStartJourneyModal={() => setIsJourneyModalOpen(true)}
+                  onEndJourney={handleEndJourney}
+                  onOpenAddContact={() => setIsJourneyModalOpen(true)}
+                />
+              )}
+
+              {activeTab === 'civic' && (
+                <CivicInsightsView
+                  streetlights={streetlights}
+                  reports={reports}
+                  facilities={facilities}
+                  transportStops={transportStops}
+                  onSelectCoordinate={(coords) => {
+                    setMapCenter(coords);
+                    handleSelectTab('map');
+                  }}
+                />
+              )}
+            </div>
+          </section>
+        )}
 
         {/* Interactive Map Canvas (Always Mounted and Visible) */}
         <main className="flex-1 h-full relative z-10 overflow-hidden">
@@ -549,16 +528,29 @@ export default function HerPathHome() {
               setIsReportModalOpen(true);
             }}
           />
+
+          {/* Full-canvas Explore Map Controls (When activeTab === 'map') */}
+          {activeTab === 'map' && (
+            <ExploreControls
+              streetlights={streetlights}
+              facilities={facilities}
+              reports={reports}
+              transportStops={transportStops}
+              onSetAsDestination={handleSetFacilityAsDestination}
+              onRequestReport={(coords) => {
+                setReportModalCoords(coords);
+                setIsReportModalOpen(true);
+              }}
+              onCenterMap={setMapCenter}
+            />
+          )}
         </main>
       </div>
 
-      {/* 5. Floating Mobile Bottom Dock */}
+      {/* 5. Mobile Bottom Dock */}
       <MobileNav
         activeTab={activeTab}
-        onSelectTab={(tab) => {
-          setActiveTab(tab);
-          setIsMobileSheetMinimized(false);
-        }}
+        onSelectTab={handleSelectTab}
         hasActiveJourney={Boolean(activeJourney && activeJourney.status !== 'arrived')}
       />
 
@@ -573,7 +565,7 @@ export default function HerPathHome() {
         }}
       />
 
-      {/* Emergency SOS High-Priority Modal */}
+      {/* Emergency SOS Dedicated Modal */}
       <EmergencyModal
         isOpen={isEmergencyModalOpen}
         onClose={() => setIsEmergencyModalOpen(false)}
@@ -588,6 +580,7 @@ export default function HerPathHome() {
         defaultCoords={reportModalCoords}
         onSubmitReport={handleReportSubmitted}
         onSubmitStreetlight={handleStreetlightSubmitted}
+        onOpenEmergency={() => setIsEmergencyModalOpen(true)}
       />
 
       {/* Family Journey Start Modal */}
@@ -604,7 +597,7 @@ export default function HerPathHome() {
         onStartJourney={handleStartJourney}
       />
 
-      {/* Settings & Preferences Modal */}
+      {/* Settings & Privacy Modal */}
       <SettingsModal
         isOpen={isSettingsModalOpen}
         onClose={() => setIsSettingsModalOpen(false)}
@@ -614,6 +607,7 @@ export default function HerPathHome() {
           StorageRepository.savePreferences(p);
         }}
         onResetDemoData={handleResetDemoData}
+        trustedContacts={trustedContacts}
       />
     </div>
   );

@@ -1,5 +1,7 @@
+'use client';
+
 import React, { useState } from 'react';
-import { Phone, Share2, Copy, Check, X, ShieldAlert, HeartHandshake } from 'lucide-react';
+import { Phone, Share2, Copy, Check, X, ShieldAlert, HeartHandshake, AlertCircle } from 'lucide-react';
 import { Coordinates, TrustedContact } from '@/types';
 
 interface EmergencyModalProps {
@@ -16,12 +18,15 @@ export const EmergencyModal: React.FC<EmergencyModalProps> = ({
   trustedContacts,
 }) => {
   const [copied, setCopied] = useState(false);
-  const emergencyContact = trustedContacts.find((c) => c.isEmergencyAlertContact) || trustedContacts[0];
+  const [alertInitiated, setAlertInitiated] = useState(false);
+  const [alertTimestamp, setAlertTimestamp] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
   const defaultEmergencyNumber = process.env.NEXT_PUBLIC_DEFAULT_EMERGENCY_NUMBER || '112';
   const womenHelplineNumber = process.env.NEXT_PUBLIC_WOMEN_HELPLINE_NUMBER || '1091';
+
+  const emergencyContact = trustedContacts.find((c) => c.isEmergencyAlertContact) || trustedContacts[0];
 
   const shareText = currentLocation
     ? `EMERGENCY ALERT: I am using HERPATH and sharing my urgent location: https://www.google.com/maps?q=${currentLocation.lat},${currentLocation.lng} (Lat: ${currentLocation.lat.toFixed(5)}, Lng: ${currentLocation.lng.toFixed(5)}) at ${new Date().toLocaleTimeString()}`
@@ -48,152 +53,179 @@ export const EmergencyModal: React.FC<EmergencyModalProps> = ({
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-brand-text/30 backdrop-blur-md animate-fadeIn">
-      <div className="surface-pearl border border-white/95 rounded-sheet max-w-lg w-full p-6 text-brand-text shadow-glass-floating relative overflow-hidden">
-        {/* Urgent header accent bar */}
-        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-danger-500 via-champagne-400 to-danger-500 animate-pulse" />
+  const handleSendAlert = () => {
+    setAlertInitiated(true);
+    setAlertTimestamp(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+    handleNativeShare();
+  };
 
-        <div className="flex items-center justify-between mb-4">
+  return (
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-ink/50 backdrop-blur-sm animate-fade-in"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="emergency-modal-title"
+    >
+      <div className="bg-white border-2 border-emergency rounded-card max-w-lg w-full p-6 text-ink shadow-e3 relative overflow-hidden">
+        {/* Urgent solid bar */}
+        <div className="absolute top-0 left-0 right-0 h-1.5 bg-emergency" />
+
+        {/* Modal Header */}
+        <div className="flex items-center justify-between mb-4 pb-3 border-b border-border">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-danger-50 flex items-center justify-center border border-danger-200 shadow-sm">
-              <ShieldAlert className="w-5 h-5 text-danger-500" />
+            <div className="w-10 h-10 rounded-lg bg-danger-tint flex items-center justify-center border border-danger/30 shrink-0">
+              <ShieldAlert className="w-5 h-5 text-emergency" />
             </div>
             <div>
-              <h2 className="text-xl font-black text-brand-text tracking-wide">Emergency Support</h2>
-              <p className="text-xs text-danger-600 font-bold">Immediate Assistance & Trusted Helplines</p>
+              <h2 id="emergency-modal-title" className="font-serif text-xl font-bold text-ink">
+                Emergency Assistance
+              </h2>
+              <p className="text-xs text-text-secondary">
+                Direct connections to emergency helplines and trusted contacts.
+              </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="text-brand-text-muted hover:text-brand-text p-2 rounded-xl bg-brand-bg hover:bg-brand-bg-secondary transition-colors"
-            title="Cancel / Close"
+            className="text-text-secondary hover:text-ink p-2 rounded-lg bg-paper hover:bg-raised transition-colors focus-ring-peacock"
+            aria-label="Close emergency modal"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Action Grid */}
-        <div className="space-y-3 my-5">
-          {/* Universal Police/Emergency */}
+        {/* Truthful Status Box if Alert was sent */}
+        {alertInitiated && (
+          <div className="mb-4 p-3.5 rounded-lg bg-paper border border-border text-xs space-y-1.5 animate-fade-in">
+            <div className="font-semibold text-ink flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emergency" />
+              <span>Alert Sharing Triggered at {alertTimestamp}</span>
+            </div>
+            <p className="text-text-secondary text-[11px] leading-relaxed">
+              <strong>Delivery status:</strong> System share intent was opened on this device. Emergency services require placing a voice call via native dialer.
+            </p>
+          </div>
+        )}
+
+        {/* Main Emergency Call Actions */}
+        <div className="space-y-2.5 my-4">
+          {/* Universal Police/Emergency (112) */}
           <a
             href={`tel:${defaultEmergencyNumber}`}
-            className="flex items-center justify-between p-4 rounded-2xl bg-danger-500 hover:bg-danger-600 active:scale-[0.99] transition-all text-white font-semibold shadow-md shadow-danger-500/20 group"
+            className="flex items-center justify-between p-4 rounded-lg bg-emergency hover:bg-emergency-hover text-white transition-colors shadow-e2 group focus-ring-peacock"
           >
             <div className="flex items-center gap-3.5">
-              <div className="w-11 h-11 rounded-xl bg-danger-600 flex items-center justify-center group-hover:scale-105 transition-transform shadow-inner">
-                <Phone className="w-5 h-5" />
+              <div className="w-10 h-10 rounded-md bg-white/10 flex items-center justify-center shrink-0">
+                <Phone className="w-5 h-5 text-white" />
               </div>
               <div className="text-left">
-                <div className="text-base font-black">Call Police / Medical ({defaultEmergencyNumber})</div>
-                <div className="text-xs text-danger-100 font-medium">Direct universal emergency connection</div>
+                <div className="font-serif font-bold text-base leading-snug">
+                  Call National Emergency ({defaultEmergencyNumber})
+                </div>
+                <div className="text-xs text-white/90">
+                  Universal Police, Fire, and Ambulance connection
+                </div>
               </div>
             </div>
-            <span className="text-xs font-black uppercase tracking-wider bg-white/20 px-3 py-1.5 rounded-full">
-              Call
+            <span className="text-xs font-bold uppercase tracking-wider bg-white text-emergency px-3.5 py-1.5 rounded shadow-e1">
+              Call Now
             </span>
           </a>
 
-          {/* Women Helpline */}
+          {/* Women Helpline (1091) */}
           <a
             href={`tel:${womenHelplineNumber}`}
-            className="flex items-center justify-between p-4 rounded-2xl bg-teal-50 hover:bg-teal-100/70 border border-teal-200 text-brand-text font-semibold transition-all group shadow-sm"
+            className="flex items-center justify-between p-3.5 rounded-lg bg-paper hover:bg-raised border border-border text-ink transition-colors shadow-e1 group focus-ring-peacock"
           >
-            <div className="flex items-center gap-3.5">
-              <div className="w-11 h-11 rounded-xl bg-white border border-teal-200 flex items-center justify-center group-hover:scale-105 transition-transform shadow-sm">
-                <HeartHandshake className="w-5 h-5 text-teal-600" />
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-md bg-peacock-tint flex items-center justify-center shrink-0 border border-peacock/30">
+                <HeartHandshake className="w-4 h-4 text-peacock" />
               </div>
               <div className="text-left">
-                <div className="text-base font-black text-teal-800">
+                <div className="font-serif font-bold text-sm text-ink leading-snug">
                   National Women's Helpline ({womenHelplineNumber})
                 </div>
-                <div className="text-xs text-brand-text-secondary font-medium">
-                  24/7 dedicated women distress support
+                <div className="text-[11px] text-text-secondary">
+                  24/7 dedicated distress and safety counsel
                 </div>
               </div>
             </div>
-            <span className="text-xs font-black uppercase tracking-wider bg-teal-500 text-white px-3 py-1.5 rounded-full shadow-xs">
+            <span className="btn-secondary text-xs px-3 py-1 font-bold">
               Call
             </span>
           </a>
 
-          {/* Trusted Family / Contact */}
+          {/* Primary Trusted Contact */}
           {emergencyContact && (
             <a
               href={`tel:${emergencyContact.phone.replace(/[^0-9+]/g, '')}`}
-              className="flex items-center justify-between p-4 rounded-2xl bg-softblue-50 hover:bg-softblue-100/70 border border-softblue-200 text-brand-text font-semibold transition-all group shadow-sm"
+              className="flex items-center justify-between p-3.5 rounded-lg bg-paper hover:bg-raised border border-border text-ink transition-colors shadow-e1 group focus-ring-peacock"
             >
-              <div className="flex items-center gap-3.5">
-                <div className="w-11 h-11 rounded-xl bg-white border border-softblue-200 flex items-center justify-center group-hover:scale-105 transition-transform shadow-sm">
-                  <Phone className="w-5 h-5 text-softblue-500" />
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-md bg-white border border-border flex items-center justify-center shrink-0">
+                  <Phone className="w-4 h-4 text-ink" />
                 </div>
                 <div className="text-left">
-                  <div className="text-base font-black text-blue-900">
-                    Call Trusted: {emergencyContact.name}
+                  <div className="font-serif font-bold text-sm text-ink leading-snug">
+                    Call Trusted Contact: {emergencyContact.name}
                   </div>
-                  <div className="text-xs text-brand-text-secondary font-medium">
-                    {emergencyContact.relation} • {emergencyContact.phone}
+                  <div className="text-[11px] text-text-secondary">
+                    {emergencyContact.relation} · {emergencyContact.phone}
                   </div>
                 </div>
               </div>
-              <span className="text-xs font-black uppercase tracking-wider bg-blue-600 text-white px-3 py-1.5 rounded-full shadow-xs">
-                Dial
+              <span className="btn-secondary text-xs px-3 py-1 font-bold">
+                Call
               </span>
             </a>
           )}
 
-          {/* Share Current GPS Coordinates */}
-          <div className="p-4 rounded-2xl bg-brand-bg border border-brand-border">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-brand-text-secondary uppercase tracking-wider">
-                Instant GPS Broadcast
-              </span>
+          {/* Location Broadcast Options */}
+          <div className="p-3.5 rounded-lg bg-raised border border-border space-y-2">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-semibold text-ink">Urgent GPS Location</span>
               {currentLocation ? (
-                <span className="text-xs text-teal-700 font-mono font-bold">
+                <span className="font-mono text-peacock-dark font-bold text-[11px]">
                   {currentLocation.lat.toFixed(4)}, {currentLocation.lng.toFixed(4)}
                 </span>
               ) : (
-                <span className="text-xs text-warning-700 font-medium">Location pending GPS</span>
+                <span className="text-text-muted text-[11px]">Location pending</span>
               )}
             </div>
+
             <div className="flex gap-2">
               <button
+                type="button"
                 onClick={handleCopyLocation}
-                className="flex-1 py-2.5 px-3 rounded-full bg-white hover:bg-brand-bg-secondary active:scale-95 text-xs font-bold text-brand-text flex items-center justify-center gap-2 transition-all border border-brand-border shadow-xs"
+                className="btn-secondary flex-1 py-2 px-3 text-xs flex items-center justify-center gap-1.5 shadow-e1"
               >
-                {copied ? (
-                  <>
-                    <Check className="w-4 h-4 text-teal-600" />
-                    <span className="text-teal-700">Copied Location</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-4 h-4 text-brand-text-muted" />
-                    <span>Copy Distress Message</span>
-                  </>
-                )}
+                {copied ? <Check className="w-3.5 h-3.5 text-peacock" /> : <Copy className="w-3.5 h-3.5" />}
+                <span>{copied ? 'Location Copied' : 'Copy Coordinates'}</span>
               </button>
+
               <button
-                onClick={handleNativeShare}
-                className="py-2.5 px-4 rounded-full bg-teal-500 hover:bg-teal-600 active:scale-95 text-xs font-bold text-white flex items-center gap-1.5 transition-all shadow-sm"
+                type="button"
+                onClick={handleSendAlert}
+                className="btn-ink py-2 px-4 text-xs font-bold flex items-center gap-1.5 shadow-e1"
               >
-                <Share2 className="w-4 h-4" />
-                <span>Share</span>
+                <Share2 className="w-3.5 h-3.5 text-peacock-tint" />
+                <span>Send Alert</span>
               </button>
             </div>
           </div>
         </div>
 
-        {/* Accidental cancel button */}
-        <div className="pt-3 border-t border-brand-border flex items-center justify-between">
-          <p className="text-[11px] text-brand-text-secondary leading-tight pr-4 font-medium">
-            *Emergency numbers trigger your native phone app. HERPATH never claims delivery without real telecommunication carrier response.
+        {/* Footer & Truthful Clarification */}
+        <div className="pt-3 border-t border-border flex items-center justify-between text-xs text-text-secondary">
+          <p className="text-[11px] leading-tight pr-4">
+            *Emergency numbers connect directly through your device's cellular dialer. HERPATH never claims help is dispatched without telecommunication carrier response.
           </p>
           <button
+            type="button"
             onClick={onClose}
-            className="py-2 px-3.5 rounded-full text-xs font-bold text-brand-text-secondary hover:text-brand-text bg-brand-bg hover:bg-brand-bg-secondary transition-colors shrink-0"
+            className="btn-secondary py-1.5 px-3.5 text-xs shrink-0"
           >
-            Cancel / False Alarm
+            Close / False Alarm
           </button>
         </div>
       </div>
