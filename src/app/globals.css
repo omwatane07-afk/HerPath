@@ -1,66 +1,81 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
   /* =========================================================================
-     BORDEAUX ATELIER & LUMINOUS ROSE GOLD / CHAMPAGNE DESIGN TOKENS
-     Haute travel editorial, warm cashmere surfaces, rich velvet depth
+     NIGHTBLOOM DESIGN SYSTEM TOKENS
+     Aubergine ink, electric violet route, champagne detail.
+     Nocturnal luxury that stays legible at noon.
      ========================================================================= */
 
   /* Structural & Canvas */
-  --canvas: #FAF6F0;
-  --canvas-subtle: #F3ECE1;
+  --canvas: #F7F3EE;
+  --canvas-2: #EEE8E1;
+  --canvas-subtle: #EEE8E1;
   --surface-card: #FFFFFF;
-  --surface-raised: #F8F3EC;
+  --surface-raised: #FBF8F4;
   --white: #FFFFFF;
-  --border: #E8DFD7;
-  --border-strong: #C4B5A9;
-  --border-gold: #D4A359;
+  --border: #E4DCD3;
+  --border-control: #867B72;
+  --border-gold: #C9A25E;
 
-  /* Editorial Brand Accents */
-  --bordeaux: #240D1E;
-  --velvet: #4A1E35;
-  --rose-gold: #C8415F;
-  --rose-gold-dark: #A32D48;
-  --rose-tint: #FCEEF2;
-  --champagne: #D4A359;
-  --champagne-dark: #9C6E2E;
+  /* Brand Accents */
+  --ink: #1E0F28;
+  --ink-2: #3A1C4A;
+  --primary: #5A2FC2;
+  --primary-hover: #46229C;
+  --primary-tint: #EDE5FA;
+  --champagne: #C9A25E;
+  --champagne-text: #7A5A1E;
   --champagne-tint: #FDF8EE;
 
   /* Typography Colors */
-  --text: #240D1E;
-  --text-secondary: #6B5663;
-  --text-muted: #8A7783;
-  --text-gold: #9C6E2E;
+  --text: #1E0F28;
+  --text-secondary: #5E5068;
+  --text-muted: #6F6179;
+  --text-gold: #7A5A1E;
+
+  /* Route Tokens */
+  --route-selected: #5A2FC2;
+  --route-alt: #6E6090;
+  --route-casing: #FFFFFF;
+
+  /* Safety & Semantic (Strict Functional Separation) */
+  --emergency: #C21428;
+  --emergency-hover: #A30F20;
+  --emergency-tint: #FDECEE;
+  --error: #9E1B24;
+  --error-tint: #FCEAEB;
+  --caution: #A8560A;
+  --caution-text: #8A4A08;
+  --caution-tint: #FDF2E3;
+  --verified: #1F6B4D;
+  --verified-tint: #E6F3EC;
+  --info: #1F5FA8;
+  --info-tint: #EEF4FC;
+  --unknown: #6F6179;
 
   /* Backward Compatibility Aliases */
-  --ink: #240D1E;
-  --peacock: #C8415F;
-  --peacock-dark: #A32D48;
-  --peacock-tint: #FCEEF2;
-  --clay: #D4A359;
-  --paper: #FAF6F0;
-  --raised: #F8F3EC;
-  --disabled-text: #A0929B;
-
-  /* Safety & Semantic (Strict Non-Ambiguity) */
-  --emergency: #C21428;
+  --bordeaux: #1E0F28;
+  --velvet: #3A1C4A;
+  --rose-gold: #5A2FC2;
+  --peacock: #5A2FC2;
+  --peacock-dark: #46229C;
+  --peacock-tint: #EDE5FA;
+  --clay: #C9A25E;
+  --paper: #F7F3EE;
+  --raised: #FBF8F4;
   --danger: #9E1B24;
-  --danger-tint: #FCEAEB;
-  --caution: #BA6A15;
-  --caution-dark: #944F0B;
-  --caution-tint: #FDF2E3;
-  --verified: #1C6B48;
-  --verified-tint: #E6F3EC;
-  --info: #255EA8;
 
   /* Atmospheric Shadows */
-  --shadow-e1: 0 2px 8px rgba(36, 13, 30, 0.05);
-  --shadow-e2: 0 8px 24px rgba(36, 13, 30, 0.08);
-  --shadow-e3: 0 20px 48px -10px rgba(36, 13, 30, 0.14);
-  --shadow-atelier: 0 24px 60px -12px rgba(36, 13, 30, 0.16), 0 0 0 1px rgba(212, 163, 89, 0.18);
-  --shadow-rose-glow: 0 0 20px rgba(200, 65, 95, 0.35);
+  --shadow-e1: 0 2px 8px rgba(30, 15, 40, 0.05);
+  --shadow-e2: 0 8px 24px rgba(30, 15, 40, 0.08);
+  --shadow-e3: 0 20px 48px -10px rgba(30, 15, 40, 0.14);
+  --shadow-atelier: 0 20px 50px -10px rgba(30, 15, 40, 0.12), 0 0 0 1px rgba(228, 220, 211, 0.6);
+  --shadow-violet: 0 4px 16px rgba(90, 47, 194, 0.25);
 
   /* Motion Timing */
   --dur-micro: 150ms;
@@ -83,33 +98,64 @@
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
   ::selection {
-    background-color: var(--rose-gold);
-    color: #FFFFFF;
+    background-color: var(--primary-tint);
+    color: var(--ink);
   }
   h1, h2, h3, .font-serif-title, .font-editorial {
-    font-family: var(--font-serif-display), "Playfair Display", Georgia, serif;
+    font-family: var(--font-serif-display), "Fraunces", Georgia, serif;
   }
 }
 
 /* =========================================================================
-   LUXURY ATELIER SPATIAL CARDS & SURFACES
-   Floating panels, warm porcelain texture, refined gold hairline borders
+   NIGHTBLOOM FOCUS RING & ACCESSIBILITY SPECIFICATION
+   2px solid #5A2FC2 with 2px offset on light surfaces; #E4D4FF on ink surfaces
    ========================================================================= */
 
-/* Floating Atelier Sidebar Panel */
-.panel-atelier {
-  background: rgba(255, 255, 255, 0.96);
-  backdrop-filter: blur(16px);
-  border: 1px solid var(--border);
-  border-radius: 24px;
-  box-shadow: var(--shadow-atelier);
+.focus-ring-primary:focus-visible,
+.focus-ring-bordeaux:focus-visible,
+.focus-ring-peacock:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
 
-/* Primary Porcelain Surface Card */
+.focus-ring-on-dark:focus-visible {
+  outline: 2px solid #E4D4FF;
+  outline-offset: 2px;
+}
+
+/* Control input border boundary (>= 3:1 WCAG contrast) */
+.input-control {
+  border: 1px solid var(--border-control);
+  background-color: #FFFFFF;
+  color: var(--text);
+  border-radius: 12px;
+  transition: border-color var(--dur-micro) var(--ease-standard), box-shadow var(--dur-micro) var(--ease-standard);
+}
+.input-control:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-tint);
+}
+
+/* =========================================================================
+   NIGHTBLOOM CARDS & FLOATING SURFACES
+   Floating 440px desktop card panel, e2 shadow, clean 1px border
+   ========================================================================= */
+
+/* Floating Atelier Sidebar Panel (Full-Bleed Map Behind) */
+.panel-floating-nightbloom {
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  box-shadow: var(--shadow-e2);
+}
+
+/* Primary Surface Card */
 .surface-card {
   background-color: #FFFFFF;
   border: 1px solid var(--border);
-  border-radius: 20px;
+  border-radius: 16px;
   box-shadow: var(--shadow-e1);
 }
 
@@ -117,23 +163,23 @@
 .surface-raised {
   background-color: var(--surface-raised);
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: 14px;
 }
 
 /* Interactive Card with Smooth Elevation */
 .card-interactive {
   background-color: #FFFFFF;
   border: 1px solid var(--border);
-  border-radius: 20px;
+  border-radius: 16px;
   box-shadow: var(--shadow-e1);
-  transition: transform 200ms var(--ease-standard), box-shadow 200ms var(--ease-standard), border-color 200ms var(--ease-standard);
+  transition: transform var(--dur-micro) var(--ease-standard), box-shadow var(--dur-micro) var(--ease-standard), border-color var(--dur-micro) var(--ease-standard);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .card-interactive:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-e2);
-    border-color: var(--champagne);
+    border-color: var(--primary);
   }
 }
 
@@ -141,86 +187,72 @@
   transform: translateY(0);
 }
 
-/* Selected Card: Luminous Petal Fill & Rose Gold Accent */
+/* Selected Route Card: Violet Tint Fill & Violet Border */
 .card-selected {
-  background-color: var(--rose-tint) !important;
-  border: 2px solid var(--rose-gold) !important;
-  box-shadow: 0 4px 16px rgba(200, 65, 95, 0.15) !important;
+  background-color: var(--primary-tint) !important;
+  border: 2px solid var(--primary) !important;
+  box-shadow: 0 4px 16px rgba(90, 47, 194, 0.15) !important;
   transform: none !important;
 }
 
-/* Visible Keyboard Focus */
-.focus-ring-peacock:focus-visible,
-.focus-ring-bordeaux:focus-visible {
-  outline: 2px solid var(--rose-gold);
-  outline-offset: 2px;
-}
-
 /* =========================================================================
-   HAUTE EDITORIAL BUTTONS & CONTROLS
+   NIGHTBLOOM BUTTONS & ACTIONS
+   One primary button per view (violet fill #5A2FC2, white text, 44px min height)
    ========================================================================= */
 
-/* Primary Button: Deep Velvet Bordeaux */
+/* Primary Button: Electric Violet (44px min touch target) */
+.btn-primary,
 .btn-ink,
 .btn-bordeaux {
-  background-color: var(--bordeaux);
+  background-color: var(--primary);
   color: #FFFFFF;
-  border-radius: 14px;
+  min-height: 44px;
+  border-radius: 12px;
   font-weight: 600;
   letter-spacing: 0.01em;
-  box-shadow: 0 4px 14px rgba(36, 13, 30, 0.18);
+  box-shadow: 0 2px 8px rgba(90, 47, 194, 0.25);
   transition: background-color var(--dur-micro) var(--ease-standard), transform var(--dur-micro) var(--ease-standard), box-shadow var(--dur-micro) var(--ease-standard);
 }
+.btn-primary:hover,
 .btn-ink:hover,
 .btn-bordeaux:hover {
-  background-color: #160712;
-  box-shadow: 0 6px 18px rgba(36, 13, 30, 0.25);
+  background-color: var(--primary-hover);
+  box-shadow: 0 4px 14px rgba(90, 47, 194, 0.35);
 }
+.btn-primary:active,
 .btn-ink:active,
 .btn-bordeaux:active {
   transform: scale(0.98);
 }
 
-/* Secondary Button: Clean Porcelain with Gold-Umber Border */
+/* Secondary Button: Clean Porcelain with Control Border */
 .btn-secondary {
   background-color: #FFFFFF;
-  color: var(--bordeaux);
-  border: 1px solid var(--border-strong);
-  border-radius: 14px;
+  color: var(--text);
+  min-height: 44px;
+  border: 1px solid var(--border-control);
+  border-radius: 12px;
   font-weight: 600;
   transition: background-color var(--dur-micro) var(--ease-standard), border-color var(--dur-micro) var(--ease-standard);
 }
 .btn-secondary:hover {
   background-color: var(--surface-raised);
-  border-color: var(--champagne);
+  border-color: var(--primary);
 }
 
-/* Accent Action: Luminous Rose Gold */
-.btn-accent {
-  background-color: var(--rose-gold);
-  color: #FFFFFF;
-  border-radius: 14px;
-  font-weight: 600;
-  box-shadow: 0 4px 14px rgba(200, 65, 95, 0.28);
-  transition: background-color var(--dur-micro) var(--ease-standard), transform var(--dur-micro) var(--ease-standard);
-}
-.btn-accent:hover {
-  background-color: var(--rose-gold-dark);
-}
-
-/* Dedicated Emergency SOS: Unmistakable Crimson Jewel (No Idle Pulse) */
+/* Dedicated Emergency SOS: Unmistakable Crimson Jewel (56x56px min, zero decorative motion) */
 .btn-emergency-sos {
   background-color: var(--emergency);
   color: #FFFFFF;
   font-weight: 800;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   border-radius: 14px;
-  box-shadow: 0 4px 14px rgba(194, 20, 40, 0.32);
+  box-shadow: 0 4px 14px rgba(194, 20, 40, 0.35);
   transition: background-color var(--dur-micro) var(--ease-standard), transform var(--dur-micro) var(--ease-standard);
 }
 .btn-emergency-sos:hover {
-  background-color: #A30F20;
+  background-color: var(--emergency-hover);
 }
 .btn-emergency-sos:active {
   transform: scale(0.97);
@@ -228,32 +260,32 @@
 
 /* =========================================================================
    MAP TILE STYLING & LEAFLET CANVAS
-   Luxury Atelier Atlas: warm porcelain roads, delicate vintage-chic landmass
+   Muted basemap: desaturated so violet routes and markers dominate cleanly
    ========================================================================= */
 
 .leaflet-container {
-  background-color: var(--canvas) !important;
+  background-color: #E9E4DD !important;
   font-family: inherit !important;
 }
 
-/* Bespoke Luxury Atlas Filter: warms roads, reduces commercial POI glare */
+/* Carto Positron or Muted OSM Tile Pane Filter */
 .leaflet-tile-pane {
-  filter: sepia(0.24) hue-rotate(315deg) contrast(0.96) brightness(1.02) saturate(0.68);
+  filter: contrast(0.98) brightness(1.01) saturate(0.85);
 }
 
-/* Luxury Editorial Map Popups */
+/* Nightbloom Map Popups */
 .herpath-popup .leaflet-popup-content-wrapper {
   background: #FFFFFF !important;
   color: var(--text) !important;
-  border-radius: 20px !important;
-  border: 1px solid var(--border-gold) !important;
+  border-radius: 16px !important;
+  border: 1px solid var(--border) !important;
   box-shadow: var(--shadow-e3) !important;
   padding: 4px !important;
 }
 
 .herpath-popup .leaflet-popup-tip {
   background: #FFFFFF !important;
-  border: 1px solid var(--border-gold) !important;
+  border: 1px solid var(--border) !important;
 }
 
 .herpath-popup .leaflet-popup-content {
@@ -269,7 +301,7 @@
 }
 
 .herpath-popup a.leaflet-popup-close-button:hover {
-  color: var(--bordeaux) !important;
+  color: var(--ink) !important;
 }
 
 /* Custom DivIcons */
@@ -278,11 +310,11 @@
   border: none !important;
 }
 
-/* Marker selection lift animation */
+/* Marker selection lift animation (rises 4px, scales 1.08) */
 .marker-selected {
-  transform: scale(1.18) translateY(-6px) !important;
-  transition: transform 180ms var(--ease-emphasis);
-  filter: drop-shadow(0 8px 16px rgba(36, 13, 30, 0.28));
+  transform: scale(1.08) translateY(-4px) !important;
+  transition: transform var(--dur-card) var(--ease-emphasis);
+  filter: drop-shadow(0 6px 14px rgba(30, 15, 40, 0.25));
   z-index: 9999 !important;
 }
 
@@ -320,6 +352,11 @@
   animation: fadeInCard var(--dur-card) var(--ease-standard) forwards;
 }
 
+/* Basemap tile styling: desaturated, clean warm canvas so violet route and markers dominate */
+.leaflet-tile-pane {
+  filter: grayscale(90%) contrast(0.88) brightness(1.06) sepia(0.06);
+}
+
 @keyframes modalIn {
   from {
     opacity: 0;
@@ -333,20 +370,6 @@
 
 .animate-modal {
   animation: modalIn var(--dur-scene) var(--ease-standard) forwards;
-}
-
-/* Floating 3D Horizon Ambient Pulse */
-@keyframes orbSlowSpin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.animate-orb-spin {
-  animation: orbSlowSpin 30s linear infinite;
 }
 
 /* Reduced motion compliance */
@@ -367,12 +390,14 @@
     stroke-dasharray: none !important;
     animation: none !important;
   }
-  .animate-orb-spin {
-    animation: none !important;
-  }
 }
 
-/* Restrained Editorial Scrollbar */
+/* Tabular Numbers Utility */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Restrained Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -383,7 +408,7 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border-strong);
+  background: var(--border-control);
   border-radius: 9999px;
 }
 

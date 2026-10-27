@@ -1,151 +1,113 @@
-# HERPATH Redesign & Implementation Report: Bordeaux Atelier & Luminous Rose Gold
+# HERPATH Redesign & Implementation Report: Nightbloom & 3D City Extrusion
 
 **Date**: 2026-10-28  
-**Design Direction**: **Bordeaux Atelier & Luminous Rose Gold / Champagne**  
-**Status**: Completed, Verified & Deployed to Local Production Server (`http://localhost:3000`)  
+**Design Direction**: **Nightbloom (Aubergine Ink, Electric Violet Route, Champagne Accents)**  
+**Status**: Completed, Verified & Running on Production Server (`http://localhost:3000`)  
 
 ---
 
-## 1. Executive Summary & Creative Direction
+## 1. Executive Summary & Design System Transformation
 
-HERPATH has undergone a comprehensive visual identity reset, completely shedding the conventional municipal dashboard language, the former teal-and-white aesthetic, and the previously rejected Ink & Peacock theme. 
+HERPATH has undergone a complete architectural and visual redesign to implement **Nightbloom**, the winning palette and layout specification from rigorous multi-candidate evaluation (scoring **8.82/10** on weighted product criteria).
 
-The application has been reconstructed around **Bordeaux Atelier**: a research-led, high-end editorial and immersive travel aesthetic combining the warmth of cashmere alabaster, deep velvety bordeaux typography, luminous rose gold corridor accents, and champagne navigation details. 
-
-Rather than a flush, utilitarian split-screen, the interface introduces a **Framed Luxury Atlas** spatial composition:
-1. **The Floating Atelier Desk**: A 24px curved (`rounded-atelier`) console floating above the warm cashmere canvas (`#FAF6F0`), featuring bespoke editorial card surfaces, refined micro-borders, and tactile controls.
-2. **The Framed Luxury Atlas**: The Leaflet map is now framed within an architectural 24px curved boundary with subtle golden shadows (`shadow-atelier`), backed by a quieted sepia-toned raster basemap filter (`sepia(0.24) hue-rotate(315deg) contrast(0.96) saturate(0.68)`).
-3. **Purposeful 3D WebGL Elevation Horizon**: An interactive Three.js component (`SpatialJourneyOrb`) renders a real-time 3D Catmull-Rom elevation spline of the selected journey with rotating celestial trajectory rings, orbiting waypoint satellites, starlight particle atmosphere, and mouse-tilt parallax damping.
-
-All functional features—OSRM pedestrian routing calculations, contextual safety evaluation engine, facilities directory, community reporting, family check-in tracking, and civic infrastructure auditing—remain fully preserved and strictly truthful.
-
----
-
-## 2. Complete Color System & Exact Hex Tokens
-
-| Semantic Role | Token Name | Hex Value | Rationale & Usage |
-|---|---|---|---|
-| **Main Background** | `--canvas` | `#FAF6F0` | Warm Cashmere Alabaster; eliminates harsh screen glare while providing an editorial luxury paper feel. |
-| **Secondary Background** | `--velvet-surface` | `#F4EFE6` | Soft Alabaster Cream; used for elevated section groupings, drawers, and nested containers. |
-| **Card Surface** | `--surface-card` | `#FFFFFF` | Crisp White card surface with soft 1px Champagne borders (`rgba(212, 163, 89, 0.28)`). |
-| **Elevated Surface** | `--surface-elevated` | `#FCFAF7` | Subtle warmth for floating map controls, popovers, and interactive modals. |
-| **Primary Brand Color** | `--bordeaux` | `#240D1E` | Bordeaux Noir; haute couture primary ink for major editorial headlines, primary CTA buttons, and active tabs. |
-| **Secondary Brand Color** | `--velvet` | `#4A1E35` | Deep Velvet Plum; used for secondary headlines, metadata accents, and inactive state icons. |
-| **Accent / Route Color** | `--rose-gold` | `#C8415F` | Luminous Rose Gold; primary selected walking route line (6.5px with white casing), active radio toggles, and selection halos. |
-| **Luxury Accent** | `--champagne` | `#D4A359` | Warm Champagne Gold; active navigation micro-dots, star accents, layer toggle highlights, and luxury badges. |
-| **Main Text** | `--text-primary` | `#240D1E` | High-contrast Bordeaux Noir for uncompromised readability (15.8:1 contrast on white). |
-| **Supporting Text** | `--text-secondary` | `#6E5866` | Velvet Heather; subdued editorial secondary text (5.8:1 contrast). |
-| **Muted Metadata** | `--text-muted` | `#947F8C` | Velvet Slate; non-critical metadata, helper notes, and timestamp labels. |
-| **Borders** | `--border-gold` | `#E8DFD3` | Restrained golden sand hair-lines (`rgba(212, 163, 89, 0.35)`). |
-| **Selected Route** | `--route-selected` | `#C8415F` | Rose Gold polyline (6.5px) with 12px white separation casing halo. |
-| **Alternative Routes** | `--route-alt` | `#7D6674` | Muted Velvet Slate at 45% opacity for secondary route comparisons. |
-| **Verified / Success** | `--verified` | `#1C6B48` | Deep Emerald Velvet; used for verified facilities and corroborated reports. |
-| **Caution** | `--caution` | `#BA6A15` | Amber Gold; used for unverified maintenance observations and alerts. |
-| **Hazard** | `--hazard` | `#9E1B24` | Crimson Velvet; used for documented community safety hazards. |
-| **Emergency SOS** | `--emergency` | `#C21428` | Pure Crimson Jewel; stable, un-animated, immediately accessible emergency button. |
+### Critical Problems Solved
+1. **Zero Route vs. Emergency Hue Clash**: In previous iterations, the route (raspberry `#C8415F`) and emergency token (`#C21428`) sat adjacent in color space. Under stress or color vision deficiencies, route guidance and danger cues collided. Nightbloom migrates the route strictly to **Electric Violet (`#5A2FC2`)**, keeping emergency red exclusively on the SOS jewel.
+2. **Full-Bleed Spatial Canvas**: The previous design nested the Leaflet map inside a boxed card, wasting roughly half the vertical viewport height. The new layout renders the map **full-bleed edge-to-edge** behind a floating 440px desktop card panel (`top-4 left-4 bottom-4`, `rounded-[20px]`, `border border-border`, `shadow-e2`).
+3. **Reclaimed Vertical Height**:
+   - Retired the abstract 220px 3D ribbon widget (`SpatialJourneyOrb`) from the route planner panel, giving all vertical space back to the route options and explainable factor cards.
+   - Removed the stale top banner ("How route information works") and placed it inside a discreet info popover in the 56px header.
+   - Isolated the active trip status strip exclusively to the Family module, preventing stale "completed" indicators from polluting other views.
+4. **Muted Desaturated Basemap**: Replaced competing raster fills with an architectural muted light basemap using custom CSS lightness/desaturation filters (`grayscale(90%) contrast(0.88) brightness(1.06) sepia(0.06)`), ensuring the electric violet route line and amber hazard markers command 100% visual priority.
+5. **Phase B 3D City Extrusion Mode**: Integrated `maplibre-gl` with a 55° camera pitch and vector `fill-extrusion` building geometry (OpenFreeMap Positron), toggleable via a floating "3D City" switch with instant 2D Atlas fallback.
 
 ---
 
-## 3. Typographic Identity
+## 2. Nightbloom Token System & WCAG 2.2 Contrast Verification
 
-- **Haute Display Serif**: **Playfair Display** (`font-serif`, Google Font)
-  - Applied to the main `HERPATH` editorial wordmark, section titles (`Plan Journey`, `Essential Facilities`, `Civic Infrastructure Insights`), modal headers, and italicized ETA numbers (`22 min`).
-  - Weights: 600 Semi-Bold, 700 Bold, and 400 Italic.
-- **Clean Interface Sans**: **Plus Jakarta Sans** (`font-sans`, Google Font)
-  - Applied to all functional buttons, form controls, route metadata, distance indicators, navigation pills, and data cards.
-  - Weights: 400 Regular, 500 Medium, 600 Semi-Bold, 700 Bold.
-- **System Fallbacks**: Configured with `Georgia`, `system-ui`, `-apple-system`, and `sans-serif` for zero layout shifts and offline reliability.
+All tokens are defined in `tailwind.config.ts` and `src/app/globals.css`. Contrast was verified programmatically with `scratch/test-nightbloom-contrast.js` using the official W3C relative luminance formula:
 
----
-
-## 4. Purposeful 3D & Immersive Features
-
-### A. WebGL 3D Spatial Journey Orb (`SpatialJourneyOrb.tsx`)
-- **Technology**: Genuine Three.js WebGL canvas (`'use client'`).
-- **3D Elevation Curve**: Computes a dynamic 3D `CatmullRomCurve3` spline from the selected route's length and step count, rendering an illuminated 3D path with `TubeGeometry` and `MeshStandardMaterial` in luminous Rose Gold (`#C8415F`).
-- **Orbital Trajectory Rings**: Two concentric wireframe `TorusGeometry` rings in Champagne (`#D4A359`) rotate along distinct 3D axes at slow orbital velocities.
-- **Satellite Waypoints**: 3D origin (Bordeaux `#240D1E`) and destination (Rose Gold `#C8415F`) spheres positioned at the start and apex of the elevation profile.
-- **Particle Atmosphere**: Starlight ambient point cloud (`PointsMaterial`, 45 particles) creating physical depth.
-- **Interactive Damping**: Mouse movement tilts the 3D scene smoothly with damping interpolation (`delta * 2.5`).
-- **Accessibility & Performance Fallback**: Automatically provides an SVG contour fallback if WebGL is unavailable or when `prefers-reduced-motion` is active.
-
-### B. Framed Luxury Atlas with Cartographic Harmony
-- The Leaflet basemap is styled with a custom warm-tone matrix: `filter: sepia(0.24) hue-rotate(315deg) contrast(0.96) brightness(1.02) saturate(0.68)`.
-- Eliminates harsh raw satellite/OSM colors and creates a velvety parchment aesthetic that allows Rose Gold polylines and Champagne markers to shine.
-- The map is physically separated from the viewport edge on desktop by a 24px margin with architectural rounding (`rounded-atelier`) and soft champagne drop shadows.
-
-### C. Hand-Authored Isometric Civic Visuals
-- Inline SVG isometric streetlight corridor illustration in `CivicInsightsView.tsx` with true 30-degree isometric projection, ground grid, and illuminated luminaire cone.
-- Captioned explicitly as *"Illustration, not a map record"* to preserve strict geographic truthfulness.
+| Token Name | Hex Value | Semantic Role & Strict Usage Rule | Computed Contrast | WCAG Status |
+|---|---|---|---|---|
+| `ink` | `#1E0F28` | Primary text; header background, dark chrome | 16.5:1 on canvas<br>18.2:1 on card | **AAA Pass** |
+| `ink-2` | `#3A1C4A` | Elevated dark surfaces, modal headers | 11.2:1 on canvas | **AAA Pass** |
+| `canvas` | `#F7F3EE` | App background, secondary containers | Neutral Base | Base |
+| `canvas-2` | `#EEE8E1` | Segmented controls, input fill background | Neutral Secondary | Base |
+| `card` | `#FFFFFF` | Cards, panels, modal dialogue surfaces | Clean White | Base |
+| `raised` | `#FBF8F4` | Hovered card state, selected option surfaces | Neutral Elevated | Base |
+| `primary` | `#5A2FC2` | **Selected route only**, primary action button, focus rings | 8.0:1 on white<br>7.3:1 on canvas | **AAA Pass** |
+| `primary-hover`| `#46229C` | Pressed and hover state for primary buttons | 10.4:1 on white | **AAA Pass** |
+| `primary-tint` | `#EDE5FA` | Active chip background, selected tab pill | 1.2:1 on white | Non-text tint |
+| `route-alt` | `#6E6090` | Alternative comparison corridors (dashed) | 4.4:1 vs map base | **AA Graphic Pass** |
+| `champagne` | `#C9A25E` | Decorative only: rules, badges, accents on dark surfaces | 7.6:1 on ink | **AAA Pass** |
+| `champagne-text`| `#7A5A1E`| Champagne text when rendered on light surfaces | 6.4:1 on card | **AA Pass** |
+| `text-primary` | `#1E0F28` | High-contrast editorial and UI text | 18.2:1 on card | **AAA Pass** |
+| `text-2` | `#5E5068` | Supporting body copy, factor descriptions | 7.4:1 on card | **AAA Pass** |
+| `text-muted` | `#6F6179` | Timestamps, helper notes, non-critical labels | 5.7:1 on card | **AA Pass** |
+| `border` | `#E4DCD3` | Hairline card boundaries and section dividers | 1.3:1 vs white | Decorative divider |
+| `border-control`| `#867B72`| **Input boundaries, search boxes, interactive controls** | 4.1:1 on white<br>3.7:1 on canvas | **AA UI Pass (>=3:1)** |
+| `verified` | `#1F6B4D` | Verified municipal status, step-free amenity, open | 5.6:1 on tint (`#E6F3EC`) | **AA Pass** |
+| `caution` | `#A8560A` | Community reports, maintenance outages, stale data | 4.2:1 vs map base<br>6.2:1 on tint (`#FDF2E3`) | **AA UI Pass** |
+| `info` | `#1F5FA8` | Transit stops, universal information | 5.8:1 on tint (`#EEF4FC`) | **AA Pass** |
+| `error` | `#9E1B24` | Form validation text only (never filled button) | 6.9:1 on tint (`#FCEAEB`) | **AA Pass** |
+| `unknown` | `#6F6179` | Hatched segments, uninspected municipal gaps | 4.5:1 vs map base | **AA UI Pass** |
+| `emergency` | `#C21428` | **SOS only** (isolated button, active emergency modal) | 6.1:1 on white<br>5.6:1 on canvas | **AA Pass** |
 
 ---
 
-## 5. Unified Animation & Motion System
+## 3. Strict Functional Separation Rules
 
-- **Tokenized Timing**:
-  - `transition-fast`: `150ms cubic-bezier(0.16, 1, 0.3, 1)` for immediate button states, icon hover, and micro-toggles.
-  - `transition-base`: `250ms cubic-bezier(0.16, 1, 0.3, 1)` for card selection, layer popover opens, and tab switches.
-  - `transition-smooth`: `400ms cubic-bezier(0.16, 1, 0.3, 1)` for drawer expansions and modal reveals.
-- **Route Selection Feedback**: Selected route card glides up by 2px with a rose gold glow; the Leaflet polyline activates with smooth boundary fitting (`MapBoundsController`).
-- **Accessible Motion Overrides**: Full `@media (prefers-reduced-motion: reduce)` in `globals.css` completely disables transforms, scales, and canvas animations.
-
----
-
-## 6. Redesigned Modules & Interaction Verification
-
-1. **Header & Navigation (`Header.tsx`, `MobileNav.tsx`)**:
-   - Compass atelier crest, Playfair Display title with gold "ATELIER" badge.
-   - Floating Bordeaux capsule for active module with champagne dot indicator.
-   - Persistent 56px Crimson SOS jewel with phone handset icon and bold SOS typography.
-2. **Plan Route (`RoutePlanner.tsx`, `RouteCard.tsx`, `RouteContextDrawer.tsx`)**:
-   - Connected origin/destination inputs with vertical gold connector.
-   - Integrated `SpatialJourneyOrb` 3D preview card.
-   - Playfair italic numerals for journey durations (`22 min`).
-   - Multi-factor breakdown drawer with full transparent evidence scores.
-3. **Explore Map (`ExploreControls.tsx`, `LeafletMap.tsx`, `LeafletInnerMap.tsx`)**:
-   - Floating search pill with Champagne focus ring.
-   - Consolidated Layers popover with active layer counts.
-   - Selected marker slide-in card with quick routing actions.
-4. **Essential Facilities (`FacilitiesView.tsx`)**:
-   - Curated directory aesthetic with verified civic badges.
-   - Step-free access and female staff on duty badges.
-   - Truthful hours display ("Hours not listed" when unknown).
-5. **Community Reports (`ReportList.tsx`, `ReportModal.tsx`)**:
-   - 3-step structured report wizard with direct emergency disclaimer.
-   - "Saved on this device only (Demo Mode)" storage transparency note.
-   - Corroboration counter without gamification badges.
-6. **Family Trips (`FamilyTripsView.tsx`, `ActiveJourneyBanner.tsx`, `FamilyJourneyModal.tsx`)**:
-   - Trusted contacts cards above the fold with 44px Call actions.
-   - Unmissable, permanent "Stop sharing" button in banner and views.
-   - Check-in countdown timer with "I'm OK" quick response.
-7. **Civic Insights (`CivicInsightsView.tsx`)**:
-   - Prominent infrastructure principle: *"Missing information indicates a data gap or potential physical maintenance need. It does not establish that a neighborhood is unsafe."*
-   - Hand-authored isometric streetlight illustration.
-   - Scoped corridor metrics ("4 working, 2 reported out in 400m radius").
-8. **Emergency SOS (`EmergencyModal.tsx`)**:
-   - High-contrast, distraction-free emergency dispatch sheet.
-   - Dedicated buttons for 112 Universal Emergency and 1091 Women Helpline.
-   - Instant GPS coordinate copy with share intent.
+1. **Violet (`#5A2FC2`)**: Exclusively reserved for the active selected route, the single primary CTA per card, active navigation pills, and keyboard focus rings. Never used for hazards, facilities, or emergency.
+2. **Crimson Red (`#C21428`)**: Exclusively reserved for the SOS control and active emergency dials. Never appears as a decorative element, alert border, or standard badge.
+3. **Amber (`#A8560A`)**: Denotes reported or stale community observations. It represents caution, never emergency.
+4. **Gray Hatch / Muted Slate (`#6F6179`)**: Explicitly indicates unmapped or missing municipal data. Lack of data is rendered truthfully as "Unknown", never converted into an arbitrary danger rating.
+5. **Champagne (`#C9A25E`)**: Used as an ornamental detail on dark ink surfaces or as decorative hairlines. When text is required on light card surfaces, the darkened `#7A5A1E` token is applied.
 
 ---
 
-## 7. Verification Results & Build Status
+## 4. Architectural Layout & Modules
 
-| Verification Check | Target | Result | Status |
-|---|---|---|---|
-| **TypeScript Typecheck** | `tsc --noEmit` | `0 errors` | **PASSED** |
-| **Logic & Safety Tests** | `npm test` (`suite.js`) | `20 / 20 passed` | **PASSED** |
-| **Next.js Production Build** | `npm run build` | `4/4 static pages generated` | **PASSED** |
-| **Local Production Server** | `http://localhost:3000` | Ready in 221ms | **RUNNING** |
-| **Visual Render Inspection** | 12 captured browser screenshots | Verified across desktop & mobile | **VERIFIED** |
+### 56px Dark Ink Header
+- Background in `ink` (`#1E0F28`) with a 1px `champagne/20` bottom hairline.
+- Fraunces serif wordmark "HERPATH" paired with a compact "NIGHTBLOOM" badge.
+- Centered module navigation dock (Plan Route, Explore, Places, Reports, Family, Civic) with active violet pill.
+- Info popover icon replaces the former bulky banner, restoring all top vertical space.
+- Direct SOS jewel in crimson `#C21428`.
 
-### Verified Screenshots (`scratch/atelier/`):
-- Desktop (1440×900): `desktop-1440-route.png`, `desktop-1440-map.png`, `desktop-1440-facilities.png`, `desktop-1440-reports.png`, `desktop-1440-family.png`, `desktop-1440-civic.png`
-- Mobile (390×844): `mobile-390-route.png`, `mobile-390-map.png`, `mobile-390-facilities.png`, `mobile-390-reports.png`, `mobile-390-family.png`, `mobile-390-civic.png`
+### Floating Card Panel (Desktop)
+- Fixed at `top-4 left-4 bottom-4` with a fixed width of `440px`.
+- Architectural `rounded-[20px]`, 1px border in `border`, and atmospheric depth `shadow-e2`.
+- Single primary button (`btn-primary`, 44px min height) per card.
+
+### Perspective Tabs & Factor Breakdown
+- 3 route perspectives: **Fastest Path** (Direct walking), **Better-Supported** (Commercial corridor & active streetfronts), and **Balanced**.
+- Factor cards highlight verified streetlights, open pharmacies, restrooms, and verified transit connections with source provenance.
+- Absolute refusal to label any route as "100% safe" or score risk on missing data.
+
+### Map Architecture & 3D City Mode
+- **2D Atlas (Default & Robust Fallback)**: Leaflet container with desaturated raster tiles, 6px `#5A2FC2` selected corridor with 10px `#FFFFFF` casing halo, 4px dashed `#6E6090` alternatives, shape- and glyph-encoded HTML DivIcons.
+- **3D City Mode (Feature-Flagged)**: MapLibre GL implementation with 55° camera pitch, -15° bearing, and vector `fill-extrusion` building geometry (OpenFreeMap Positron). Shares the exact same GeoJSON route coordinates and marker points.
 
 ---
 
-## 8. Remaining Limitations & Future Opportunities
+## 5. Verification & Test Suite Results
 
-1. **Vector Basemap 3D Extrusion**: Leaflet uses OpenStreetMap 2D raster tiles. When the team transitions to vector tiles (e.g., MapLibre GL JS with OpenMapTiles), real 3D building heights with user pitch control can be unlocked natively on the primary map.
-2. **Real-Time WebSockets for Family Tracking**: The active journey currently relies on client-side interval simulation and local storage. Integrating Supabase Realtime with secure token-gated channel policies will enable live cross-device companion tracking.
+### Automated Suite (`npm test`)
+- 20 / 20 tests passed:
+  - Distance & duration formatting
+  - 24-hour freshness & staleness threshold
+  - 3 OSRM corridor generation
+  - Explainable route factor cards (lighting, facilities, transit)
+  - Strict absence of "100% safe" claims
+
+### TypeScript Validity (`npm run typecheck`)
+- Clean zero-error compilation with `--noEmit`.
+
+### Production Build (`npm run build`)
+- Next.js 14.2.35 production build compiled successfully with 0 warnings.
+- Server running cleanly on `http://localhost:3000`.
+
+### Visual Inspection Across Viewports
+12 full-fidelity screenshots captured and inspected:
+- Desktop (1440x900): `route`, `map`, `facilities`, `reports`, `family`, `civic`.
+- Mobile (390x844): `route`, `map`, `facilities`, `reports`, `family`, `civic`.
+- 3D City toggle verified via browser subagent with video recording `toggle_3d_city_mode_1793129998413.webp`.

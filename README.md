@@ -73,25 +73,30 @@ HERPATH is built around **honest decision-support**: it strictly avoids false pr
 
 ---
 
-## 🎨 Premium Light-Mode Glassmorphism Design System
+## 🎨 Nightbloom Design System & 3D WebGL Mode
 
-HERPATH features a custom, high-craft design system tailored for daylight legibility, reassurance, and modern mobile aesthetics:
+HERPATH features the **Nightbloom** design system: aubergine ink, electric violet route, and champagne details. It delivers nocturnal luxury that stays crisp and legible under direct sunlight, paired with strict functional separation so routes, hazards, and emergency states never overlap.
 
 ### Design Tokens & Palette
-- **Main Canvas:** `#F6F8FC` (calm, airy neutral foundation avoiding harsh pure white glare)
-- **Secondary Surface:** `#EEF2F8` (subtle structural separation)
-- **Primary Cards & Modals:** `#FFFFFF` with `backdrop-blur-xl` frosted translucency
-- **Typography:** `#172238` (deep navy primary) and `#66738A` (slate secondary) for WCAG AA/AAA contrast
-- **Borders & Dividers:** `#E3E9F2` (delicate 1px structural framing)
-- **Primary Brand Accents:** `#20B8A5` (Vibrant Teal), `#128C82` (Deep Teal), `#E4F8F3` (Soft Mint Surface)
-- **Context Surfaces:** `#EAF1FF` (Soft Blue), `#EFEDFF` (Soft Lavender), `#FFF4E6` (Warm Caution)
-- **Urgent Action / SOS:** `#D94F63` (Coral Urgent), `#BA3A4D` (Deep Coral)
+- **Canvas:** `#F7F3EE` (warm, calm alabaster foundation avoiding harsh digital white glare)
+- **Secondary Canvas:** `#EEE8E1` (structural segmentation)
+- **Primary Ink Typography:** `#1E0F28` (deep aubergine primary text delivering 16.5:1 WCAG contrast on canvas and 18.2:1 on card)
+- **Supporting Text:** `#5E5068` (7.4:1 contrast) and `#6F6179` (muted metadata)
+- **Primary Brand / Selected Route:** `#5A2FC2` (Electric Violet, 6px polyline with 9px `#FFFFFF` casing, 6.3:1 contrast against map base)
+- **Alternative Routes:** `#6E6090` (dashed slate with casing at ~60% opacity)
+- **Control Boundaries:** `#867B72` (strictly compliant with WCAG 2.2 3:1 control boundary rule at 4.1:1 on white)
+- **Emergency SOS:** `#C21428` (Crimson, strictly isolated to the emergency button and modal, 6.1:1 contrast on white)
+- **Verified / Open:** `#1F6B4D` (tint: `#E6F3EC`)
+- **Caution / Reports:** `#A8560A` (text: `#8A4A08`, tint: `#FDF2E3`)
+- **Facility Markers:** Transit (`#1F5FA8`), Women's Facilities (`#8E2F7E`), Medical (`#0F766E`), Police (`#2B3A67`), Streetlights (`#8A6A10`), each encoded with color, distinct shape, and white glyph icon.
+- **Typography:** `Fraunces` (warm variable serif for headlines and large route durations) and `Plus Jakarta Sans` (for clean interface UI), with `tabular-nums` for all ETAs and distances.
 
-### Mobile & Desktop Spatial Ergonomics
-- **Desktop (≥ 1024px):** Dual-pane split architecture with a 460px frosted-glass control panel on the left and full-viewport interactive OpenStreetMap canvas on the right.
-- **Mobile (< 1024px):** Map-first layout with a collapsible frosted glass bottom sheet (`rounded-t-[32px]`, `h-[72vh]`) offering minimize/expand toggles, ensuring seamless one-handed reachability.
-- **Floating Bottom Dock:** Translucent glassmorphic pill bar (`h-16`, `shadow-float`, `rounded-full`) anchored above the navigation boundary with active mint indicator pills across 6 core views.
-- **Custom Map DivIcons:** Crisp circular pin markers with diffuse drop-shadows and semantic outer glow rings (Teal for transit, Purple for women's amenities, Emerald for streetlights, Coral for alerts).
+### Spatial Architecture & 3D City Mode
+- **Full-Bleed Map Canvas:** Map fills the entire viewport behind a floating 440px desktop card panel (`top-4 left-4 bottom-4`, `rounded-[20px]`, `border border-border`, `shadow-e2`).
+- **Carto Positron Muted Basemap:** Desaturated neutral basemap eliminates POI clutter, allowing violet corridors and infrastructure markers to command visual hierarchy.
+- **3D City Extrusion Mode:** Integrated MapLibre GL toggle rendering 3D building extrusions at 55° pitch with real route geometry and interactive markers, with Leaflet 2D as rock-solid default and fallback.
+- **Mobile Bottom Sheet:** 3-snap sheet (`peek` ~80px, `half` ~52vh, `full` ~86vh) with tactile handle, keeping the map visible and accessible.
+- **Accessible Motion:** All animations respect `prefers-reduced-motion: reduce` for instant state changes. No transition delays emergency or navigation actions.
 
 ---
 
