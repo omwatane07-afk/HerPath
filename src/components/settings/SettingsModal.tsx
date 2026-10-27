@@ -4,17 +4,10 @@ import React, { useState } from 'react';
 import { RoutePreferences, TrustedContact } from '@/types';
 import {
   X,
-  SlidersHorizontal,
   Shield,
-  RotateCcw,
-  Eye,
   Lock,
-  Compass,
-  Users,
   MapPin,
-  Sparkles,
   Accessibility,
-  Check,
 } from 'lucide-react';
 
 interface SettingsModalProps {
@@ -42,16 +35,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-ink/40 backdrop-blur-sm animate-fade-in"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-bordeaux/40 backdrop-blur-sm animate-fade-in"
       role="dialog"
       aria-modal="true"
       aria-labelledby="settings-title"
     >
-      <div className="surface-card max-w-xl w-full p-6 text-ink shadow-e3 relative overflow-hidden flex flex-col max-h-[85vh]">
+      <div className="surface-card max-w-xl w-full p-6 text-bordeaux shadow-atelier border border-border-gold/60 rounded-atelier relative overflow-hidden flex flex-col max-h-[85vh] bg-white">
         {/* Modal Header */}
         <div className="flex items-start justify-between pb-4 border-b border-border">
           <div>
-            <h2 id="settings-title" className="font-serif text-xl font-bold text-ink">
+            <h2 id="settings-title" className="font-editorial text-xl font-bold text-bordeaux">
               Settings & Privacy
             </h2>
             <p className="text-xs text-text-secondary mt-0.5">
@@ -60,15 +53,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="text-text-secondary hover:text-ink p-2 rounded-lg bg-paper hover:bg-raised transition-colors focus-ring-peacock"
+            className="text-text-secondary hover:text-bordeaux p-2 rounded-xl bg-canvas hover:bg-canvas-subtle transition-colors focus-ring-bordeaux"
             aria-label="Close settings"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* 4 Clear Sections Tabs */}
-        <div className="mt-3 flex rounded-lg bg-paper p-1 border border-border text-xs font-semibold gap-1" role="tablist">
+        {/* 3 Clear Sections Tabs */}
+        <div className="mt-3 flex rounded-xl bg-canvas p-1 border border-border text-xs font-semibold gap-1" role="tablist">
           {[
             { id: 'privacy' as const, label: 'Data & Privacy', icon: Shield },
             { id: 'sharing' as const, label: 'Sharing & Location', icon: MapPin },
@@ -81,15 +74,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 py-1.5 px-2 rounded-md flex items-center justify-center gap-1.5 transition-colors focus-ring-peacock ${
+                className={`flex-1 py-1.5 px-2 rounded-lg flex items-center justify-center gap-1.5 transition-all focus-ring-bordeaux ${
                   isActive
-                    ? 'bg-white text-ink font-bold shadow-e1'
-                    : 'text-text-secondary hover:text-ink'
+                    ? 'bg-bordeaux text-white font-bold shadow-sm'
+                    : 'text-text-secondary hover:text-bordeaux'
                 }`}
                 role="tab"
                 aria-selected={isActive}
               >
-                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-peacock' : ''}`} />
+                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-champagne' : ''}`} />
                 <span className="truncate">{tab.label}</span>
               </button>
             );
@@ -101,22 +94,22 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {/* TAB 1: DATA & PRIVACY */}
           {activeTab === 'privacy' && (
             <div className="space-y-3.5 animate-fade-in">
-              <div className="surface-card p-4 space-y-2.5">
-                <h4 className="font-serif font-bold text-sm text-ink flex items-center gap-2">
-                  <Lock className="w-4 h-4 text-peacock" />
+              <div className="surface-card p-4 space-y-2.5 border border-border">
+                <h4 className="font-editorial font-bold text-sm text-bordeaux flex items-center gap-2">
+                  <Lock className="w-4 h-4 text-rose-gold" />
                   <span>Plain-Language Privacy Commitment</span>
                 </h4>
                 <ul className="space-y-2 text-text-secondary leading-relaxed">
                   <li className="flex items-start gap-2">
-                    <span className="text-peacock font-bold">✓</span>
+                    <span className="text-rose-gold font-bold">✓</span>
                     <span><strong>No Covert Tracking:</strong> We never log background movements or share personal trajectories with commercial ad brokers.</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-peacock font-bold">✓</span>
+                    <span className="text-rose-gold font-bold">✓</span>
                     <span><strong>Local Data Ownership:</strong> In this evaluation mode, all reports, preferences, and journeys reside exclusively in your local device storage.</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-peacock font-bold">✓</span>
+                    <span className="text-rose-gold font-bold">✓</span>
                     <span><strong>No Neighborhood Profiling:</strong> Unmapped infrastructure is marked neutrally as "No Data", never stigmatized as dangerous.</span>
                   </li>
                 </ul>
@@ -126,7 +119,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <div className="surface-card p-4 space-y-2 border-danger/30">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="font-bold text-xs text-ink">Reset Evaluation Data</h4>
+                    <h4 className="font-bold text-xs text-bordeaux">Reset Evaluation Data</h4>
                     <p className="text-[11px] text-text-secondary mt-0.5">
                       Clears all locally saved community reports, custom contacts, and active journeys.
                     </p>
@@ -149,9 +142,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {/* TAB 2: SHARING & LOCATION */}
           {activeTab === 'sharing' && (
             <div className="space-y-3 animate-fade-in">
-              <div className="surface-card p-4 space-y-3">
-                <h4 className="font-serif font-bold text-sm text-ink flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-peacock" />
+              <div className="surface-card p-4 space-y-3 border border-border">
+                <h4 className="font-editorial font-bold text-sm text-bordeaux flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-rose-gold" />
                   <span>Trip Sharing Controls</span>
                 </h4>
                 
@@ -168,8 +161,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </div>
               </div>
 
-              <div className="surface-card p-4 space-y-2">
-                <h4 className="font-bold text-xs text-ink">GPS Location Precision</h4>
+              <div className="surface-card p-4 space-y-2 border border-border">
+                <h4 className="font-bold text-xs text-bordeaux">GPS Location Precision</h4>
                 <p className="text-[11px] text-text-secondary">
                   HERPATH requests high-accuracy browser geolocation only when you tap "Use my location" or during an active journey check-in.
                 </p>
@@ -180,92 +173,64 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {/* TAB 3: APPEARANCE & ACCESSIBILITY */}
           {activeTab === 'appearance' && (
             <div className="space-y-3 animate-fade-in">
-              <div className="surface-card p-4 space-y-3">
-                <h4 className="font-serif font-bold text-sm text-ink flex items-center gap-2">
-                  <Accessibility className="w-4 h-4 text-peacock" />
+              <div className="surface-card p-4 space-y-3 border border-border">
+                <h4 className="font-editorial font-bold text-sm text-bordeaux flex items-center gap-2">
+                  <Accessibility className="w-4 h-4 text-rose-gold" />
                   <span>Display & Accessibility</span>
                 </h4>
 
                 {/* Text Size Control */}
                 <div className="flex items-center justify-between py-2 border-b border-border">
                   <div>
-                    <span className="font-semibold text-ink">Interface Text Size</span>
+                    <span className="font-semibold text-bordeaux">Interface Text Size</span>
                     <p className="text-[11px] text-text-secondary">Adjust density for high legibility</p>
                   </div>
-                  <div className="inline-flex rounded-md bg-paper border border-border p-0.5">
+                  <div className="inline-flex rounded-xl bg-canvas border border-border p-0.5">
                     <button
                       type="button"
                       onClick={() => setTextSize('normal')}
-                      className={`px-3 py-1 rounded text-xs font-semibold ${
-                        textSize === 'normal' ? 'bg-white text-ink shadow-e1 font-bold' : 'text-text-secondary'
+                      className={`px-3 py-1 rounded-lg text-xs font-semibold ${
+                        textSize === 'normal' ? 'bg-bordeaux text-white shadow-sm font-bold' : 'text-text-secondary'
                       }`}
                     >
-                      Default
+                      Standard
                     </button>
                     <button
                       type="button"
                       onClick={() => setTextSize('large')}
-                      className={`px-3 py-1 rounded text-xs font-semibold ${
-                        textSize === 'large' ? 'bg-white text-ink shadow-e1 font-bold' : 'text-text-secondary'
+                      className={`px-3 py-1 rounded-lg text-xs font-semibold ${
+                        textSize === 'large' ? 'bg-bordeaux text-white shadow-sm font-bold' : 'text-text-secondary'
                       }`}
                     >
-                      Enlarged
+                      Large (115%)
                     </button>
                   </div>
                 </div>
 
-                {/* High Contrast Toggle */}
-                <label className="flex items-center justify-between py-2 border-b border-border cursor-pointer">
-                  <div>
-                    <span className="font-semibold text-ink">High Contrast Boundaries</span>
-                    <p className="text-[11px] text-text-secondary">Enforces 3:1+ borders on all cards and inputs</p>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={highContrast}
-                    onChange={(e) => setHighContrast(e.target.checked)}
-                    className="rounded border-border text-peacock focus:ring-peacock h-4 w-4"
-                  />
-                </label>
-
                 {/* Reduced Motion Toggle */}
-                <label className="flex items-center justify-between py-2 cursor-pointer">
+                <div className="flex items-center justify-between py-2">
                   <div>
-                    <span className="font-semibold text-ink">Prefer Reduced Motion</span>
-                    <p className="text-[11px] text-text-secondary">Disables route path animations and marker lift</p>
+                    <span className="font-semibold text-bordeaux">Reduced Motion</span>
+                    <p className="text-[11px] text-text-secondary">Disables 3D camera transitions and route drawing</p>
                   </div>
                   <input
                     type="checkbox"
                     checked={reducedMotion}
                     onChange={(e) => setReducedMotion(e.target.checked)}
-                    className="rounded border-border text-peacock focus:ring-peacock h-4 w-4"
+                    className="rounded border-border text-rose-gold focus:ring-rose-gold h-4 w-4"
                   />
-                </label>
-              </div>
-
-              {/* Routing Preferences Quick Toggle */}
-              <div className="surface-card p-4 space-y-2">
-                <h4 className="font-bold text-xs text-ink">Default Mobility Accessibility</h4>
-                <label className="flex items-center justify-between cursor-pointer">
-                  <span className="text-text font-medium">Require step-free routes (curb cuts & ramps)</span>
-                  <input
-                    type="checkbox"
-                    checked={preferences.wheelchairAccessible}
-                    onChange={(e) => onUpdatePreferences({ ...preferences, wheelchairAccessible: e.target.checked })}
-                    className="rounded border-border text-peacock focus:ring-peacock h-4 w-4"
-                  />
-                </label>
+                </div>
               </div>
             </div>
           )}
         </div>
 
-        {/* Modal Footer */}
-        <div className="pt-3 border-t border-border flex items-center justify-end">
+        {/* Footer */}
+        <div className="pt-3 border-t border-border flex justify-end">
           <button
             type="button"
             onClick={onClose}
-            className="btn-ink py-2 px-5 text-xs font-bold shadow-e1"
+            className="btn-bordeaux py-2 px-5 text-xs font-semibold shadow-sm"
           >
             Done
           </button>

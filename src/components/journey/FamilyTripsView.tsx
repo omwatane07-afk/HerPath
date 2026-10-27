@@ -7,13 +7,10 @@ import {
   Users,
   Compass,
   CheckCircle2,
-  ShieldCheck,
   Plus,
   Phone,
   Share2,
   Check,
-  Clock,
-  Shield,
   Eye,
   Info,
 } from 'lucide-react';
@@ -46,11 +43,11 @@ export const FamilyTripsView: React.FC<FamilyTripsViewProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full bg-paper text-ink overflow-y-auto w-full">
+    <div className="flex flex-col h-full bg-canvas text-bordeaux overflow-y-auto w-full">
       {/* Header */}
-      <div className="p-4 sm:p-5 border-b border-border bg-white shadow-e1 flex items-center justify-between">
+      <div className="p-4 sm:p-5 border-b border-border bg-white shadow-sm flex items-center justify-between">
         <div>
-          <h2 className="font-serif text-xl font-bold text-ink">Family Journey Companion</h2>
+          <h2 className="font-editorial text-xl font-bold text-bordeaux">Family Journey Companion</h2>
           <p className="text-xs text-text-secondary mt-0.5">
             Explicit, user-controlled trip sharing with trusted contacts.
           </p>
@@ -59,9 +56,9 @@ export const FamilyTripsView: React.FC<FamilyTripsViewProps> = ({
           <button
             type="button"
             onClick={onOpenStartJourneyModal}
-            className="btn-ink py-2 px-3.5 text-xs font-semibold flex items-center gap-1.5 shadow-e1"
+            className="btn-bordeaux py-2 px-3.5 text-xs font-semibold flex items-center gap-1.5 shadow-sm"
           >
-            <Compass className="w-3.5 h-3.5 text-peacock-tint" />
+            <Compass className="w-3.5 h-3.5 text-champagne" />
             <span>Start a trip</span>
           </button>
         )}
@@ -71,13 +68,13 @@ export const FamilyTripsView: React.FC<FamilyTripsViewProps> = ({
         {/* Trusted Contacts Section (Always Displayed Above the Fold) */}
         <section aria-labelledby="trusted-contacts-heading" className="space-y-2.5">
           <div className="flex items-center justify-between">
-            <h3 id="trusted-contacts-heading" className="font-serif text-base font-bold text-ink">
+            <h3 id="trusted-contacts-heading" className="font-editorial text-base font-bold text-bordeaux">
               Trusted Contacts
             </h3>
             <button
               type="button"
               onClick={onOpenAddContact}
-              className="text-peacock-dark hover:text-ink text-xs font-semibold flex items-center gap-1"
+              className="text-rose-gold hover:text-bordeaux text-xs font-semibold flex items-center gap-1"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Add contact</span>
@@ -88,13 +85,13 @@ export const FamilyTripsView: React.FC<FamilyTripsViewProps> = ({
             {trustedContacts.map((contact) => (
               <div
                 key={contact.id}
-                className="surface-card p-3 flex items-center justify-between gap-3 shadow-e1"
+                className="surface-card p-3.5 flex items-center justify-between gap-3 shadow-e1 border border-border hover:border-champagne transition-colors"
               >
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <h4 className="font-bold text-sm text-ink truncate">{contact.name}</h4>
+                    <h4 className="font-bold text-sm text-bordeaux truncate">{contact.name}</h4>
                     {contact.isEmergencyAlertContact && (
-                      <span className="text-[10px] font-semibold text-danger bg-danger-tint px-1.5 py-0.2 rounded border border-danger/30">
+                      <span className="text-[10px] font-semibold text-danger bg-danger-tint px-1.5 py-0.2 rounded-full border border-danger/30">
                         SOS
                       </span>
                     )}
@@ -112,7 +109,7 @@ export const FamilyTripsView: React.FC<FamilyTripsViewProps> = ({
                   className="btn-secondary min-h-[44px] min-w-[44px] px-3.5 flex items-center justify-center gap-1.5 text-xs font-semibold shrink-0"
                   aria-label={`Call ${contact.name}`}
                 >
-                  <Phone className="w-3.5 h-3.5 text-ink" />
+                  <Phone className="w-3.5 h-3.5 text-bordeaux" />
                   <span>Call</span>
                 </a>
               </div>
@@ -122,10 +119,10 @@ export const FamilyTripsView: React.FC<FamilyTripsViewProps> = ({
 
         {/* Active Journey Card or Empty State */}
         {activeJourney ? (
-          <section aria-labelledby="active-trip-heading" className="surface-card p-5 space-y-4 shadow-e1">
+          <section aria-labelledby="active-trip-heading" className="surface-card p-5 space-y-4 shadow-atelier border border-border-gold/60">
             <div className="flex items-center justify-between">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold bg-peacock-tint text-peacock-dark border border-peacock/30">
-                <span className="w-2 h-2 rounded-full bg-peacock" />
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-tint text-rose-gold border border-rose-gold/30">
+                <span className="w-2 h-2 rounded-full bg-rose-gold animate-pulse" />
                 Trip Sharing Active
               </span>
               <span className="text-xs text-text-secondary font-medium">
@@ -134,10 +131,10 @@ export const FamilyTripsView: React.FC<FamilyTripsViewProps> = ({
             </div>
 
             <div>
-              <div className="text-xs font-semibold text-text-secondary uppercase tracking-wider">
+              <div className="text-[10px] font-bold text-rose-gold uppercase tracking-wider font-editorial">
                 Destination
               </div>
-              <h3 id="active-trip-heading" className="font-serif text-xl font-bold text-ink mt-0.5">
+              <h3 id="active-trip-heading" className="font-editorial text-2xl font-bold text-bordeaux mt-0.5">
                 {activeJourney.destinationName}
               </h3>
               <p className="text-xs text-text-secondary mt-0.5">
@@ -146,26 +143,26 @@ export const FamilyTripsView: React.FC<FamilyTripsViewProps> = ({
             </div>
 
             {/* Explicit Breakdown of What's Shared & Privacy Scope */}
-            <div className="p-3.5 rounded-lg bg-raised border border-border text-xs space-y-2">
-              <h4 className="font-bold text-xs text-ink flex items-center gap-1.5">
-                <Eye className="w-3.5 h-3.5 text-peacock" />
+            <div className="p-3.5 rounded-xl bg-surface-raised border border-border text-xs space-y-2">
+              <h4 className="font-bold text-xs text-bordeaux flex items-center gap-1.5">
+                <Eye className="w-3.5 h-3.5 text-rose-gold" />
                 <span>What information is shared</span>
               </h4>
               <ul className="space-y-1 text-text-secondary">
                 <li className="flex items-start gap-1.5">
-                  <span className="text-ink font-bold">•</span>
+                  <span className="text-bordeaux font-bold">•</span>
                   <span><strong>Viewer:</strong> {activeJourney.trustedContact?.name || 'Trusted Contact'} ({activeJourney.trustedContact?.phone || 'No phone recorded'})</span>
                 </li>
                 <li className="flex items-start gap-1.5">
-                  <span className="text-ink font-bold">•</span>
+                  <span className="text-bordeaux font-bold">•</span>
                   <span><strong>Shared data:</strong> Destination name, planned corridor, and periodic check-in status</span>
                 </li>
                 <li className="flex items-start gap-1.5">
-                  <span className="text-ink font-bold">•</span>
+                  <span className="text-bordeaux font-bold">•</span>
                   <span><strong>Check-in frequency:</strong> Every {activeJourney.checkInIntervalMinutes} minutes</span>
                 </li>
                 <li className="flex items-start gap-1.5">
-                  <span className="text-ink font-bold">•</span>
+                  <span className="text-bordeaux font-bold">•</span>
                   <span><strong>Sharing expires:</strong> Automatically upon marked safe arrival or when stopped below</span>
                 </li>
               </ul>
@@ -173,18 +170,18 @@ export const FamilyTripsView: React.FC<FamilyTripsViewProps> = ({
 
             {/* Checkpoints Audit Log */}
             <div className="pt-3 border-t border-border">
-              <div className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-2">
+              <div className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-2 font-editorial">
                 Check-in Audit Log ({activeJourney.checkIns.length} recorded)
               </div>
               <div className="space-y-1.5">
                 {activeJourney.checkIns.slice(0, 4).map((chk) => (
                   <div
                     key={chk.id}
-                    className="flex items-center justify-between p-2 rounded-md bg-paper border border-border text-xs"
+                    className="flex items-center justify-between p-2.5 rounded-xl bg-canvas border border-border text-xs"
                   >
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="w-3.5 h-3.5 text-verified" />
-                      <span className="font-semibold text-ink">
+                      <span className="font-semibold text-bordeaux">
                         {chk.status === 'arrived' ? 'Arrived Safely' : 'Periodic Confirmation'}
                       </span>
                     </div>
@@ -197,68 +194,62 @@ export const FamilyTripsView: React.FC<FamilyTripsViewProps> = ({
             </div>
 
             {/* Sharing Link & Honest Notice */}
-            <div className="p-3 rounded-lg bg-paper border border-border text-xs space-y-2">
+            <div className="p-3.5 rounded-xl bg-canvas border border-border text-xs space-y-2">
               <div className="flex items-center justify-between">
-                <span className="font-semibold text-ink">Journey Access Link</span>
+                <span className="font-semibold text-bordeaux">Shareable Journey Link</span>
                 <button
                   type="button"
                   onClick={handleShare}
-                  className="btn-secondary py-1 px-2.5 text-xs flex items-center gap-1"
+                  className="btn-secondary py-1 px-2.5 text-xs flex items-center gap-1.5"
                 >
-                  {copied ? <Check className="w-3.5 h-3.5 text-peacock" /> : <Share2 className="w-3.5 h-3.5" />}
-                  <span>{copied ? 'Link Copied' : 'Copy Link'}</span>
+                  {copied ? <Check className="w-3.5 h-3.5 text-verified" /> : <Share2 className="w-3.5 h-3.5" />}
+                  <span>{copied ? 'Copied' : 'Copy link'}</span>
                 </button>
               </div>
-              <p className="text-[11px] text-text-secondary leading-relaxed">
-                *Link copied. In this local evaluation environment, data is persisted in browser storage and is not transmitted over an SMS or cloud server.
+              <p className="text-[11px] text-text-muted leading-relaxed">
+                Demo link copied to clipboard. In this evaluation mode, journey data is stored on this device only.
               </p>
             </div>
 
-            {/* Stop Sharing Button (Always visible and accessible) */}
+            {/* Permanent STOP SHARING Button */}
             <div className="pt-2">
               <button
                 type="button"
                 onClick={onEndJourney}
-                className="w-full py-2.5 px-4 rounded-lg bg-white border-2 border-danger text-xs font-bold text-danger hover:bg-danger-tint transition-colors focus-ring-peacock"
+                className="w-full py-3 px-4 rounded-xl border-2 border-bordeaux text-bordeaux hover:bg-bordeaux hover:text-white font-bold text-xs uppercase tracking-wider transition-all shadow-sm focus-ring-bordeaux"
+                aria-label="Stop sharing journey location now"
               >
-                Stop sharing journey
+                Stop Sharing Location
               </button>
             </div>
           </section>
         ) : (
-          /* Empty State: Restrained clay illustration + explanation + Start Trip */
-          <div className="surface-card p-6 text-center space-y-4 shadow-e1">
-            {/* Inline SVG Isometric/Hand-authored illustration in Clay + Ink style */}
-            <div className="w-24 h-24 mx-auto flex items-center justify-center">
-              <svg width="80" height="80" viewBox="0 0 80 80" fill="none" aria-hidden="true">
-                <rect x="15" y="25" width="50" height="40" rx="8" fill="#F8F4EC" stroke="#14213D" strokeWidth="2" />
-                <path d="M15 45L40 32L65 45" stroke="#D8A58E" strokeWidth="2.5" strokeLinecap="round" />
-                <circle cx="40" cy="32" r="5" fill="#0E7C86" stroke="#FFFFFF" strokeWidth="1.5" />
-                <circle cx="28" cy="52" r="3" fill="#D8A58E" />
-                <circle cx="52" cy="52" r="3" fill="#14213D" />
-                <path d="M28 52H52" stroke="#B9AF99" strokeWidth="1.5" strokeDasharray="3 3" />
+          <section className="surface-card p-6 text-center space-y-3 shadow-e1 border border-border">
+            {/* Hand-authored SVG Clay & Ink Illustration */}
+            <div className="w-24 h-24 mx-auto" aria-hidden="true">
+              <svg viewBox="0 0 96 96" fill="none" className="w-full h-full">
+                <circle cx="48" cy="48" r="44" fill="#FAF6F0" stroke="#D4A359" strokeWidth="1.5" strokeDasharray="3 3" />
+                <path d="M48 24C38 24 30 32 30 42C30 55 48 72 48 72C48 72 66 55 66 42C66 32 58 24 48 24Z" fill="#FCEEF2" stroke="#C8415F" strokeWidth="2" />
+                <circle cx="48" cy="42" r="7" fill="#240D1E" />
+                <path d="M26 68L36 62M70 68L60 62" stroke="#D4A359" strokeWidth="1.5" strokeLinecap="round" />
               </svg>
             </div>
-            <p className="text-[10px] uppercase font-bold text-text-muted tracking-wider">
+            <div className="text-[10px] text-text-muted uppercase tracking-wider font-mono">
               Illustration, not a map record
-            </p>
-
-            <div>
-              <h3 className="font-serif text-lg font-bold text-ink">No Journey Currently Running</h3>
-              <p className="text-xs text-text-secondary mt-1 max-w-sm mx-auto leading-relaxed">
-                When you depart, start a journey to share your route and check-in timeline with trusted contacts. You control who sees your trip and can stop sharing anytime.
-              </p>
             </div>
-
+            <h4 className="font-editorial text-lg font-bold text-bordeaux">No Journey Currently Shared</h4>
+            <p className="text-xs text-text-secondary max-w-sm mx-auto leading-relaxed">
+              When you start a trip, you choose which trusted contact receives your destination, expected arrival, and periodic check-in status. You can stop sharing at any moment.
+            </p>
             <button
               type="button"
               onClick={onOpenStartJourneyModal}
-              className="btn-ink py-2.5 px-6 text-xs font-bold shadow-e1 inline-flex items-center gap-2"
+              className="btn-bordeaux py-2.5 px-5 text-xs font-bold inline-flex items-center gap-2 shadow-md"
             >
-              <Compass className="w-4 h-4 text-peacock-tint" />
+              <Compass className="w-4 h-4 text-champagne" />
               <span>Start a trip</span>
             </button>
-          </div>
+          </section>
         )}
       </div>
     </div>

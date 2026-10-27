@@ -10,11 +10,8 @@ import {
 import { generateId } from '@/lib/utils';
 import {
   X,
-  AlertTriangle,
-  Lightbulb,
   MapPin,
   Send,
-  ShieldCheck,
   CheckCircle2,
   ChevronRight,
   ChevronLeft,
@@ -51,21 +48,21 @@ const CATEGORIES: { id: DisturbanceCategory; label: string; icon: string; descri
   },
   {
     id: 'broken_footpath',
-    label: 'Broken Footpath',
+    label: 'Footpath / Access Hazard',
     icon: '🚧',
-    description: 'Uneven surface, construction debris, or missing walkway',
+    description: 'Broken pavement, open construction, or blocked ramp',
   },
   {
     id: 'transport_disruption',
     label: 'Transit Disruption',
     icon: '🚌',
-    description: 'Barricaded stop, unlit shelter, or cancelled service',
+    description: 'Bus stop dark, gate closed, or route cancelled',
   },
   {
-    id: 'facility_unavailable',
-    label: 'Facility Closed / Defect',
-    icon: '🚻',
-    description: 'Locked restroom, closed pharmacy, or unattended desk',
+    id: 'other_concern',
+    label: 'Other Safety Hazard',
+    icon: 'ℹ️',
+    description: 'General environmental or urban maintenance issue',
   },
 ];
 
@@ -81,39 +78,39 @@ export const ReportModal: React.FC<ReportModalProps> = ({
   const [category, setCategory] = useState<DisturbanceCategory>('streetlight_issue');
   const [locationName, setLocationName] = useState('');
   const [description, setDescription] = useState('');
+  const [severity, setSeverity] = useState<'low' | 'medium' | 'high'>('medium');
+  const [validationError, setValidationError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
-  const [validationError, setValidationError] = useState('');
 
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!locationName.trim()) {
-      setValidationError('Please specify a street or landmark name.');
-      setStep(2);
+      setValidationError('Please enter a location name or landmark.');
       return;
     }
 
     const now = new Date();
     const newReport: CommunityReport = {
       id: generateId('rep'),
-      category,
       coordinates: defaultCoords,
       locationName: locationName.trim(),
-      description: description.trim() || 'Observed condition reported by community commuter.',
-      status: 'pending',
+      category,
+      description: description.trim() || 'Observed by community member',
       source: 'community',
+      status: 'pending',
       upvotes: 1,
       flagCount: 0,
       createdAt: now.toISOString(),
-      expiresAt: new Date(now.getTime() + 48 * 3600 * 1000).toISOString(),
+      expiresAt: new Date(now.getTime() + 48 * 60 * 60 * 1000).toISOString(),
     };
 
     onSubmitReport(newReport);
 
     if (category === 'streetlight_issue' && onSubmitStreetlight) {
       const newStreetlight: StreetlightSegment = {
-        id: generateId('sl'),
+        id: generateId('stl'),
         segmentName: locationName.trim(),
         coordinates: defaultCoords,
         status: 'malfunctioning',
@@ -137,22 +134,22 @@ export const ReportModal: React.FC<ReportModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-ink/40 backdrop-blur-sm animate-fade-in"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-bordeaux/40 backdrop-blur-sm animate-fade-in"
       role="dialog"
       aria-modal="true"
       aria-labelledby="report-modal-title"
     >
-      <div className="surface-card max-w-lg w-full p-6 text-ink shadow-e3 relative overflow-hidden">
+      <div className="surface-card max-w-lg w-full p-6 text-bordeaux shadow-atelier border border-border-gold/60 rounded-atelier relative overflow-hidden bg-white">
         {/* Modal Header */}
         <div className="flex items-start justify-between pb-4 border-b border-border">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs font-semibold uppercase tracking-wider text-peacock-dark">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-rose-gold font-editorial">
                 Step {step} of 3
               </span>
               <span className="text-xs text-text-secondary">· Community Contribution</span>
             </div>
-            <h3 id="report-modal-title" className="font-serif text-xl font-bold text-ink">
+            <h3 id="report-modal-title" className="font-editorial text-xl font-bold text-bordeaux">
               {step === 1 && 'What did you observe?'}
               {step === 2 && 'Where did it happen?'}
               {step === 3 && 'Details & confirmation'}
@@ -160,7 +157,7 @@ export const ReportModal: React.FC<ReportModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="text-text-secondary hover:text-ink p-2 rounded-lg bg-paper hover:bg-raised transition-colors focus-ring-peacock"
+            className="text-text-secondary hover:text-bordeaux p-2 rounded-xl bg-canvas hover:bg-canvas-subtle transition-colors focus-ring-bordeaux"
             aria-label="Close dialog"
           >
             <X className="w-5 h-5" />
@@ -168,9 +165,9 @@ export const ReportModal: React.FC<ReportModalProps> = ({
         </div>
 
         {/* Emergency disclaimer banner with SOS entry point */}
-        <div className="my-3 p-3 rounded-lg bg-raised border border-border text-xs flex items-center justify-between gap-3">
+        <div className="my-3 p-3 rounded-xl bg-surface-raised border border-border text-xs flex items-center justify-between gap-3">
           <p className="text-text-secondary leading-snug">
-            <strong className="text-ink font-semibold">Public Notice:</strong> Community reports do not notify emergency dispatch.
+            <strong className="text-bordeaux font-semibold">Public Notice:</strong> Community reports do not notify emergency dispatch.
           </p>
           {onOpenEmergency && (
             <button
@@ -179,121 +176,133 @@ export const ReportModal: React.FC<ReportModalProps> = ({
                 onClose();
                 onOpenEmergency();
               }}
-              className="btn-emergency-sos py-1 px-2.5 text-[11px] font-bold shrink-0 shadow-e1"
+              className="text-emergency hover:bg-danger-tint px-2.5 py-1 rounded-lg border border-emergency/30 font-bold flex items-center gap-1 shrink-0 transition-colors"
             >
-              SOS Dispatch
+              <PhoneCall className="w-3.5 h-3.5" />
+              <span>SOS</span>
             </button>
           )}
         </div>
 
         {submitted ? (
-          <div className="py-12 flex flex-col items-center justify-center text-center space-y-3 animate-fade-in">
-            <div className="w-12 h-12 rounded-full bg-verified-tint text-verified flex items-center justify-center border border-verified/30">
-              <CheckCircle2 className="w-7 h-7" />
-            </div>
-            <h4 className="font-serif text-lg font-bold text-ink">Report Submitted</h4>
-            <p className="text-xs text-text-secondary max-w-xs">
-              Thank you for keeping commuters informed. Your report has been saved to the community map feed.
+          <div className="py-12 text-center space-y-3 animate-fade-in">
+            <CheckCircle2 className="w-12 h-12 text-verified mx-auto" />
+            <h4 className="font-editorial text-lg font-bold text-bordeaux">Report Submitted</h4>
+            <p className="text-xs text-text-secondary">
+              Thank you. Your observation has been saved to device records and will help other commuters.
             </p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4 my-2">
-            {/* Step 1: What happened? (Category selection) */}
+            {/* STEP 1: What happened? */}
             {step === 1 && (
-              <div className="space-y-2">
-                <p className="text-xs text-text-secondary">
-                  Select the category that best describes the road or infrastructure condition:
-                </p>
-                <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-2 animate-fade-in max-h-[60vh] overflow-y-auto pr-1">
+                <div className="text-xs font-semibold text-text-secondary mb-1">
+                  Select the issue type:
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {CATEGORIES.map((cat) => (
                     <button
                       key={cat.id}
                       type="button"
                       onClick={() => setCategory(cat.id)}
-                      className={`p-3 rounded-lg border text-left transition-colors focus-ring-peacock ${
+                      className={`p-3 rounded-xl border text-left transition-all flex items-start gap-2.5 ${
                         category === cat.id
-                          ? 'bg-peacock-tint border-2 border-peacock shadow-e1'
-                          : 'bg-white border-border hover:border-border-strong hover:bg-paper'
+                          ? 'border-2 border-rose-gold bg-rose-tint shadow-sm'
+                          : 'border-border bg-white hover:bg-canvas'
                       }`}
                     >
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-base">{cat.icon}</span>
-                        <span className="font-bold text-xs text-ink">{cat.label}</span>
+                      <span className="text-xl shrink-0 mt-0.5">{cat.icon}</span>
+                      <div className="min-w-0">
+                        <div className="font-bold text-xs text-bordeaux leading-snug">{cat.label}</div>
+                        <div className="text-[11px] text-text-secondary mt-0.5 leading-tight">
+                          {cat.description}
+                        </div>
                       </div>
-                      <p className="text-[11px] text-text-secondary leading-snug">
-                        {cat.description}
-                      </p>
                     </button>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Step 2: Where did it happen? (Location) */}
+            {/* STEP 2: Where did it happen? */}
             {step === 2 && (
-              <div className="space-y-3">
+              <div className="space-y-3.5 animate-fade-in">
                 <div>
-                  <label className="block text-xs font-semibold text-ink mb-1">
-                    Street, Intersection, or Landmark Name *
+                  <label className="block text-xs font-semibold text-bordeaux mb-1 font-editorial">
+                    Location Name or Nearest Landmark *
                   </label>
                   <input
                     type="text"
                     value={locationName}
                     onChange={(e) => {
                       setLocationName(e.target.value);
-                      setValidationError('');
+                      setValidationError(null);
                     }}
-                    placeholder="e.g. Tolstoy Road near Janpath junction"
-                    className="w-full text-xs font-medium bg-paper rounded-lg px-3 py-2.5 border border-border focus:border-peacock focus-ring-peacock text-ink placeholder:text-text-muted"
+                    placeholder="e.g. Connaught Place Inner Circle, near Gate 2"
+                    className="w-full text-xs bg-canvas rounded-xl p-2.5 border border-border focus:border-rose-gold text-bordeaux font-medium"
                     required
+                    autoFocus
                   />
                   {validationError && (
-                    <p className="text-[11px] text-danger mt-1 font-medium">{validationError}</p>
+                    <p className="text-danger text-[11px] font-medium mt-1">{validationError}</p>
                   )}
                 </div>
 
-                <div className="p-3 rounded-lg bg-paper border border-border text-xs text-text-secondary">
-                  <div className="flex items-center gap-1.5 font-semibold text-ink mb-1">
-                    <MapPin className="w-3.5 h-3.5 text-peacock" />
-                    <span>Selected Map Position</span>
+                <div className="p-3 rounded-xl bg-canvas border border-border text-xs flex items-center justify-between text-text-secondary">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-rose-gold" />
+                    <span>GPS Coordinates:</span>
                   </div>
-                  <div className="font-mono text-[11px]">
-                    Lat: {defaultCoords.lat.toFixed(5)}, Lng: {defaultCoords.lng.toFixed(5)}
-                  </div>
-                  <p className="text-[11px] text-text-muted mt-1">
-                    Point was placed at the current center of your map view.
-                  </p>
+                  <span className="font-mono text-bordeaux font-bold">
+                    {defaultCoords.lat.toFixed(4)}, {defaultCoords.lng.toFixed(4)}
+                  </span>
                 </div>
               </div>
             )}
 
-            {/* Step 3: Details & Confirmation */}
+            {/* STEP 3: Details & Confirmation */}
             {step === 3 && (
-              <div className="space-y-3">
+              <div className="space-y-3.5 animate-fade-in">
                 <div>
-                  <label className="block text-xs font-semibold text-ink mb-1">
-                    Description & Helpful Commuter Details (Optional)
+                  <label className="block text-xs font-semibold text-bordeaux mb-1 font-editorial">
+                    Optional Details or Context
                   </label>
                   <textarea
-                    rows={3}
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Provide context (e.g. 2 streetlights out between bus stop and market gate)..."
-                    className="w-full text-xs font-medium bg-paper rounded-lg p-3 border border-border focus:border-peacock focus-ring-peacock text-ink placeholder:text-text-muted"
+                    placeholder="Provide additional details to help verify or locate..."
+                    rows={3}
+                    className="w-full text-xs bg-canvas rounded-xl p-2.5 border border-border focus:border-rose-gold text-bordeaux font-medium"
                   />
                 </div>
 
-                <div className="p-3 rounded-lg bg-paper border border-border text-xs space-y-1.5">
-                  <div className="font-semibold text-ink">Summary of Report</div>
-                  <div className="text-text-secondary">
-                    <strong>Category:</strong> {CATEGORIES.find((c) => c.id === category)?.label}
+                <div>
+                  <label className="block text-xs font-semibold text-bordeaux mb-1.5 font-editorial">
+                    Urgency / Impact Level
+                  </label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {(['low', 'medium', 'high'] as const).map((sev) => (
+                      <button
+                        key={sev}
+                        type="button"
+                        onClick={() => setSeverity(sev)}
+                        className={`py-2 text-xs font-semibold rounded-xl border uppercase tracking-wider transition-all ${
+                          severity === sev
+                            ? sev === 'high'
+                              ? 'bg-danger-tint text-danger border-danger font-bold'
+                              : 'bg-rose-tint text-rose-gold border-rose-gold font-bold'
+                            : 'bg-canvas text-text-secondary border-border hover:bg-canvas-subtle'
+                        }`}
+                      >
+                        {sev}
+                      </button>
+                    ))}
                   </div>
-                  <div className="text-text-secondary">
-                    <strong>Location:</strong> {locationName || 'Location not specified yet'}
-                  </div>
-                  <div className="text-[11px] text-text-muted pt-1 border-t border-border">
-                    Report will remain active for 48 hours for community corroboration.
-                  </div>
+                </div>
+
+                <div className="p-3 rounded-xl bg-canvas border border-border text-[11px] text-text-secondary leading-relaxed">
+                  <strong className="text-bordeaux font-semibold">Community Integrity:</strong> Submitted reports are marked as <em>Unverified</em> until corroborated by other commuters.
                 </div>
               </div>
             )}
@@ -329,7 +338,7 @@ export const ReportModal: React.FC<ReportModalProps> = ({
                     }
                     setStep((s) => (s + 1) as any);
                   }}
-                  className="btn-ink py-2 px-4 text-xs font-bold flex items-center gap-1 shadow-e1"
+                  className="btn-bordeaux py-2 px-4 text-xs font-bold flex items-center gap-1 shadow-md"
                 >
                   <span>Continue</span>
                   <ChevronRight className="w-3.5 h-3.5" />
@@ -337,9 +346,9 @@ export const ReportModal: React.FC<ReportModalProps> = ({
               ) : (
                 <button
                   type="submit"
-                  className="btn-ink py-2 px-5 text-xs font-bold flex items-center gap-1.5 shadow-e1"
+                  className="btn-bordeaux py-2 px-5 text-xs font-bold flex items-center gap-1.5 shadow-md"
                 >
-                  <Send className="w-3.5 h-3.5 text-peacock-tint" />
+                  <Send className="w-3.5 h-3.5 text-champagne" />
                   <span>Publish Report</span>
                 </button>
               )}

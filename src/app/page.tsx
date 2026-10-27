@@ -296,11 +296,11 @@ export default function HerPathHome() {
         />
       )}
 
-      {/* 4. Main Body: Split Desktop & Floating Mobile Experience */}
-      <div className="flex-1 flex overflow-hidden relative">
-        {/* Desktop Left Contextual Sidebar (~400px wide, hidden in full-canvas 'map' mode) */}
+      {/* 4. Main Body Workspace: Framed Luxury Atelier & Atlas */}
+      <div className="flex-1 flex overflow-hidden relative p-0 lg:p-3 xl:p-4 lg:gap-3 xl:gap-4 bg-canvas">
+        {/* Desktop Left Atelier Panel (Curved luxury atelier desk, hidden in 'map' mode) */}
         {activeTab !== 'map' && (
-          <aside className="hidden lg:flex w-[400px] xl:w-[420px] h-full flex-col z-20 shrink-0 bg-paper border-r border-border shadow-e1 overflow-hidden">
+          <aside className="hidden lg:flex w-[420px] xl:w-[450px] h-full flex-col z-20 shrink-0 bg-white/98 backdrop-blur-md border border-border-gold/50 rounded-atelier shadow-atelier overflow-hidden">
             {activeTab === 'route' && (
               <RoutePlanner
                 origin={origin}
@@ -383,24 +383,24 @@ export default function HerPathHome() {
         {activeTab !== 'map' && (
           <section
             aria-label="Module Content Sheet"
-            className={`lg:hidden fixed left-0 right-0 z-30 transition-all duration-280 ease-standard flex flex-col bg-white border-t border-border shadow-e3 ${
+            className={`lg:hidden fixed left-0 right-0 z-30 transition-all duration-280 ease-standard flex flex-col bg-white/98 backdrop-blur-md border-t border-border-gold/50 shadow-atelier ${
               sheetSnap === 'peek'
-                ? 'bottom-[68px] h-20 rounded-t-[20px] overflow-hidden'
+                ? 'bottom-[68px] h-20 rounded-t-[28px] overflow-hidden'
                 : sheetSnap === 'half'
-                ? 'bottom-[68px] h-[52vh] rounded-t-[20px]'
-                : 'bottom-[68px] h-[86vh] rounded-t-[20px]'
+                ? 'bottom-[68px] h-[52vh] rounded-t-[28px]'
+                : 'bottom-[68px] h-[86vh] rounded-t-[28px]'
             }`}
           >
             {/* Sheet Handle & Height Controls (touch + keyboard accessible) */}
             <div
               onClick={cycleSheetSnap}
-              className="w-full pt-2.5 pb-2 flex flex-col items-center justify-center cursor-pointer select-none shrink-0 border-b border-border/60 bg-paper/60 hover:bg-paper transition-colors"
+              className="w-full pt-2.5 pb-2 flex flex-col items-center justify-center cursor-pointer select-none shrink-0 border-b border-border/60 bg-canvas/80 hover:bg-canvas transition-colors"
             >
               <div className="w-10 h-1.5 rounded-full bg-border-strong mb-1.5" />
               <div className="flex items-center justify-between w-full px-4">
-                <span className="text-xs font-serif font-bold text-ink flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-peacock" />
-                  {activeTab === 'route' && 'Plan Route'}
+                <span className="text-xs font-editorial font-bold text-bordeaux flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-rose-gold" />
+                  {activeTab === 'route' && 'Plan Journey'}
                   {activeTab === 'facilities' && 'Nearby Facilities'}
                   {activeTab === 'reports' && 'Community Reports'}
                   {activeTab === 'family' && 'Family Journey'}
@@ -413,7 +413,7 @@ export default function HerPathHome() {
                     e.stopPropagation();
                     cycleSheetSnap();
                   }}
-                  className="p-1 rounded-md text-text-secondary hover:text-ink flex items-center gap-1 text-[11px] font-medium"
+                  className="p-1 rounded-lg text-text-secondary hover:text-bordeaux flex items-center gap-1 text-[11px] font-medium"
                   aria-label="Toggle sheet height"
                 >
                   <span>{sheetSnap === 'peek' ? 'Expand' : sheetSnap === 'half' ? 'Full view' : 'Minimize'}</span>
@@ -503,8 +503,8 @@ export default function HerPathHome() {
           </section>
         )}
 
-        {/* Interactive Map Canvas (Always Mounted and Visible) */}
-        <main className="flex-1 h-full relative z-10 overflow-hidden">
+        {/* Interactive Map Canvas (Framed Luxury Atlas) */}
+        <main className="flex-1 h-full relative z-10 overflow-hidden lg:rounded-atelier border-0 lg:border border-border-gold/40 shadow-none lg:shadow-atelier">
           <LeafletMap
             center={mapCenter}
             origin={origin}

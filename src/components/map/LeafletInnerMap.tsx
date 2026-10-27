@@ -74,16 +74,16 @@ function createCustomMarkerIcon(html: string, className: string = '', size: [num
   });
 }
 
-// Origin: Ink pin with contrasting white border
+// Origin: Bordeaux Noir seal with gold inner accent
 const originIcon = createCustomMarkerIcon(
-  `<div class="w-8 h-8 rounded-full bg-[#14213D] border-2 border-white shadow-e2 flex items-center justify-center text-white font-serif font-bold text-xs ring-2 ring-[#14213D]/20">A</div>`,
+  `<div class="w-8 h-8 rounded-full bg-[#240D1E] border-2 border-white shadow-atelier flex items-center justify-center text-[#D4A359] font-editorial font-bold text-xs ring-2 ring-[#240D1E]/20">A</div>`,
   '',
   [32, 32]
 );
 
-// Destination: Peacock pin with contrasting white border
+// Destination: Luminous Rose Gold jewel with gold ring
 const destinationIcon = createCustomMarkerIcon(
-  `<div class="w-8 h-8 rounded-full bg-[#0E7C86] border-2 border-white shadow-e2 flex items-center justify-center text-white font-serif font-bold text-xs ring-2 ring-[#0E7C86]/20">B</div>`,
+  `<div class="w-8 h-8 rounded-full bg-[#C8415F] border-2 border-white shadow-atelier flex items-center justify-center text-white font-editorial font-bold text-xs ring-2 ring-[#D4A359]/60">B</div>`,
   '',
   [32, 32]
 );
@@ -91,13 +91,13 @@ const destinationIcon = createCustomMarkerIcon(
 function getStreetlightIcon(status: string) {
   if (status === 'working' || status === 'resolved') {
     return createCustomMarkerIcon(
-      `<div class="w-7 h-7 rounded-full bg-white border border-[#E3DCCD] shadow-e1 flex items-center justify-center text-xs text-[#1B6B4A]">💡</div>`,
+      `<div class="w-7 h-7 rounded-full bg-white border border-[#D4A359]/60 shadow-e1 flex items-center justify-center text-xs text-[#1C6B48]">💡</div>`,
       '',
       [28, 28]
     );
   }
   return createCustomMarkerIcon(
-    `<div class="w-7 h-7 rounded-full bg-[#FDF1E0] border border-[#B25E00] shadow-e1 flex items-center justify-center text-xs text-[#B25E00]">⚠️</div>`,
+    `<div class="w-7 h-7 rounded-full bg-[#FDF2E3] border border-[#BA6A15] shadow-e1 flex items-center justify-center text-xs text-[#BA6A15]">⚠️</div>`,
     '',
     [28, 28]
   );
@@ -105,7 +105,7 @@ function getStreetlightIcon(status: string) {
 
 function getFacilityIcon(category: string) {
   let emoji = '🏢';
-  let border = 'border-[#E3DCCD]';
+  let border = 'border-[#E8DFD7]';
   if (category === 'womens_restroom') {
     emoji = '🚺';
   } else if (category === 'public_toilet') {
@@ -120,7 +120,7 @@ function getFacilityIcon(category: string) {
     emoji = 'ℹ️';
   }
   return createCustomMarkerIcon(
-    `<div class="w-7 h-7 rounded-full bg-white border ${border} shadow-e1 flex items-center justify-center text-xs text-[#14213D]">${emoji}</div>`,
+    `<div class="w-7 h-7 rounded-full bg-white border ${border} shadow-e1 flex items-center justify-center text-xs text-[#240D1E]">${emoji}</div>`,
     '',
     [28, 28]
   );
@@ -128,7 +128,7 @@ function getFacilityIcon(category: string) {
 
 function getDisturbanceIcon(category: string) {
   return createCustomMarkerIcon(
-    `<div class="w-7 h-7 rounded-full bg-[#FBE9EA] border border-[#A4161A] shadow-e1 flex items-center justify-center text-xs text-[#A4161A]">⚠️</div>`,
+    `<div class="w-7 h-7 rounded-full bg-[#FCEAEB] border border-[#9E1B24] shadow-e1 flex items-center justify-center text-xs text-[#9E1B24]">⚠️</div>`,
     '',
     [28, 28]
   );
@@ -137,7 +137,7 @@ function getDisturbanceIcon(category: string) {
 function getTransportIcon(type: string) {
   const emoji = type === 'metro_station' ? '🚇' : type === 'railway_station' ? '🚆' : '🚌';
   return createCustomMarkerIcon(
-    `<div class="w-7 h-7 rounded-full bg-white border border-[#1D5FA8]/30 shadow-e1 flex items-center justify-center text-xs text-[#1D5FA8]">${emoji}</div>`,
+    `<div class="w-7 h-7 rounded-full bg-white border border-[#D4A359]/40 shadow-e1 flex items-center justify-center text-xs text-[#240D1E]">${emoji}</div>`,
     '',
     [28, 28]
   );
@@ -327,26 +327,26 @@ export const LeafletInnerMap: React.FC<LeafletInnerMapProps> = ({
 
         return (
           <React.Fragment key={route.id}>
-            {/* White halo casing for separation (selected route) */}
+            {/* White and Champagne halo casing for separation (selected route) */}
             {isSelected && (
               <Polyline
                 positions={route.coordinates}
                 pathOptions={{
                   color: '#FFFFFF',
-                  weight: 10,
+                  weight: 12,
                   opacity: 0.95,
                   lineCap: 'round',
                   lineJoin: 'round',
                 }}
               />
             )}
-            {/* Route Polyline: Peacock #0E7C86 for selected, Slate #55607A for alternates */}
+            {/* Route Polyline: Rose Gold #C8415F for selected, Velvet Plum #7D6674 for alternates */}
             <Polyline
               positions={route.coordinates}
               pathOptions={{
-                color: isSelected ? '#0E7C86' : '#55607A',
-                weight: isSelected ? 6 : 3.5,
-                opacity: isSelected ? 1 : 0.55,
+                color: isSelected ? '#C8415F' : '#7D6674',
+                weight: isSelected ? 6.5 : 4,
+                opacity: isSelected ? 1 : 0.45,
                 dashArray: isSynthetic ? '8, 8' : undefined,
                 lineCap: 'round',
                 lineJoin: 'round',
@@ -357,15 +357,15 @@ export const LeafletInnerMap: React.FC<LeafletInnerMapProps> = ({
             >
               <Popup className="herpath-popup">
                 <div className="p-1 space-y-1">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-peacock-dark">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-rose-gold font-editorial">
                     {route.name}
                   </span>
-                  <div className="font-serif font-bold text-sm text-ink">{route.summary}</div>
+                  <div className="font-editorial font-bold text-sm text-bordeaux">{route.summary}</div>
                   <div className="text-xs text-text-secondary">
                     {Math.round(route.durationSeconds / 60)} min · {(route.distanceMeters / 1000).toFixed(1)} km
                   </div>
                   {isSynthetic && (
-                    <div className="text-[10px] text-text-secondary bg-paper px-1.5 py-0.5 rounded border border-border inline-block">
+                    <div className="text-[10px] text-text-secondary bg-canvas px-1.5 py-0.5 rounded border border-border inline-block">
                       Approximate path model
                     </div>
                   )}

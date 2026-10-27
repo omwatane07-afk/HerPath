@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Coordinates, RouteOption, RoutePreferences } from '@/types';
 import { RouteCard } from './RouteCard';
+import { SpatialJourneyOrb } from '../spatial/SpatialJourneyOrb';
 import {
   Navigation,
   MapPin,
@@ -15,6 +16,7 @@ import {
   AlertCircle,
   Footprints,
   Bus,
+  Sparkles,
 } from 'lucide-react';
 
 interface RoutePlannerProps {
@@ -98,21 +100,23 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
 
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        onSetOrigin(coords, 'Current GPS Location');
-        setOriginInput('Current GPS Location');
         setIsLocating(false);
+        const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        onSetOrigin(coords, 'Current Location');
+        setOriginInput('Current Location (GPS)');
+        setShowOriginDropdown(false);
       },
       (err) => {
         setIsLocating(false);
-        // Honest error handling per truthfulness rules: never silently substitute a fake demo location!
-        setLocationError(
-          err.code === 1
-            ? 'Location permission was denied. Please select a starting point from the list below.'
-            : 'Could not acquire GPS fix. Please select a starting place manually.'
-        );
+        let msg = 'Unable to acquire location.';
+        if (err.code === err.PERMISSION_DENIED) {
+          msg = 'Location access denied. Please select a starting point below.';
+        } else if (err.code === err.TIMEOUT) {
+          msg = 'Location request timed out. Please select a starting point below.';
+        }
+        setLocationError(msg);
       },
-      { timeout: 8000 }
+      { timeout: 10000, enableHighAccuracy: true }
     );
   };
 
@@ -124,21 +128,32 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
   ].filter(Boolean).length;
 
   return (
-    <div className="flex flex-col h-full bg-paper text-ink overflow-y-auto">
-      {/* Header section with Walk / Transit control */}
-      <div className="p-4 sm:p-5 border-b border-border bg-white sticky top-0 z-10 shadow-e1">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="font-serif text-xl font-bold text-ink">Plan Route</h2>
-          
-          {/* Walk / Transit Segmented Control */}
-          <div className="inline-flex p-0.5 rounded-lg bg-paper border border-border text-xs font-semibold" role="tablist">
+    <div className="w-full flex flex-col divide-y divide-border/60">
+      {/* Route Planning Header Card */}
+      <div className="p-4 sm:p-5 space-y-4">
+        {/* Top Control Bar: Walk / Transit segmented switch */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="font-editorial text-xl font-bold text-bordeaux tracking-tight">
+              Plan Journey
+            </h2>
+            <p className="text-xs text-text-secondary mt-0.5">
+              Select waypoints to compare verified walking corridors
+            </p>
+          </div>
+
+          <div
+            className="flex items-center p-1 rounded-xl bg-canvas border border-border text-xs font-semibold"
+            role="tablist"
+            aria-label="Travel mode selection"
+          >
             <button
               type="button"
               onClick={() => setTravelMode('walk')}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-md transition-colors focus-ring-peacock ${
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg transition-all focus-ring-bordeaux ${
                 travelMode === 'walk'
-                  ? 'bg-white text-ink font-bold shadow-e1'
-                  : 'text-text-secondary hover:text-ink'
+                  ? 'bg-bordeaux text-white shadow-sm'
+                  : 'text-text-secondary hover:text-bordeaux'
               }`}
               role="tab"
               aria-selected={travelMode === 'walk'}
@@ -149,10 +164,10 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
             <button
               type="button"
               onClick={() => setTravelMode('transit')}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-md transition-colors focus-ring-peacock ${
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg transition-all focus-ring-bordeaux ${
                 travelMode === 'transit'
-                  ? 'bg-white text-ink font-bold shadow-e1'
-                  : 'text-text-secondary hover:text-ink'
+                  ? 'bg-bordeaux text-white shadow-sm'
+                  : 'text-text-secondary hover:text-bordeaux'
               }`}
               role="tab"
               aria-selected={travelMode === 'transit'}
@@ -164,15 +179,15 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
         </div>
 
         {/* Connected Origin & Destination Card */}
-        <div className="surface-card p-3 relative">
+        <div className="surface-card p-3.5 relative border border-border-gold/50 shadow-atelier">
           <div className="flex items-stretch gap-2.5">
             {/* Visual connector line A to B */}
             <div className="flex flex-col items-center justify-between py-2 shrink-0 select-none">
-              <div className="w-6 h-6 rounded-full bg-ink text-white font-bold text-xs flex items-center justify-center">
+              <div className="w-6 h-6 rounded-full bg-bordeaux text-champagne font-bold text-xs flex items-center justify-center border border-champagne/40">
                 A
               </div>
               <div className="w-0.5 flex-1 bg-border-strong my-1" />
-              <div className="w-6 h-6 rounded-full bg-peacock text-white font-bold text-xs flex items-center justify-center">
+              <div className="w-6 h-6 rounded-full bg-rose-gold text-white font-bold text-xs flex items-center justify-center border border-white">
                 B
               </div>
             </div>
@@ -190,17 +205,17 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
                   }}
                   onFocus={() => setShowOriginDropdown(true)}
                   placeholder="Starting point or GPS location..."
-                  className="w-full text-xs font-medium bg-paper rounded-lg px-3 py-2 border border-border focus:border-peacock focus-ring-peacock text-ink placeholder:text-text-muted"
+                  className="w-full text-xs font-medium bg-canvas rounded-xl px-3 py-2.5 border border-border focus:border-rose-gold focus-ring-bordeaux text-bordeaux placeholder:text-text-muted transition-colors"
                   aria-label="Starting location"
                 />
 
                 {showOriginDropdown && (
-                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-border rounded-lg shadow-e2 z-30 max-h-48 overflow-y-auto">
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-border-gold rounded-xl shadow-atelier z-30 max-h-48 overflow-y-auto">
                     <button
                       type="button"
                       onClick={handleUseCurrentLocation}
                       disabled={isLocating}
-                      className="w-full text-left px-3 py-2 text-xs font-semibold text-peacock-dark hover:bg-peacock-tint flex items-center gap-2 border-b border-border"
+                      className="w-full text-left px-3 py-2 text-xs font-semibold text-rose-gold hover:bg-rose-tint flex items-center gap-2 border-b border-border"
                     >
                       <Crosshair className={`w-3.5 h-3.5 ${isLocating ? 'animate-spin' : ''}`} />
                       <span>{isLocating ? 'Locating device...' : 'Use current location'}</span>
@@ -215,9 +230,9 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
                           setShowOriginDropdown(false);
                           setLocationError(null);
                         }}
-                        className="w-full text-left px-3 py-2 text-xs hover:bg-paper border-b border-border/50 last:border-b-0"
+                        className="w-full text-left px-3 py-2 text-xs hover:bg-canvas border-b border-border/50 last:border-b-0"
                       >
-                        <div className="font-semibold text-ink">{place.name}</div>
+                        <div className="font-semibold text-bordeaux">{place.name}</div>
                         <div className="text-[11px] text-text-secondary">{place.detail}</div>
                       </button>
                     ))}
@@ -236,12 +251,12 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
                   }}
                   onFocus={() => setShowDestDropdown(true)}
                   placeholder="Where would you like to walk?..."
-                  className="w-full text-xs font-medium bg-paper rounded-lg px-3 py-2 border border-border focus:border-peacock focus-ring-peacock text-ink placeholder:text-text-muted"
+                  className="w-full text-xs font-medium bg-canvas rounded-xl px-3 py-2.5 border border-border focus:border-rose-gold focus-ring-bordeaux text-bordeaux placeholder:text-text-muted transition-colors"
                   aria-label="Destination location"
                 />
 
                 {showDestDropdown && (
-                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-border rounded-lg shadow-e2 z-30 max-h-48 overflow-y-auto">
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-border-gold rounded-xl shadow-atelier z-30 max-h-48 overflow-y-auto">
                     {PRESET_PLACES.map((place) => (
                       <button
                         key={place.id}
@@ -251,9 +266,9 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
                           setDestInput(place.name);
                           setShowDestDropdown(false);
                         }}
-                        className="w-full text-left px-3 py-2 text-xs hover:bg-paper border-b border-border/50 last:border-b-0"
+                        className="w-full text-left px-3 py-2 text-xs hover:bg-canvas border-b border-border/50 last:border-b-0"
                       >
-                        <div className="font-semibold text-ink">{place.name}</div>
+                        <div className="font-semibold text-bordeaux">{place.name}</div>
                         <div className="text-[11px] text-text-secondary">{place.detail}</div>
                       </button>
                     ))}
@@ -267,7 +282,7 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
               <button
                 type="button"
                 onClick={handleSwapPoints}
-                className="p-2 rounded-lg bg-paper hover:bg-raised text-text-secondary hover:text-ink border border-border transition-colors focus-ring-peacock"
+                className="p-2.5 rounded-xl bg-canvas hover:bg-canvas-subtle text-text-secondary hover:text-bordeaux border border-border transition-colors focus-ring-bordeaux"
                 title="Swap starting point and destination"
                 aria-label="Swap starting point and destination"
               >
@@ -278,7 +293,7 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
 
           {/* Location Error Notice if GPS failed */}
           {locationError && (
-            <div className="mt-2.5 p-2 rounded bg-danger-tint border border-danger/30 text-danger text-[11px] flex items-start gap-1.5 font-medium">
+            <div className="mt-2.5 p-2 rounded-lg bg-danger-tint border border-danger/30 text-danger text-[11px] flex items-start gap-1.5 font-medium">
               <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
               <span>{locationError}</span>
             </div>
@@ -290,12 +305,12 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
           <button
             type="button"
             onClick={() => setShowPreferences(!showPreferences)}
-            className="flex items-center gap-1.5 text-xs font-semibold text-text-secondary hover:text-ink focus-ring-peacock rounded px-1.5 py-1"
+            className="flex items-center gap-1.5 text-xs font-semibold text-text-secondary hover:text-bordeaux focus-ring-bordeaux rounded-lg px-2 py-1"
           >
-            <SlidersHorizontal className="w-3.5 h-3.5 text-peacock" />
+            <SlidersHorizontal className="w-3.5 h-3.5 text-champagne" />
             <span>Priorities & Accessibility</span>
             {activePrioritiesCount > 0 && (
-              <span className="w-4 h-4 rounded-full bg-peacock-tint text-peacock-dark text-[10px] font-bold flex items-center justify-center">
+              <span className="w-4 h-4 rounded-full bg-champagne-tint text-champagne-dark text-[10px] font-bold flex items-center justify-center">
                 {activePrioritiesCount}
               </span>
             )}
@@ -307,67 +322,75 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
             type="button"
             onClick={onFetchRoutes}
             disabled={isLoadingRoutes || !origin || !destination}
-            className="btn-ink px-4 py-2 text-xs font-bold shadow-e1 disabled:opacity-50 flex items-center gap-1.5"
+            className="btn-bordeaux px-4 py-2.5 text-xs font-bold shadow-md disabled:opacity-50 flex items-center gap-2"
           >
-            <Navigation className="w-3.5 h-3.5 text-peacock-tint" />
-            <span>{isLoadingRoutes ? 'Calculating...' : 'Find routes'}</span>
+            <Navigation className="w-3.5 h-3.5 text-champagne" />
+            <span>{isLoadingRoutes ? 'Evaluating...' : 'Find routes'}</span>
           </button>
         </div>
 
         {/* Collapsible Priorities Panel */}
         {showPreferences && (
-          <div className="mt-3 p-3 rounded-lg bg-raised border border-border text-xs space-y-2 animate-fade-in">
-            <div className="font-semibold text-ink text-[11px] uppercase tracking-wider mb-1">
+          <div className="mt-3 p-3.5 rounded-xl bg-surface-raised border border-border text-xs space-y-2 animate-fade-in">
+            <div className="font-semibold text-bordeaux text-[11px] uppercase tracking-wider mb-1">
               Active Routing Factors
             </div>
             
             <label className="flex items-center justify-between cursor-pointer">
-              <span className="text-text font-medium">Better street lighting</span>
+              <span className="text-bordeaux font-medium">Better street lighting</span>
               <input
                 type="checkbox"
                 checked={preferences.preferWellLit}
                 onChange={(e) => onUpdatePreferences({ ...preferences, preferWellLit: e.target.checked })}
-                className="rounded border-border text-peacock focus:ring-peacock h-4 w-4"
+                className="rounded border-border text-rose-gold focus:ring-rose-gold h-4 w-4"
               />
             </label>
 
             <label className="flex items-center justify-between cursor-pointer">
-              <span className="text-text font-medium">Busier streets & transit access</span>
+              <span className="text-bordeaux font-medium">Busier streets & transit access</span>
               <input
                 type="checkbox"
                 checked={preferences.preferPublicTransport}
                 onChange={(e) => onUpdatePreferences({ ...preferences, preferPublicTransport: e.target.checked })}
-                className="rounded border-border text-peacock focus:ring-peacock h-4 w-4"
+                className="rounded border-border text-rose-gold focus:ring-rose-gold h-4 w-4"
               />
             </label>
 
             <label className="flex items-center justify-between cursor-pointer">
-              <span className="text-text font-medium">Proximity to open essential facilities</span>
+              <span className="text-bordeaux font-medium">Proximity to open essential facilities</span>
               <input
                 type="checkbox"
                 checked={preferences.preferEssentialFacilities}
                 onChange={(e) => onUpdatePreferences({ ...preferences, preferEssentialFacilities: e.target.checked })}
-                className="rounded border-border text-peacock focus:ring-peacock h-4 w-4"
+                className="rounded border-border text-rose-gold focus:ring-rose-gold h-4 w-4"
               />
             </label>
 
             <label className="flex items-center justify-between cursor-pointer">
-              <span className="text-text font-medium">Step-free wheelchair accessibility</span>
+              <span className="text-bordeaux font-medium">Step-free wheelchair accessibility</span>
               <input
                 type="checkbox"
                 checked={preferences.wheelchairAccessible}
                 onChange={(e) => onUpdatePreferences({ ...preferences, wheelchairAccessible: e.target.checked })}
-                className="rounded border-border text-peacock focus:ring-peacock h-4 w-4"
+                className="rounded border-border text-rose-gold focus:ring-rose-gold h-4 w-4"
               />
             </label>
           </div>
         )}
       </div>
 
+      {/* Interactive 3D Spatial Journey Orb */}
+      <div className="px-4 py-3 bg-canvas/60">
+        <SpatialJourneyOrb
+          routePerspective={routes[selectedRouteIndex]?.perspective ? `${routes[selectedRouteIndex].perspective.replace('_', ' ').toUpperCase()} CORRIDOR` : 'CONNAUGHT ATELIER AXIS'}
+          isEvaluating={isLoadingRoutes}
+        />
+      </div>
+
       {/* Route Results Section */}
       <div className="p-4 sm:p-5 space-y-3">
         <div className="flex items-center justify-between text-xs text-text-secondary px-0.5">
-          <span className="font-semibold uppercase tracking-wider text-[11px] text-text-secondary">
+          <span className="font-semibold uppercase tracking-wider text-[11px] text-text-secondary font-editorial">
             {routes.length} Route Alternatives
           </span>
           <span className="text-[11px]">Sorted by travel context</span>
@@ -377,9 +400,9 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
           <div className="space-y-3 py-4">
             {[1, 2, 3].map((i) => (
               <div key={i} className="surface-card p-4 space-y-3 animate-pulse">
-                <div className="h-4 bg-raised rounded w-1/3" />
-                <div className="h-6 bg-raised rounded w-2/3" />
-                <div className="h-3 bg-raised rounded w-full" />
+                <div className="h-4 bg-surface-raised rounded w-1/3" />
+                <div className="h-6 bg-surface-raised rounded w-2/3" />
+                <div className="h-3 bg-surface-raised rounded w-full" />
               </div>
             ))}
           </div>
@@ -397,9 +420,9 @@ export const RoutePlanner: React.FC<RoutePlannerProps> = ({
             ))}
           </div>
         ) : (
-          <div className="surface-card p-6 text-center text-text-secondary space-y-2">
+          <div className="surface-card p-6 text-center text-text-secondary space-y-2 border border-border">
             <MapPin className="w-8 h-8 text-border-strong mx-auto" />
-            <p className="text-sm font-semibold text-ink">No routes computed yet</p>
+            <p className="text-sm font-semibold text-bordeaux font-editorial">No routes computed yet</p>
             <p className="text-xs">Select your origin and destination above to compare transparent walking corridors.</p>
           </div>
         )}

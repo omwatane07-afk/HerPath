@@ -14,8 +14,6 @@ import {
   Users,
   Clock,
   UserPlus,
-  Shield,
-  CheckCircle,
 } from 'lucide-react';
 
 interface FamilyJourneyModalProps {
@@ -49,7 +47,7 @@ export const FamilyJourneyModal: React.FC<FamilyJourneyModalProps> = ({
   const [durationMinutes, setDurationMinutes] = useState<number>(
     selectedRoute ? Math.ceil(selectedRoute.durationSeconds / 60) + 5 : 25
   );
-  const [checkInInterval, setCheckInInterval] = useState<number>(10);
+  const [intervalMinutes, setIntervalMinutes] = useState<number>(10);
   const [showAddContact, setShowAddContact] = useState(false);
   const [newContactName, setNewContactName] = useState('');
   const [newContactPhone, setNewContactPhone] = useState('');
@@ -57,44 +55,44 @@ export const FamilyJourneyModal: React.FC<FamilyJourneyModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleAddNewContact = (e: React.FormEvent) => {
+  const handleCreateContact = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newContactName.trim() || !newContactPhone.trim()) return;
 
-    const contact: TrustedContact = {
-      id: generateId('tc'),
+    const newContact: TrustedContact = {
+      id: generateId('contact'),
       name: newContactName.trim(),
       phone: newContactPhone.trim(),
       relation: newContactRelation,
-      isEmergencyAlertContact: true,
+      isEmergencyAlertContact: false,
     };
-    onAddContact(contact);
-    setSelectedContactId(contact.id);
+
+    onAddContact(newContact);
+    setSelectedContactId(newContact.id);
     setShowAddContact(false);
     setNewContactName('');
     setNewContactPhone('');
   };
 
   const handleStart = () => {
-    if (!origin || !destination) return;
+    if (!origin || !destination || !selectedContactId) return;
 
-    const selectedContact = trustedContacts.find((c) => c.id === selectedContactId);
+    const contact = trustedContacts.find((c) => c.id === selectedContactId);
     const now = new Date();
-    const eta = new Date(now.getTime() + durationMinutes * 60 * 1000).toISOString();
-    const nextCheckIn = new Date(now.getTime() + checkInInterval * 60 * 1000).toISOString();
+    const nextCheckIn = new Date(now.getTime() + intervalMinutes * 60 * 1000).toISOString();
 
     const journey: JourneySession = {
-      id: generateId('jrn'),
-      originName: originName || 'Current Location',
+      id: generateId('journey'),
       originCoords: origin,
-      destinationName: destinationName || 'Selected Destination',
       destCoords: destination,
-      routeGeometry: selectedRoute ? selectedRoute.coordinates : [[origin.lat, origin.lng], [destination.lat, destination.lng]],
-      estimatedArrival: eta,
-      checkInIntervalMinutes: checkInInterval,
+      originName: originName || 'Starting Point',
+      destinationName: destinationName || 'Destination Point',
+      routeGeometry: selectedRoute?.coordinates || [[origin.lat, origin.lng], [destination.lat, destination.lng]],
+      estimatedArrival: new Date(now.getTime() + durationMinutes * 60 * 1000).toISOString(),
+      checkInIntervalMinutes: intervalMinutes,
       status: 'in_progress',
-      trustedContact: selectedContact,
-      shareToken: `herpath_share_${Math.random().toString(36).substring(2, 10)}`,
+      trustedContact: contact,
+      shareToken: Math.random().toString(36).substring(2, 9),
       currentCoords: origin,
       lastCheckInAt: now.toISOString(),
       nextCheckInDueAt: nextCheckIn,
@@ -105,7 +103,7 @@ export const FamilyJourneyModal: React.FC<FamilyJourneyModalProps> = ({
           timestamp: now.toISOString(),
           coordinates: origin,
           status: 'ok',
-          note: 'Journey started from origin point',
+          note: 'Journey commenced',
         },
       ],
       isDemoMode: true,
@@ -117,27 +115,27 @@ export const FamilyJourneyModal: React.FC<FamilyJourneyModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-ink/40 backdrop-blur-sm animate-fade-in"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-bordeaux/40 backdrop-blur-sm animate-fade-in"
       role="dialog"
       aria-modal="true"
       aria-labelledby="journey-modal-title"
     >
-      <div className="surface-card max-w-lg w-full p-6 text-ink shadow-e3 relative overflow-hidden">
+      <div className="surface-card max-w-lg w-full p-6 text-bordeaux shadow-atelier border border-border-gold/60 rounded-atelier relative overflow-hidden bg-white">
         {/* Header */}
         <div className="flex items-start justify-between pb-4 border-b border-border">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs font-semibold uppercase tracking-wider text-peacock-dark">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-rose-gold font-editorial">
                 Consent-Based Companion
               </span>
             </div>
-            <h3 id="journey-modal-title" className="font-serif text-xl font-bold text-ink">
+            <h3 id="journey-modal-title" className="font-editorial text-xl font-bold text-bordeaux">
               Start Family Journey
             </h3>
           </div>
           <button
             onClick={onClose}
-            className="text-text-secondary hover:text-ink p-2 rounded-lg bg-paper hover:bg-raised transition-colors focus-ring-peacock"
+            className="text-text-secondary hover:text-bordeaux p-2 rounded-xl bg-canvas hover:bg-canvas-subtle transition-colors focus-ring-bordeaux"
             aria-label="Close dialog"
           >
             <X className="w-5 h-5" />
@@ -146,17 +144,17 @@ export const FamilyJourneyModal: React.FC<FamilyJourneyModalProps> = ({
 
         <div className="space-y-4 my-4 max-h-[70vh] overflow-y-auto pr-1">
           {/* Trip Summary Card */}
-          <div className="p-3.5 rounded-lg bg-raised border border-border text-xs space-y-1">
-            <div className="font-semibold text-ink">Selected Trip</div>
+          <div className="p-3.5 rounded-xl bg-surface-raised border border-border text-xs space-y-1">
+            <div className="font-semibold text-bordeaux font-editorial">Selected Trip</div>
             <div className="text-text-secondary">
-              <span className="font-medium text-ink">Destination:</span> {destinationName || 'Destination Point'}
+              <span className="font-medium text-bordeaux">Destination:</span> {destinationName || 'Destination Point'}
             </div>
             <div className="text-text-secondary">
-              <span className="font-medium text-ink">Origin:</span> {originName || 'Starting Point'}
+              <span className="font-medium text-bordeaux">Origin:</span> {originName || 'Starting Point'}
             </div>
             {selectedRoute && (
               <div className="text-text-secondary">
-                <span className="font-medium text-ink">Route perspective:</span> {selectedRoute.name} ({Math.round(selectedRoute.durationSeconds / 60)} min)
+                <span className="font-medium text-bordeaux">Route perspective:</span> {selectedRoute.name} ({Math.round(selectedRoute.durationSeconds / 60)} min)
               </div>
             )}
           </div>
@@ -164,13 +162,13 @@ export const FamilyJourneyModal: React.FC<FamilyJourneyModalProps> = ({
           {/* Trusted Contact Picker */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="text-xs font-semibold text-ink">
+              <label className="text-xs font-semibold text-bordeaux font-editorial">
                 Share With Trusted Contact
               </label>
               <button
                 type="button"
                 onClick={() => setShowAddContact(!showAddContact)}
-                className="text-peacock-dark hover:text-ink text-xs font-semibold flex items-center gap-1"
+                className="text-rose-gold hover:text-bordeaux text-xs font-semibold flex items-center gap-1"
               >
                 <UserPlus className="w-3.5 h-3.5" />
                 <span>{showAddContact ? 'Cancel' : 'Add New Contact'}</span>
@@ -178,66 +176,64 @@ export const FamilyJourneyModal: React.FC<FamilyJourneyModalProps> = ({
             </div>
 
             {showAddContact ? (
-              <form onSubmit={handleAddNewContact} className="p-3.5 rounded-lg bg-paper border border-border space-y-2.5">
-                <div className="font-serif font-bold text-xs text-ink">New Trusted Contact</div>
-                <div>
+              <form onSubmit={handleCreateContact} className="p-3.5 rounded-xl bg-canvas border border-border space-y-3">
+                <div className="font-semibold text-xs text-bordeaux font-editorial">New Trusted Contact</div>
+                <div className="grid grid-cols-2 gap-2">
                   <input
                     type="text"
                     value={newContactName}
                     onChange={(e) => setNewContactName(e.target.value)}
-                    placeholder="Full name (e.g. Maya Sharma)"
-                    className="w-full text-xs bg-white rounded-md p-2 border border-border text-ink"
+                    placeholder="Contact Name"
+                    className="text-xs bg-white rounded-lg p-2 border border-border text-bordeaux"
                     required
                   />
-                </div>
-                <div className="grid grid-cols-2 gap-2">
                   <input
                     type="tel"
                     value={newContactPhone}
                     onChange={(e) => setNewContactPhone(e.target.value)}
-                    placeholder="Phone number (+91...)"
-                    className="w-full text-xs bg-white rounded-md p-2 border border-border text-ink"
+                    placeholder="Phone (e.g. +91 98765...)"
+                    className="text-xs bg-white rounded-lg p-2 border border-border text-bordeaux"
                     required
                   />
+                </div>
+                <div className="flex items-center justify-between">
                   <select
                     value={newContactRelation}
                     onChange={(e) => setNewContactRelation(e.target.value)}
-                    className="w-full text-xs bg-white rounded-md p-2 border border-border text-ink"
+                    className="text-xs bg-white rounded-lg p-1.5 border border-border text-bordeaux"
                   >
-                    <option value="Mother">Mother</option>
-                    <option value="Father">Father</option>
-                    <option value="Sister">Sister</option>
-                    <option value="Brother">Brother</option>
-                    <option value="Partner">Partner</option>
-                    <option value="Friend">Friend</option>
+                    <option value="Family">Family Member</option>
+                    <option value="Friend">Trusted Friend</option>
                     <option value="Colleague">Colleague</option>
+                    <option value="Partner">Partner</option>
                   </select>
+                  <button type="submit" className="btn-bordeaux text-xs py-1.5 px-3">
+                    Save Contact
+                  </button>
                 </div>
-                <button type="submit" className="btn-ink py-1.5 px-3 text-xs w-full">
-                  Save Contact
-                </button>
               </form>
             ) : (
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 {trustedContacts.map((contact) => (
                   <label
                     key={contact.id}
-                    className={`flex items-center justify-between p-2.5 rounded-lg border cursor-pointer transition-colors ${
+                    className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${
                       selectedContactId === contact.id
-                        ? 'bg-peacock-tint border-peacock'
-                        : 'bg-white border-border hover:bg-paper'
+                        ? 'border-2 border-rose-gold bg-rose-tint shadow-sm'
+                        : 'border-border bg-white hover:bg-canvas'
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
                       <input
                         type="radio"
-                        name="trustedContact"
+                        name="selectedContact"
+                        value={contact.id}
                         checked={selectedContactId === contact.id}
                         onChange={() => setSelectedContactId(contact.id)}
-                        className="text-peacock focus:ring-peacock h-4 w-4"
+                        className="text-rose-gold focus:ring-rose-gold h-4 w-4"
                       />
                       <div>
-                        <div className="text-xs font-bold text-ink">{contact.name}</div>
+                        <div className="font-bold text-xs text-bordeaux">{contact.name}</div>
                         <div className="text-[11px] text-text-secondary">
                           {contact.relation} · {contact.phone}
                         </div>
@@ -249,16 +245,16 @@ export const FamilyJourneyModal: React.FC<FamilyJourneyModalProps> = ({
             )}
           </div>
 
-          {/* Check-In Frequency & Estimated Duration */}
-          <div className="grid grid-cols-2 gap-3">
+          {/* Check-in Interval */}
+          <div className="grid grid-cols-2 gap-3 pt-2">
             <div>
-              <label className="block text-xs font-semibold text-ink mb-1">
+              <label className="block text-xs font-semibold text-bordeaux mb-1">
                 Check-in Frequency
               </label>
               <select
-                value={checkInInterval}
-                onChange={(e) => setCheckInInterval(Number(e.target.value))}
-                className="w-full text-xs bg-paper rounded-lg p-2.5 border border-border text-ink font-medium"
+                value={intervalMinutes}
+                onChange={(e) => setIntervalMinutes(Number(e.target.value))}
+                className="w-full text-xs bg-canvas rounded-xl p-2.5 border border-border text-bordeaux font-medium"
               >
                 <option value={5}>Every 5 minutes</option>
                 <option value={10}>Every 10 minutes</option>
@@ -268,13 +264,13 @@ export const FamilyJourneyModal: React.FC<FamilyJourneyModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-ink mb-1">
+              <label className="block text-xs font-semibold text-bordeaux mb-1">
                 Trip Duration (ETA)
               </label>
               <select
                 value={durationMinutes}
                 onChange={(e) => setDurationMinutes(Number(e.target.value))}
-                className="w-full text-xs bg-paper rounded-lg p-2.5 border border-border text-ink font-medium"
+                className="w-full text-xs bg-canvas rounded-xl p-2.5 border border-border text-bordeaux font-medium"
               >
                 <option value={15}>15 minutes</option>
                 <option value={25}>25 minutes</option>
@@ -286,8 +282,8 @@ export const FamilyJourneyModal: React.FC<FamilyJourneyModalProps> = ({
           </div>
 
           {/* Honest Demo Mode Disclaimer */}
-          <div className="p-3 rounded-lg bg-paper border border-border text-[11px] text-text-secondary leading-relaxed">
-            <strong className="text-ink font-semibold">Evaluation Environment Notice:</strong> Journey tracking is held in your local browser state. In a production release, periodic check-ins trigger automated SMS/push broadcasts to your selected contact.
+          <div className="p-3 rounded-xl bg-canvas border border-border text-[11px] text-text-secondary leading-relaxed">
+            <strong className="text-bordeaux font-semibold">Evaluation Environment Notice:</strong> Journey tracking is held in your local browser state. In a production release, periodic check-ins trigger automated SMS/push broadcasts to your selected contact.
           </div>
         </div>
 
@@ -305,9 +301,9 @@ export const FamilyJourneyModal: React.FC<FamilyJourneyModalProps> = ({
             type="button"
             onClick={handleStart}
             disabled={!origin || !destination || !selectedContactId}
-            className="btn-ink py-2 px-5 text-xs font-bold flex items-center gap-1.5 shadow-e1 disabled:opacity-50"
+            className="btn-bordeaux py-2 px-5 text-xs font-bold flex items-center gap-1.5 shadow-md disabled:opacity-50"
           >
-            <Compass className="w-3.5 h-3.5 text-peacock-tint" />
+            <Compass className="w-3.5 h-3.5 text-champagne" />
             <span>Begin Journey</span>
           </button>
         </div>

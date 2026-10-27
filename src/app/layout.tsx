@@ -1,19 +1,20 @@
 import type { Metadata, Viewport } from 'next';
-import { Source_Serif_4, Inter } from 'next/font/google';
+import { Playfair_Display, Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
 
-const sourceSerif = Source_Serif_4({
+const playfair = Playfair_Display({
   subsets: ['latin'],
-  weight: ['600', '700'],
-  variable: '--font-source-serif',
+  weight: ['400', '600', '700', '800'],
+  style: ['normal', 'italic'],
+  variable: '--font-serif-display',
   display: 'swap',
   fallback: ['Georgia', 'serif'],
 });
 
-const inter = Inter({
+const plusJakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
-  variable: '--font-inter',
+  variable: '--font-sans-ui',
   display: 'swap',
   fallback: ['system-ui', '-apple-system', 'sans-serif'],
 });
@@ -31,7 +32,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
-  themeColor: '#F8F4EC',
+  themeColor: '#FAF6F0',
 };
 
 export default function RootLayout({
@@ -40,8 +41,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${sourceSerif.variable} ${inter.variable}`}>
-      <body className="min-h-screen bg-paper text-ink flex flex-col font-sans antialiased selection:bg-peacock selection:text-white">
+    <html lang="en" className={`${playfair.variable} ${plusJakarta.variable}`}>
+      <body className="min-h-screen bg-canvas text-bordeaux flex flex-col font-sans antialiased selection:bg-rose-gold selection:text-white">
         {children}
       </body>
     </html>

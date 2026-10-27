@@ -4,14 +4,11 @@ import React, { useState, useEffect } from 'react';
 import { JourneySession, JourneyCheckIn } from '@/types';
 import { generateId } from '@/lib/utils';
 import {
-  Compass,
   CheckCircle,
   Clock,
   Share2,
   Check,
-  Navigation,
   Shield,
-  Square,
 } from 'lucide-react';
 
 interface ActiveJourneyBannerProps {
@@ -118,23 +115,23 @@ export const ActiveJourneyBanner: React.FC<ActiveJourneyBannerProps> = ({
   const secsRemaining = secondsRemaining % 60;
 
   return (
-    <div className="bg-white border-b border-border p-3 sm:px-6 text-ink shadow-e1 transition-all">
+    <div className="bg-white/95 backdrop-blur-md border-b border-border-gold/40 p-3 sm:px-6 text-bordeaux shadow-sm transition-all">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
         {/* Status & Destination */}
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-peacock-tint border border-peacock/30 flex items-center justify-center text-peacock shrink-0">
-            <Shield className="w-4 h-4 text-peacock" />
+          <div className="w-9 h-9 rounded-xl bg-rose-tint border border-rose-gold/30 flex items-center justify-center text-rose-gold shrink-0">
+            <Shield className="w-4 h-4 text-rose-gold" />
           </div>
 
           <div>
             <div className="flex items-center gap-2">
               <span
-                className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border ${
+                className={`text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full border ${
                   journey.status === 'check_in_due'
                     ? 'bg-caution-tint text-caution-dark border-caution/30'
                     : journey.status === 'arrived'
                     ? 'bg-verified-tint text-verified border-verified/30'
-                    : 'bg-paper text-ink border-border'
+                    : 'bg-canvas text-bordeaux border-border'
                 }`}
               >
                 {journey.status === 'check_in_due'
@@ -144,11 +141,11 @@ export const ActiveJourneyBanner: React.FC<ActiveJourneyBannerProps> = ({
                   : 'Journey Sharing Active'}
               </span>
               <span className="text-[11px] text-text-secondary">
-                Contact: <strong className="text-ink font-semibold">{journey.trustedContact?.name || 'Trusted Contact'}</strong>
+                Contact: <strong className="text-bordeaux font-semibold">{journey.trustedContact?.name || 'Trusted Contact'}</strong>
               </span>
             </div>
-            <h4 className="font-serif text-sm font-bold text-ink mt-0.5 flex items-center gap-1.5">
-              <span className="text-text-secondary font-normal font-sans">Destination:</span>
+            <h4 className="font-editorial text-base font-bold text-bordeaux mt-0.5 flex items-center gap-1.5">
+              <span className="text-text-secondary font-normal font-sans text-xs">Destination:</span>
               <span className="truncate max-w-xs">{journey.destinationName}</span>
             </h4>
           </div>
@@ -156,13 +153,13 @@ export const ActiveJourneyBanner: React.FC<ActiveJourneyBannerProps> = ({
 
         {/* Check-in Timer */}
         {journey.status !== 'arrived' && (
-          <div className="flex items-center gap-2 px-3 py-1 rounded-md bg-paper border border-border text-xs">
-            <Clock className="w-3.5 h-3.5 text-text-secondary" />
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-canvas border border-border text-xs">
+            <Clock className="w-3.5 h-3.5 text-champagne" />
             <div className="leading-tight">
               <span className="text-[10px] text-text-secondary uppercase tracking-wider block font-medium">
                 Next Check-In
               </span>
-              <span className="font-serif font-bold text-ink">
+              <span className="font-editorial font-bold text-bordeaux">
                 {minutesRemaining}:{secsRemaining < 10 ? `0${secsRemaining}` : secsRemaining}
               </span>
             </div>
@@ -176,16 +173,16 @@ export const ActiveJourneyBanner: React.FC<ActiveJourneyBannerProps> = ({
               <button
                 type="button"
                 onClick={handleCheckIn}
-                className="btn-ink py-1.5 px-3.5 text-xs font-semibold flex items-center gap-1.5 shadow-e1"
+                className="btn-bordeaux py-1.5 px-3.5 text-xs font-semibold flex items-center gap-1.5 shadow-sm"
               >
                 {showCheckInSuccess ? (
                   <>
-                    <Check className="w-3.5 h-3.5 text-peacock-tint" />
+                    <Check className="w-3.5 h-3.5 text-champagne" />
                     <span>Checked In!</span>
                   </>
                 ) : (
                   <>
-                    <CheckCircle className="w-3.5 h-3.5 text-peacock-tint" />
+                    <CheckCircle className="w-3.5 h-3.5 text-champagne" />
                     <span>I'm OK (Check-In)</span>
                   </>
                 )}
@@ -200,7 +197,7 @@ export const ActiveJourneyBanner: React.FC<ActiveJourneyBannerProps> = ({
               </button>
             </>
           ) : (
-            <div className="text-xs font-semibold text-verified bg-verified-tint px-3 py-1 rounded border border-verified/30">
+            <div className="text-xs font-semibold text-verified bg-verified-tint px-3 py-1 rounded-full border border-verified/30">
               Trip completed safely
             </div>
           )}
@@ -211,7 +208,7 @@ export const ActiveJourneyBanner: React.FC<ActiveJourneyBannerProps> = ({
             className="btn-secondary py-1.5 px-3 text-xs flex items-center gap-1.5"
             title="Copy share link (stored locally on this device)"
           >
-            {copied ? <Check className="w-3.5 h-3.5 text-peacock" /> : <Share2 className="w-3.5 h-3.5" />}
+            {copied ? <Check className="w-3.5 h-3.5 text-rose-gold" /> : <Share2 className="w-3.5 h-3.5" />}
             <span className="hidden sm:inline">{copied ? 'Link Copied' : 'Share Link'}</span>
           </button>
 
@@ -219,7 +216,7 @@ export const ActiveJourneyBanner: React.FC<ActiveJourneyBannerProps> = ({
           <button
             type="button"
             onClick={onEndJourney}
-            className="py-1.5 px-3 rounded-lg bg-white border border-danger/40 hover:bg-danger-tint text-xs font-bold text-danger transition-colors focus-ring-peacock"
+            className="py-1.5 px-3 rounded-xl bg-white border border-danger/40 hover:bg-danger-tint text-xs font-bold text-danger transition-colors focus-ring-bordeaux"
             title="Immediately stop sharing location and trip status"
           >
             <span>Stop sharing</span>

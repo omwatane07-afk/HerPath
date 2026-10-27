@@ -6,7 +6,6 @@ import {
   Clock,
   Lightbulb,
   Building2,
-  Bus,
   AlertTriangle,
   ChevronRight,
   ShieldCheck,
@@ -54,10 +53,10 @@ export const RouteCard: React.FC<RouteCardProps> = ({
   return (
     <article
       onClick={onSelect}
-      className={`p-4 rounded-card border transition-all cursor-pointer relative select-none focus-ring-peacock ${
+      className={`p-4 rounded-card border transition-all cursor-pointer relative select-none focus-ring-bordeaux ${
         isSelected
-          ? 'bg-peacock-tint border-2 border-peacock shadow-e1'
-          : 'bg-white border-border hover:border-border-strong card-interactive shadow-e1'
+          ? 'bg-rose-tint border-2 border-rose-gold shadow-md'
+          : 'bg-white border-border hover:border-champagne card-interactive shadow-e1'
       }`}
       aria-selected={isSelected}
       tabIndex={0}
@@ -75,13 +74,13 @@ export const RouteCard: React.FC<RouteCardProps> = ({
             <span
               className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold ${
                 isSelected
-                  ? 'bg-white text-peacock-dark border border-peacock/30 shadow-e1'
-                  : 'bg-paper text-ink border border-border'
+                  ? 'bg-white text-rose-gold border border-rose-gold/40 shadow-sm'
+                  : 'bg-canvas text-bordeaux border border-border'
               }`}
             >
-              {route.perspective === 'better_supported' && <ShieldCheck className="w-3.5 h-3.5 text-peacock" />}
-              {route.perspective === 'fastest' && <Clock className="w-3.5 h-3.5 text-ink" />}
-              {route.perspective === 'balanced' && <CheckCircle2 className="w-3.5 h-3.5 text-ink" />}
+              {route.perspective === 'better_supported' && <ShieldCheck className="w-3.5 h-3.5 text-champagne-dark" />}
+              {route.perspective === 'fastest' && <Clock className="w-3.5 h-3.5 text-bordeaux" />}
+              {route.perspective === 'balanced' && <CheckCircle2 className="w-3.5 h-3.5 text-bordeaux" />}
               <span>{getPerspectiveLabel()}</span>
             </span>
 
@@ -89,7 +88,7 @@ export const RouteCard: React.FC<RouteCardProps> = ({
             <span
               className={`text-[11px] font-medium px-2 py-0.5 rounded border ${
                 isSynthetic
-                  ? 'bg-paper text-text-secondary border-border border-dashed'
+                  ? 'bg-canvas text-text-secondary border-border border-dashed'
                   : 'bg-verified-tint text-verified border-verified/30'
               }`}
               title={isSynthetic ? 'Synthesized route corridor based on street layout' : 'Navigable geometry verified by OpenStreetMap OSRM'}
@@ -98,16 +97,16 @@ export const RouteCard: React.FC<RouteCardProps> = ({
             </span>
           </div>
 
-          <h4 className="font-serif text-lg font-bold text-ink mt-1.5 leading-snug">
+          <h4 className="font-editorial text-lg font-bold text-bordeaux mt-1.5 leading-snug">
             {route.summary || route.name}
           </h4>
         </div>
 
         {/* Large ETA Figure */}
         <div className="text-right shrink-0">
-          <div className="font-serif text-3xl font-bold text-ink leading-none">
+          <div className="font-editorial text-3xl font-bold italic text-bordeaux leading-none">
             {minutes}
-            <span className="font-sans text-xs font-medium text-text-secondary ml-1">min</span>
+            <span className="font-sans text-xs not-italic font-medium text-text-secondary ml-1">min</span>
           </div>
           <div className="text-[12px] text-text-secondary mt-1 font-medium">
             {distanceKm} km · ETA {arrivalTime}
@@ -122,7 +121,7 @@ export const RouteCard: React.FC<RouteCardProps> = ({
           <span>
             {route.verifiedLightCount > 0 ? (
               <>
-                <strong className="text-ink font-semibold">{route.verifiedLightCount} working streetlights</strong> documented along corridor
+                <strong className="text-bordeaux font-semibold">{route.verifiedLightCount} working streetlights</strong> documented along corridor
                 {route.outageReportCount > 0 && (
                   <span className="text-danger font-semibold"> ({route.outageReportCount} reported out)</span>
                 )}
@@ -134,11 +133,11 @@ export const RouteCard: React.FC<RouteCardProps> = ({
         </div>
 
         <div className="flex items-center gap-2">
-          <Building2 className="w-3.5 h-3.5 text-peacock shrink-0" />
+          <Building2 className="w-3.5 h-3.5 text-rose-gold shrink-0" />
           <span>
             {route.nearbyFacilityCount > 0 ? (
               <>
-                <strong className="text-ink font-semibold">{route.nearbyFacilityCount} essential facilities</strong> (pharmacies, restrooms, police help desks)
+                <strong className="text-bordeaux font-semibold">{route.nearbyFacilityCount} essential facilities</strong> (pharmacies, restrooms, police desks)
               </>
             ) : (
               <span className="text-text-muted">No open facilities mapped directly on route</span>
@@ -162,7 +161,7 @@ export const RouteCard: React.FC<RouteCardProps> = ({
             e.stopPropagation();
             onOpenDetails();
           }}
-          className="text-peacock-dark hover:text-ink font-semibold flex items-center gap-1 focus-ring-peacock rounded py-1 px-1.5 -ml-1.5 transition-colors"
+          className="text-rose-gold hover:text-bordeaux font-semibold flex items-center gap-1 focus-ring-bordeaux rounded-lg py-1 px-1.5 -ml-1.5 transition-colors"
         >
           <span>Why this route?</span>
           <ChevronRight className="w-3.5 h-3.5" />
@@ -176,16 +175,16 @@ export const RouteCard: React.FC<RouteCardProps> = ({
                 e.stopPropagation();
                 onStartTrip();
               }}
-              className="btn-ink px-3 py-1.5 text-xs flex items-center gap-1.5 shadow-e1"
+              className="btn-bordeaux px-3 py-1.5 text-xs flex items-center gap-1.5 shadow-sm"
             >
-              <Navigation className="w-3 h-3 text-peacock-tint" />
+              <Navigation className="w-3 h-3 text-champagne" />
               <span>Start Trip</span>
             </button>
           )}
 
           <span className="text-[11px] font-medium text-text-secondary">
             {isSelected ? (
-              <span className="text-peacock-dark font-bold">Selected</span>
+              <span className="text-rose-gold font-bold">Selected</span>
             ) : (
               <span>Select route</span>
             )}

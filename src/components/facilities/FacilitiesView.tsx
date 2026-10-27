@@ -10,7 +10,6 @@ import {
   Clock,
   Phone,
   Search,
-  CheckCircle,
   Accessibility,
   UserCheck,
   Bookmark,
@@ -68,12 +67,12 @@ export const FacilitiesView: React.FC<FacilitiesViewProps> = ({
   });
 
   return (
-    <div className="flex flex-col h-full bg-paper text-ink overflow-hidden w-full">
+    <div className="flex flex-col h-full bg-canvas text-bordeaux overflow-hidden w-full">
       {/* Header */}
-      <div className="p-4 sm:p-5 border-b border-border bg-white shadow-e1">
-        <h2 className="font-serif text-xl font-bold text-ink">Essential Facilities</h2>
+      <div className="p-4 sm:p-5 border-b border-border bg-white shadow-sm">
+        <h2 className="font-editorial text-xl font-bold text-bordeaux">Essential Facilities</h2>
         <p className="text-xs text-text-secondary mt-0.5 leading-relaxed">
-          Curated directory of women’s restrooms, pharmacies, and 24/7 assistance points.
+          Curated directory of verified women’s restrooms, pharmacies, and 24/7 assistance points.
         </p>
 
         {/* Search Input */}
@@ -83,10 +82,10 @@ export const FacilitiesView: React.FC<FacilitiesViewProps> = ({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search facility name, address, or service..."
-            className="w-full py-2 pl-9 pr-3 text-xs rounded-lg bg-paper border border-border focus:border-peacock focus-ring-peacock text-ink placeholder:text-text-muted font-medium"
+            className="w-full py-2.5 pl-9 pr-3 text-xs rounded-xl bg-canvas border border-border focus:border-rose-gold focus-ring-bordeaux text-bordeaux placeholder:text-text-muted font-medium transition-colors"
             aria-label="Search facilities"
           />
-          <Search className="w-4 h-4 text-text-secondary absolute left-3 top-2.5" />
+          <Search className="w-4 h-4 text-text-secondary absolute left-3 top-3" />
         </div>
 
         {/* Horizontally scrollable category filter row */}
@@ -95,10 +94,10 @@ export const FacilitiesView: React.FC<FacilitiesViewProps> = ({
             <button
               key={tab.id}
               onClick={() => setSelectedCategory(tab.id)}
-              className={`px-3 py-1.5 rounded-md whitespace-nowrap font-semibold transition-colors focus-ring-peacock ${
+              className={`px-3 py-1.5 rounded-xl whitespace-nowrap font-semibold transition-all focus-ring-bordeaux ${
                 selectedCategory === tab.id
-                  ? 'bg-ink text-white font-bold shadow-e1'
-                  : 'bg-paper text-text-secondary hover:text-ink hover:bg-raised border border-border'
+                  ? 'bg-bordeaux text-white font-bold shadow-sm'
+                  : 'bg-canvas text-text-secondary hover:text-bordeaux hover:bg-canvas-subtle border border-border'
               }`}
               role="tab"
               aria-selected={selectedCategory === tab.id}
@@ -110,21 +109,21 @@ export const FacilitiesView: React.FC<FacilitiesViewProps> = ({
 
         {/* Attribute toggles */}
         <div className="mt-2.5 flex items-center gap-3 pt-2 border-t border-border/70 text-xs">
-          <label className="flex items-center gap-1.5 cursor-pointer select-none text-text-secondary hover:text-ink">
+          <label className="flex items-center gap-1.5 cursor-pointer select-none text-text-secondary hover:text-bordeaux">
             <input
               type="checkbox"
               checked={accessibleOnly}
               onChange={(e) => setAccessibleOnly(e.target.checked)}
-              className="rounded border-border text-peacock focus:ring-peacock h-3.5 w-3.5"
+              className="rounded border-border text-rose-gold focus:ring-rose-gold h-3.5 w-3.5"
             />
             <span>Step-free access</span>
           </label>
-          <label className="flex items-center gap-1.5 cursor-pointer select-none text-text-secondary hover:text-ink">
+          <label className="flex items-center gap-1.5 cursor-pointer select-none text-text-secondary hover:text-bordeaux">
             <input
               type="checkbox"
               checked={femaleStaffOnly}
               onChange={(e) => setFemaleStaffOnly(e.target.checked)}
-              className="rounded border-border text-peacock focus:ring-peacock h-3.5 w-3.5"
+              className="rounded border-border text-rose-gold focus:ring-rose-gold h-3.5 w-3.5"
             />
             <span>Female staff on duty</span>
           </label>
@@ -134,7 +133,7 @@ export const FacilitiesView: React.FC<FacilitiesViewProps> = ({
       {/* Facility List */}
       <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3">
         <div className="flex items-center justify-between text-xs text-text-secondary px-0.5">
-          <span className="font-semibold uppercase tracking-wider text-[11px]">
+          <span className="font-semibold uppercase tracking-wider text-[11px] font-editorial">
             {filtered.length} Facilities Located
           </span>
           {currentLocation && (
@@ -143,9 +142,9 @@ export const FacilitiesView: React.FC<FacilitiesViewProps> = ({
         </div>
 
         {filtered.length === 0 ? (
-          <div className="surface-card p-6 text-center text-text-secondary space-y-1">
+          <div className="surface-card p-6 text-center text-text-secondary space-y-1 border border-border">
             <Building2 className="w-8 h-8 text-border-strong mx-auto" />
-            <p className="text-sm font-semibold text-ink">No facilities match your filter</p>
+            <p className="text-sm font-semibold text-bordeaux font-editorial">No facilities match your filter</p>
             <p className="text-xs">Try selecting a different category or clearing search terms.</p>
           </div>
         ) : (
@@ -158,13 +157,13 @@ export const FacilitiesView: React.FC<FacilitiesViewProps> = ({
             return (
               <article
                 key={fac.id}
-                className="surface-card p-4 space-y-2.5 transition-all card-interactive shadow-e1"
+                className="surface-card p-4 space-y-2.5 transition-all card-interactive shadow-e1 border border-border hover:border-champagne"
               >
                 {/* Header: Name, Distance, Verification */}
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <span className="text-[11px] font-semibold text-peacock-dark uppercase tracking-wider">
+                      <span className="text-[10px] font-bold text-rose-gold uppercase tracking-wider font-editorial">
                         {fac.category.replace(/_/g, ' ')}
                       </span>
                       {dist !== null && (
@@ -173,7 +172,7 @@ export const FacilitiesView: React.FC<FacilitiesViewProps> = ({
                         </span>
                       )}
                     </div>
-                    <h3 className="font-serif text-base font-bold text-ink leading-snug">
+                    <h3 className="font-editorial text-base font-bold text-bordeaux leading-snug">
                       {fac.name}
                     </h3>
                     <p className="text-xs text-text-secondary mt-0.5 line-clamp-1">
@@ -187,7 +186,7 @@ export const FacilitiesView: React.FC<FacilitiesViewProps> = ({
                 {/* Operating hours & phone if known */}
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-secondary">
                   <div className="flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-text-secondary" />
+                    <Clock className="w-3.5 h-3.5 text-champagne" />
                     <span>{fac.openingHours ? fac.openingHours : 'Hours not listed'}</span>
                   </div>
 
@@ -196,7 +195,7 @@ export const FacilitiesView: React.FC<FacilitiesViewProps> = ({
                       <Phone className="w-3.5 h-3.5 text-text-secondary" />
                       <a
                         href={`tel:${fac.phone.replace(/[^0-9+]/g, '')}`}
-                        className="hover:text-ink font-medium underline"
+                        className="hover:text-bordeaux font-medium underline"
                       >
                         {fac.phone}
                       </a>
@@ -207,13 +206,13 @@ export const FacilitiesView: React.FC<FacilitiesViewProps> = ({
                 {/* Maximum 2 Attribute Chips */}
                 <div className="flex flex-wrap gap-1.5 pt-1">
                   {fac.hasFemaleStaff && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-peacock-tint text-peacock-dark border border-peacock/25">
-                      <UserCheck className="w-3 h-3 text-peacock" />
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-rose-tint text-rose-gold border border-rose-gold/30">
+                      <UserCheck className="w-3 h-3 text-rose-gold" />
                       <span>Female Staff</span>
                     </span>
                   )}
                   {fac.isAccessible && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-raised text-text border border-border">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-surface-raised text-bordeaux border border-border">
                       <Accessibility className="w-3 h-3 text-text-secondary" />
                       <span>Step-Free Access</span>
                     </span>
@@ -225,19 +224,19 @@ export const FacilitiesView: React.FC<FacilitiesViewProps> = ({
                   <button
                     type="button"
                     onClick={() => onSetAsDestination(fac.coordinates, fac.name)}
-                    className="btn-ink py-2 px-3.5 text-xs font-semibold flex items-center gap-1.5 shadow-e1"
+                    className="btn-bordeaux py-2 px-3.5 text-xs font-semibold flex items-center gap-1.5 shadow-sm"
                   >
-                    <Navigation className="w-3 h-3 text-peacock-tint" />
+                    <Navigation className="w-3 h-3 text-champagne" />
                     <span>Get directions</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => toggleSave(fac.id)}
-                    className={`p-2 rounded-lg text-xs font-medium border transition-colors flex items-center gap-1.5 ${
+                    className={`py-1.5 px-3 rounded-xl text-xs font-medium border transition-colors flex items-center gap-1.5 ${
                       isSaved
-                        ? 'bg-peacock-tint text-peacock-dark border-peacock/30'
-                        : 'bg-paper text-text-secondary hover:text-ink hover:bg-raised border-border'
+                        ? 'bg-rose-tint text-rose-gold border-rose-gold/40'
+                        : 'bg-canvas text-text-secondary hover:text-bordeaux hover:bg-canvas-subtle border-border'
                     }`}
                     title={isSaved ? 'Saved to places' : 'Save place'}
                   >

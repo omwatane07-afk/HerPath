@@ -9,84 +9,123 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ink: {
-          DEFAULT: "#14213D",
-          hover: "#0D1629",
-          active: "#080E1A",
+        // Luxury Atelier Palette
+        bordeaux: {
+          DEFAULT: "#240D1E",
+          hover: "#180814",
+          dark: "#10050D",
+          tint: "#F5EFF2",
         },
-        peacock: {
-          DEFAULT: "#0E7C86",
-          dark: "#0B6169",
-          tint: "#DCEFF0",
-          hover: "#09626A",
+        velvet: {
+          DEFAULT: "#4A1E35",
+          hover: "#391428",
         },
-        clay: {
-          DEFAULT: "#D8A58E",
-          tint: "#F7ECE6",
+        "rose-gold": {
+          DEFAULT: "#C8415F",
+          hover: "#B0324E",
+          tint: "#FCEEF2",
         },
-        paper: {
-          DEFAULT: "#F8F4EC",
+        champagne: {
+          DEFAULT: "#D4A359",
+          hover: "#BF8A3D",
+          dark: "#9C6E2E",
+          tint: "#FDF8EE",
         },
-        raised: {
-          DEFAULT: "#F1EBDD",
+        canvas: {
+          DEFAULT: "#FAF6F0",
+          subtle: "#F3ECE1",
         },
         surface: {
           DEFAULT: "#FFFFFF",
-          paper: "#F8F4EC",
-          raised: "#F1EBDD",
+          card: "#FFFFFF",
+          raised: "#F8F3EC",
+          subtle: "#F3ECE1",
         },
         border: {
-          DEFAULT: "#E3DCCD",
-          strong: "#B9AF99",
+          DEFAULT: "#E8DFD7",
+          strong: "#C4B5A9",
+          gold: "#D4A359",
+          rose: "#E5CAD1",
         },
         text: {
-          DEFAULT: "#14213D",
-          secondary: "#55607A",
-          muted: "#6D6A63",
-          disabled: "#6D6A63",
+          DEFAULT: "#240D1E",
+          primary: "#240D1E",
+          secondary: "#6B5663",
+          muted: "#8A7783",
+          gold: "#9C6E2E",
+          disabled: "#A0929B",
         },
+        // Backward-compatible design token mappings
+        ink: {
+          DEFAULT: "#240D1E",
+          hover: "#180814",
+          active: "#10050D",
+        },
+        peacock: {
+          DEFAULT: "#C8415F",
+          dark: "#A32D48",
+          tint: "#FCEEF2",
+          hover: "#B0324E",
+        },
+        clay: {
+          DEFAULT: "#D4A359",
+          tint: "#FDF8EE",
+        },
+        paper: {
+          DEFAULT: "#FAF6F0",
+        },
+        raised: {
+          DEFAULT: "#F8F3EC",
+        },
+        // Semantic safety tokens
         emergency: {
-          DEFAULT: "#C41230",
-          hover: "#A80D27",
+          DEFAULT: "#C21428",
+          hover: "#A30F20",
+          tint: "#FDECEE",
         },
         danger: {
-          DEFAULT: "#A4161A",
-          tint: "#FBE9EA",
+          DEFAULT: "#9E1B24",
+          tint: "#FCEAEB",
         },
         caution: {
-          DEFAULT: "#B25E00",
-          dark: "#8A4800",
-          tint: "#FDF1E0",
+          DEFAULT: "#BA6A15",
+          dark: "#944F0B",
+          tint: "#FDF2E3",
         },
         verified: {
-          DEFAULT: "#1B6B4A",
-          tint: "#E4F2EB",
+          DEFAULT: "#1C6B48",
+          tint: "#E6F3EC",
         },
         info: {
-          DEFAULT: "#1D5FA8",
-          tint: "#EBF3FC",
+          DEFAULT: "#255EA8",
+          tint: "#EEF4FC",
         },
       },
       boxShadow: {
-        e1: "0 1px 2px rgba(20, 33, 61, 0.08)",
-        e2: "0 4px 12px rgba(20, 33, 61, 0.10)",
-        e3: "0 10px 24px rgba(20, 33, 61, 0.14)",
+        e1: "0 2px 8px rgba(36, 13, 30, 0.05)",
+        e2: "0 8px 24px rgba(36, 13, 30, 0.08)",
+        e3: "0 20px 48px -10px rgba(36, 13, 30, 0.14)",
+        atelier: "0 24px 60px -12px rgba(36, 13, 30, 0.16), 0 0 0 1px rgba(212, 163, 89, 0.15)",
+        "rose-glow": "0 0 20px rgba(200, 65, 95, 0.35)",
+        "gold-glow": "0 0 15px rgba(212, 163, 89, 0.30)",
       },
       borderRadius: {
         sm: "8px",
         md: "12px",
-        card: "16px",
-        sheet: "20px",
-        modal: "20px",
+        card: "20px",
+        atelier: "24px",
+        sheet: "28px",
+        modal: "28px",
       },
       fontFamily: {
-        serif: ["var(--font-source-serif)", "Source Serif 4", "Georgia", "serif"],
-        sans: ["var(--font-inter)", "Inter", "system-ui", "-apple-system", "sans-serif"],
+        serif: ["var(--font-serif-display)", "Playfair Display", "Georgia", "serif"],
+        editorial: ["var(--font-serif-display)", "Playfair Display", "Georgia", "serif"],
+        sans: ["var(--font-sans-ui)", "Plus Jakarta Sans", "system-ui", "-apple-system", "sans-serif"],
       },
       transitionDuration: {
         micro: "150ms",
-        card: "220ms",
-        scene: "400ms",
+        card: "240ms",
+        scene: "450ms",
         route: "800ms",
       },
       transitionTimingFunction: {

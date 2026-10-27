@@ -3,41 +3,69 @@
 @tailwind utilities;
 
 :root {
-  /* Brand & Structural */
-  --ink: #14213D;
-  --peacock: #0E7C86;
-  --peacock-dark: #0B6169;
-  --peacock-tint: #DCEFF0;
-  --clay: #D8A58E;
-  --paper: #F8F4EC;
+  /* =========================================================================
+     BORDEAUX ATELIER & LUMINOUS ROSE GOLD / CHAMPAGNE DESIGN TOKENS
+     Haute travel editorial, warm cashmere surfaces, rich velvet depth
+     ========================================================================= */
+
+  /* Structural & Canvas */
+  --canvas: #FAF6F0;
+  --canvas-subtle: #F3ECE1;
+  --surface-card: #FFFFFF;
+  --surface-raised: #F8F3EC;
   --white: #FFFFFF;
-  --raised: #F1EBDD;
-  --border: #E3DCCD;
-  --border-strong: #B9AF99;
-  --text: #14213D;
-  --text-secondary: #55607A;
+  --border: #E8DFD7;
+  --border-strong: #C4B5A9;
+  --border-gold: #D4A359;
 
-  /* Semantic */
-  --emergency: #C41230;
-  --danger: #A4161A;
-  --danger-tint: #FBE9EA;
-  --caution: #B25E00;
-  --caution-dark: #8A4800;
-  --caution-tint: #FDF1E0;
-  --verified: #1B6B4A;
-  --verified-tint: #E4F2EB;
-  --info: #1D5FA8;
-  --disabled-text: #6D6A63;
+  /* Editorial Brand Accents */
+  --bordeaux: #240D1E;
+  --velvet: #4A1E35;
+  --rose-gold: #C8415F;
+  --rose-gold-dark: #A32D48;
+  --rose-tint: #FCEEF2;
+  --champagne: #D4A359;
+  --champagne-dark: #9C6E2E;
+  --champagne-tint: #FDF8EE;
 
-  /* Shadows */
-  --shadow-e1: 0 1px 2px rgba(20, 33, 61, 0.08);
-  --shadow-e2: 0 4px 12px rgba(20, 33, 61, 0.10);
-  --shadow-e3: 0 10px 24px rgba(20, 33, 61, 0.14);
+  /* Typography Colors */
+  --text: #240D1E;
+  --text-secondary: #6B5663;
+  --text-muted: #8A7783;
+  --text-gold: #9C6E2E;
 
-  /* Motion Tokens */
+  /* Backward Compatibility Aliases */
+  --ink: #240D1E;
+  --peacock: #C8415F;
+  --peacock-dark: #A32D48;
+  --peacock-tint: #FCEEF2;
+  --clay: #D4A359;
+  --paper: #FAF6F0;
+  --raised: #F8F3EC;
+  --disabled-text: #A0929B;
+
+  /* Safety & Semantic (Strict Non-Ambiguity) */
+  --emergency: #C21428;
+  --danger: #9E1B24;
+  --danger-tint: #FCEAEB;
+  --caution: #BA6A15;
+  --caution-dark: #944F0B;
+  --caution-tint: #FDF2E3;
+  --verified: #1C6B48;
+  --verified-tint: #E6F3EC;
+  --info: #255EA8;
+
+  /* Atmospheric Shadows */
+  --shadow-e1: 0 2px 8px rgba(36, 13, 30, 0.05);
+  --shadow-e2: 0 8px 24px rgba(36, 13, 30, 0.08);
+  --shadow-e3: 0 20px 48px -10px rgba(36, 13, 30, 0.14);
+  --shadow-atelier: 0 24px 60px -12px rgba(36, 13, 30, 0.16), 0 0 0 1px rgba(212, 163, 89, 0.18);
+  --shadow-rose-glow: 0 0 20px rgba(200, 65, 95, 0.35);
+
+  /* Motion Timing */
   --dur-micro: 150ms;
-  --dur-card: 220ms;
-  --dur-scene: 400ms;
+  --dur-card: 240ms;
+  --dur-scene: 450ms;
   --dur-route: 800ms;
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
   --ease-exit: cubic-bezier(0.4, 0, 1, 1);
@@ -47,7 +75,7 @@
 @layer base {
   html, body {
     @apply w-full max-w-full overflow-x-hidden;
-    background-color: var(--paper);
+    background-color: var(--canvas);
     color: var(--text);
   }
   body {
@@ -55,48 +83,57 @@
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
   ::selection {
-    background-color: var(--peacock);
+    background-color: var(--rose-gold);
     color: #FFFFFF;
   }
-  h1, h2, h3, .font-serif-title {
-    font-family: var(--font-source-serif), "Source Serif 4", Georgia, serif;
+  h1, h2, h3, .font-serif-title, .font-editorial {
+    font-family: var(--font-serif-display), "Playfair Display", Georgia, serif;
   }
 }
 
 /* =========================================================================
-   INK & PEACOCK SURFACE & COMPONENT SYSTEM
-   Warm paper surfaces, restrained ink outlines, quiet peacock accents
+   LUXURY ATELIER SPATIAL CARDS & SURFACES
+   Floating panels, warm porcelain texture, refined gold hairline borders
    ========================================================================= */
 
-/* Primary Surface Card */
+/* Floating Atelier Sidebar Panel */
+.panel-atelier {
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  box-shadow: var(--shadow-atelier);
+}
+
+/* Primary Porcelain Surface Card */
 .surface-card {
   background-color: #FFFFFF;
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: 20px;
   box-shadow: var(--shadow-e1);
 }
 
-/* Secondary Raised Surface */
+/* Secondary Raised Grouping */
 .surface-raised {
-  background-color: var(--raised);
+  background-color: var(--surface-raised);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 16px;
 }
 
-/* Interactive Card with restrained lift */
+/* Interactive Card with Smooth Elevation */
 .card-interactive {
   background-color: #FFFFFF;
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: 20px;
   box-shadow: var(--shadow-e1);
-  transition: transform 180ms var(--ease-standard), box-shadow 180ms var(--ease-standard), border-color 180ms var(--ease-standard);
+  transition: transform 200ms var(--ease-standard), box-shadow 200ms var(--ease-standard), border-color 200ms var(--ease-standard);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .card-interactive:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-e2);
-    border-color: var(--border-strong);
+    border-color: var(--champagne);
   }
 }
 
@@ -104,106 +141,135 @@
   transform: translateY(0);
 }
 
-/* Selected Card State */
+/* Selected Card: Luminous Petal Fill & Rose Gold Accent */
 .card-selected {
-  background-color: var(--peacock-tint) !important;
-  border: 2px solid var(--peacock) !important;
-  box-shadow: var(--shadow-e1) !important;
+  background-color: var(--rose-tint) !important;
+  border: 2px solid var(--rose-gold) !important;
+  box-shadow: 0 4px 16px rgba(200, 65, 95, 0.15) !important;
   transform: none !important;
 }
 
 /* Visible Keyboard Focus */
-.focus-ring-peacock:focus-visible {
-  outline: 2px solid var(--peacock);
+.focus-ring-peacock:focus-visible,
+.focus-ring-bordeaux:focus-visible {
+  outline: 2px solid var(--rose-gold);
   outline-offset: 2px;
 }
 
-/* Buttons */
-.btn-ink {
-  background-color: var(--ink);
+/* =========================================================================
+   HAUTE EDITORIAL BUTTONS & CONTROLS
+   ========================================================================= */
+
+/* Primary Button: Deep Velvet Bordeaux */
+.btn-ink,
+.btn-bordeaux {
+  background-color: var(--bordeaux);
   color: #FFFFFF;
-  border-radius: 12px;
+  border-radius: 14px;
   font-weight: 600;
-  transition: background-color var(--dur-micro) var(--ease-standard), transform var(--dur-micro) var(--ease-standard);
+  letter-spacing: 0.01em;
+  box-shadow: 0 4px 14px rgba(36, 13, 30, 0.18);
+  transition: background-color var(--dur-micro) var(--ease-standard), transform var(--dur-micro) var(--ease-standard), box-shadow var(--dur-micro) var(--ease-standard);
 }
-.btn-ink:hover {
-  background-color: #0D1629;
+.btn-ink:hover,
+.btn-bordeaux:hover {
+  background-color: #160712;
+  box-shadow: 0 6px 18px rgba(36, 13, 30, 0.25);
 }
-.btn-ink:active {
+.btn-ink:active,
+.btn-bordeaux:active {
   transform: scale(0.98);
 }
 
+/* Secondary Button: Clean Porcelain with Gold-Umber Border */
 .btn-secondary {
   background-color: #FFFFFF;
-  color: var(--ink);
+  color: var(--bordeaux);
   border: 1px solid var(--border-strong);
-  border-radius: 12px;
+  border-radius: 14px;
   font-weight: 600;
   transition: background-color var(--dur-micro) var(--ease-standard), border-color var(--dur-micro) var(--ease-standard);
 }
 .btn-secondary:hover {
-  background-color: var(--raised);
-  border-color: var(--ink);
+  background-color: var(--surface-raised);
+  border-color: var(--champagne);
 }
 
-/* SOS Control */
+/* Accent Action: Luminous Rose Gold */
+.btn-accent {
+  background-color: var(--rose-gold);
+  color: #FFFFFF;
+  border-radius: 14px;
+  font-weight: 600;
+  box-shadow: 0 4px 14px rgba(200, 65, 95, 0.28);
+  transition: background-color var(--dur-micro) var(--ease-standard), transform var(--dur-micro) var(--ease-standard);
+}
+.btn-accent:hover {
+  background-color: var(--rose-gold-dark);
+}
+
+/* Dedicated Emergency SOS: Unmistakable Crimson Jewel (No Idle Pulse) */
 .btn-emergency-sos {
   background-color: var(--emergency);
   color: #FFFFFF;
   font-weight: 800;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  border-radius: 12px;
-  transition: background-color var(--dur-micro) var(--ease-standard);
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(194, 20, 40, 0.32);
+  transition: background-color var(--dur-micro) var(--ease-standard), transform var(--dur-micro) var(--ease-standard);
 }
 .btn-emergency-sos:hover {
-  background-color: #A80D27;
+  background-color: #A30F20;
+}
+.btn-emergency-sos:active {
+  transform: scale(0.97);
 }
 
 /* =========================================================================
    MAP TILE STYLING & LEAFLET CANVAS
-   Calm, desaturated warm porcelain tone without destroying road clarity
+   Luxury Atelier Atlas: warm porcelain roads, delicate vintage-chic landmass
    ========================================================================= */
 
 .leaflet-container {
-  background-color: var(--paper) !important;
+  background-color: var(--canvas) !important;
   font-family: inherit !important;
 }
 
-/* Mute OpenStreetMap saturation for a calm porcelain tone */
+/* Bespoke Luxury Atlas Filter: warms roads, reduces commercial POI glare */
 .leaflet-tile-pane {
-  filter: saturate(0.55) sepia(0.12) brightness(1.02);
+  filter: sepia(0.24) hue-rotate(315deg) contrast(0.96) brightness(1.02) saturate(0.68);
 }
 
-/* Clean, crisp popups */
+/* Luxury Editorial Map Popups */
 .herpath-popup .leaflet-popup-content-wrapper {
   background: #FFFFFF !important;
   color: var(--text) !important;
-  border-radius: 16px !important;
-  border: 1px solid var(--border) !important;
+  border-radius: 20px !important;
+  border: 1px solid var(--border-gold) !important;
   box-shadow: var(--shadow-e3) !important;
   padding: 4px !important;
 }
 
 .herpath-popup .leaflet-popup-tip {
   background: #FFFFFF !important;
-  border: 1px solid var(--border) !important;
+  border: 1px solid var(--border-gold) !important;
 }
 
 .herpath-popup .leaflet-popup-content {
-  margin: 12px 14px !important;
-  line-height: 1.45 !important;
+  margin: 14px 16px !important;
+  line-height: 1.5 !important;
 }
 
 .herpath-popup a.leaflet-popup-close-button {
   color: var(--text-secondary) !important;
   padding: 8px !important;
-  top: 6px !important;
-  right: 6px !important;
+  top: 8px !important;
+  right: 8px !important;
 }
 
 .herpath-popup a.leaflet-popup-close-button:hover {
-  color: var(--ink) !important;
+  color: var(--bordeaux) !important;
 }
 
 /* Custom DivIcons */
@@ -212,15 +278,15 @@
   border: none !important;
 }
 
-/* Marker selection lift animation (Matrix #4) */
+/* Marker selection lift animation */
 .marker-selected {
-  transform: scale(1.15) translateY(-4px) !important;
+  transform: scale(1.18) translateY(-6px) !important;
   transition: transform 180ms var(--ease-emphasis);
-  filter: drop-shadow(0 6px 12px rgba(20, 33, 61, 0.22));
+  filter: drop-shadow(0 8px 16px rgba(36, 13, 30, 0.28));
   z-index: 9999 !important;
 }
 
-/* Animated route stroke (Matrix #1) */
+/* Animated route stroke */
 @keyframes routeStrokeAnim {
   from {
     stroke-dashoffset: 1000;
@@ -242,7 +308,7 @@
 @keyframes fadeInCard {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -254,20 +320,33 @@
   animation: fadeInCard var(--dur-card) var(--ease-standard) forwards;
 }
 
-/* Modal scale */
 @keyframes modalIn {
   from {
     opacity: 0;
-    transform: scale(0.97);
+    transform: scale(0.96) translateY(10px);
   }
   to {
     opacity: 1;
-    transform: scale(1);
+    transform: scale(1) translateY(0);
   }
 }
 
 .animate-modal {
   animation: modalIn var(--dur-scene) var(--ease-standard) forwards;
+}
+
+/* Floating 3D Horizon Ambient Pulse */
+@keyframes orbSlowSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-orb-spin {
+  animation: orbSlowSpin 30s linear infinite;
 }
 
 /* Reduced motion compliance */
@@ -288,6 +367,9 @@
     stroke-dasharray: none !important;
     animation: none !important;
   }
+  .animate-orb-spin {
+    animation: none !important;
+  }
 }
 
 /* Restrained Editorial Scrollbar */
@@ -297,7 +379,7 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--paper);
+  background: var(--canvas);
 }
 
 ::-webkit-scrollbar-thumb {
