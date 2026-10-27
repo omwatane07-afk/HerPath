@@ -13,12 +13,7 @@ import {
   X,
   Users,
   Clock,
-  MapPin,
-  Check,
-  Copy,
-  ShieldCheck,
   Sparkles,
-  Phone,
   UserPlus,
 } from 'lucide-react';
 
@@ -120,43 +115,43 @@ export const FamilyJourneyModal: React.FC<FamilyJourneyModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-navy-950/80 backdrop-blur-md animate-fadeIn">
-      <div className="bg-navy-900 border border-slate-700/80 rounded-2xl max-w-lg w-full p-6 text-slate-100 shadow-2xl relative overflow-hidden">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-brand-text/30 backdrop-blur-md animate-fadeIn">
+      <div className="surface-pearl border border-white/95 rounded-sheet max-w-lg w-full p-6 text-brand-text shadow-glass-floating relative overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
+        <div className="flex items-center justify-between mb-4 pb-3 border-b border-brand-border">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-teal-950 border border-teal-500/40 flex items-center justify-center text-teal-400">
+            <div className="w-10 h-10 rounded-2xl bg-teal-50 border border-teal-200 flex items-center justify-center text-teal-600 shadow-sm">
               <Compass className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white">Family Journey Companion</h3>
-              <p className="text-xs text-slate-400">
-                Share live checkpoints and safety confirmations with loved ones
+              <h3 className="text-base font-bold text-brand-text">Family Journey Companion</h3>
+              <p className="text-xs text-brand-text-secondary">
+                Share live checkpoints and arrival confirmations with loved ones
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white p-2 rounded-lg bg-navy-800 hover:bg-navy-750 transition-colors"
+            className="text-brand-text-secondary hover:text-brand-text p-2 rounded-xl bg-brand-bg hover:bg-brand-bg-secondary transition-colors"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Route Summary */}
-        <div className="p-3.5 rounded-xl bg-navy-950 border border-slate-800 space-y-2 mb-4">
-          <div className="flex items-center gap-2 text-xs">
-            <span className="w-2 h-2 rounded-full bg-emerald-400" />
-            <span className="text-slate-400 font-medium">From:</span>
-            <span className="text-slate-200 font-semibold truncate">{originName || 'Current Location'}</span>
+        <div className="p-3.5 rounded-2xl bg-brand-bg border border-brand-border space-y-2 mb-4">
+          <div className="flex items-center gap-2 text-xs font-medium">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+            <span className="text-brand-text-secondary">From:</span>
+            <span className="text-brand-text font-bold truncate">{originName || 'Current Location'}</span>
           </div>
-          <div className="flex items-center gap-2 text-xs">
-            <span className="w-2 h-2 rounded-full bg-rose-400" />
-            <span className="text-slate-400 font-medium">To:</span>
-            <span className="text-slate-200 font-semibold truncate">{destinationName || 'Destination'}</span>
+          <div className="flex items-center gap-2 text-xs font-medium">
+            <span className="w-2.5 h-2.5 rounded-full bg-danger-500" />
+            <span className="text-brand-text-secondary">To:</span>
+            <span className="text-brand-text font-bold truncate">{destinationName || 'Destination'}</span>
           </div>
           {selectedRoute && (
-            <div className="text-[11px] text-teal-400 font-medium pt-1 border-t border-slate-800/80">
+            <div className="text-[11px] text-teal-700 font-semibold pt-1 border-t border-brand-border">
               Using route: {selectedRoute.name} ({Math.round(selectedRoute.durationSeconds / 60)} min walking)
             </div>
           )}
@@ -166,9 +161,9 @@ export const FamilyJourneyModal: React.FC<FamilyJourneyModalProps> = ({
         <div className="space-y-4">
           {/* Estimated Travel Time */}
           <div>
-            <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+            <label className="block text-[11px] font-bold text-brand-text-muted uppercase tracking-wider mb-1.5 flex items-center justify-between">
               <span>Expected Journey Duration</span>
-              <span className="text-teal-400 font-mono">{durationMinutes} minutes</span>
+              <span className="text-teal-600 font-mono font-bold">{durationMinutes} minutes</span>
             </label>
             <div className="flex gap-2">
               {[15, 25, 40, 60].map((mins) => (
@@ -176,10 +171,10 @@ export const FamilyJourneyModal: React.FC<FamilyJourneyModalProps> = ({
                   key={mins}
                   type="button"
                   onClick={() => setDurationMinutes(mins)}
-                  className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition-all ${
+                  className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-all ${
                     durationMinutes === mins
-                      ? 'bg-teal-600 text-white border-teal-500 shadow-sm'
-                      : 'bg-navy-950 border-slate-800 text-slate-300 hover:bg-navy-850'
+                      ? 'bg-teal-500 text-white border-teal-500 shadow-sm'
+                      : 'bg-brand-bg border-brand-border text-brand-text hover:bg-white'
                   }`}
                 >
                   {mins} min
@@ -190,9 +185,9 @@ export const FamilyJourneyModal: React.FC<FamilyJourneyModalProps> = ({
 
           {/* Check-in Interval */}
           <div>
-            <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+            <label className="block text-[11px] font-bold text-brand-text-muted uppercase tracking-wider mb-1.5 flex items-center justify-between">
               <span>Safety Check-In Frequency</span>
-              <span className="text-teal-400 font-mono">Every {checkInInterval} mins</span>
+              <span className="text-teal-600 font-mono font-bold">Every {checkInInterval} mins</span>
             </label>
             <div className="flex gap-2">
               {[5, 10, 15, 20].map((mins) => (
@@ -200,17 +195,17 @@ export const FamilyJourneyModal: React.FC<FamilyJourneyModalProps> = ({
                   key={mins}
                   type="button"
                   onClick={() => setCheckInInterval(mins)}
-                  className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition-all ${
+                  className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-all ${
                     checkInInterval === mins
-                      ? 'bg-teal-600 text-white border-teal-500 shadow-sm'
-                      : 'bg-navy-950 border-slate-800 text-slate-300 hover:bg-navy-850'
+                      ? 'bg-teal-500 text-white border-teal-500 shadow-sm'
+                      : 'bg-brand-bg border-brand-border text-brand-text hover:bg-white'
                   }`}
                 >
                   {mins} min
                 </button>
               ))}
             </div>
-            <p className="text-[10px] text-slate-400 mt-1">
+            <p className="text-[10px] text-brand-text-secondary mt-1 font-medium">
               HERPATH will prompt you to tap "I'm OK" at each interval. If check-in passes, your contact is notified.
             </p>
           </div>
@@ -218,15 +213,15 @@ export const FamilyJourneyModal: React.FC<FamilyJourneyModalProps> = ({
           {/* Trusted Contact Picker */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+              <label className="text-[11px] font-bold text-brand-text-muted uppercase tracking-wider">
                 Select Trusted Contact
               </label>
               <button
                 type="button"
                 onClick={() => setShowAddContact(!showAddContact)}
-                className="text-[11px] text-teal-400 hover:text-teal-300 flex items-center gap-1 font-medium"
+                className="text-[11px] text-teal-700 hover:text-teal-800 flex items-center gap-1 font-bold"
               >
-                <UserPlus className="w-3 h-3" />
+                <UserPlus className="w-3.5 h-3.5" />
                 <span>{showAddContact ? 'Cancel' : 'Add New'}</span>
               </button>
             </div>
@@ -234,14 +229,14 @@ export const FamilyJourneyModal: React.FC<FamilyJourneyModalProps> = ({
             {showAddContact ? (
               <form
                 onSubmit={handleAddNewContact}
-                className="p-3 rounded-xl bg-navy-950 border border-slate-700 space-y-2 mb-2 animate-fadeIn"
+                className="p-3.5 rounded-2xl bg-brand-bg border border-brand-border space-y-2 mb-2 animate-fadeIn"
               >
                 <input
                   type="text"
                   placeholder="Full name or relation"
                   value={newContactName}
                   onChange={(e) => setNewContactName(e.target.value)}
-                  className="w-full p-2 text-xs rounded-lg bg-navy-900 border border-slate-700 text-white outline-none"
+                  className="w-full p-2.5 text-xs rounded-xl bg-white border border-brand-border text-brand-text outline-none font-medium"
                   required
                 />
                 <input
@@ -249,12 +244,12 @@ export const FamilyJourneyModal: React.FC<FamilyJourneyModalProps> = ({
                   placeholder="Mobile telephone number"
                   value={newContactPhone}
                   onChange={(e) => setNewContactPhone(e.target.value)}
-                  className="w-full p-2 text-xs rounded-lg bg-navy-900 border border-slate-700 text-white outline-none"
+                  className="w-full p-2.5 text-xs rounded-xl bg-white border border-brand-border text-brand-text outline-none font-medium"
                   required
                 />
                 <button
                   type="submit"
-                  className="w-full py-1.5 px-3 rounded-lg bg-teal-600 hover:bg-teal-500 text-xs font-semibold text-white"
+                  className="w-full py-2 px-3 rounded-full bg-teal-500 hover:bg-teal-600 text-xs font-bold text-white shadow-xs"
                 >
                   Save & Select Contact
                 </button>
@@ -266,14 +261,14 @@ export const FamilyJourneyModal: React.FC<FamilyJourneyModalProps> = ({
                     key={contact.id}
                     type="button"
                     onClick={() => setSelectedContactId(contact.id)}
-                    className={`p-2.5 rounded-xl border text-left transition-all ${
+                    className={`p-3 rounded-2xl border text-left transition-all ${
                       selectedContactId === contact.id
-                        ? 'bg-teal-950/80 border-teal-500 text-white ring-1 ring-teal-500'
-                        : 'bg-navy-950 border-slate-800 text-slate-300 hover:border-slate-700'
+                        ? 'bg-teal-50 border-teal-500 text-teal-950 ring-2 ring-teal-500/20 shadow-xs'
+                        : 'bg-brand-bg border-brand-border text-brand-text hover:bg-white'
                     }`}
                   >
                     <div className="text-xs font-bold truncate">{contact.name}</div>
-                    <div className="text-[10px] text-slate-400 mt-0.5 truncate">
+                    <div className="text-[10px] text-brand-text-secondary mt-0.5 truncate font-medium">
                       {contact.relation} • {contact.phone}
                     </div>
                   </button>
@@ -283,10 +278,10 @@ export const FamilyJourneyModal: React.FC<FamilyJourneyModalProps> = ({
           </div>
 
           {/* Transparent Demo Notice */}
-          <div className="p-3 rounded-xl bg-navy-950 border border-slate-800 text-[11px] text-slate-400 flex items-start gap-2.5">
-            <Sparkles className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
+          <div className="p-3.5 rounded-2xl bg-brand-bg border border-brand-border text-[11px] text-brand-text-secondary flex items-start gap-2.5 font-medium">
+            <Sparkles className="w-4 h-4 text-teal-600 shrink-0 mt-0.5" />
             <p className="leading-relaxed">
-              <strong className="text-indigo-300">Demo Prototype Mode:</strong> Journey updates are
+              <strong className="text-brand-text font-bold">Demo Prototype Mode:</strong> Journey updates are
               tracked locally in this session. When deployed with connected Supabase and SMS/push credentials,
               checkpoints are broadcast live to your selected contact.
             </p>
@@ -297,15 +292,15 @@ export const FamilyJourneyModal: React.FC<FamilyJourneyModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="py-2.5 px-4 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition-colors"
+              className="py-2.5 px-4 rounded-full text-xs font-bold text-brand-text-secondary hover:text-brand-text transition-colors"
             >
               Cancel
             </button>
             <button
-              type="button"
+              type="submit"
               onClick={handleStart}
               disabled={!origin || !destination}
-              className="py-3 px-6 rounded-xl bg-teal-600 hover:bg-teal-500 active:scale-95 text-white font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-teal-950/60 transition-all disabled:opacity-50"
+              className="py-3 px-6 rounded-full bg-teal-500 hover:bg-teal-600 active:scale-95 text-white font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-md shadow-teal-500/20 transition-all disabled:opacity-50"
             >
               <Compass className="w-4 h-4" />
               <span>Start Journey Sharing</span>

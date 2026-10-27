@@ -73,11 +73,33 @@ HERPATH is built around **honest decision-support**: it strictly avoids false pr
 
 ---
 
+## 🎨 Premium Light-Mode Glassmorphism Design System
+
+HERPATH features a custom, high-craft design system tailored for daylight legibility, reassurance, and modern mobile aesthetics:
+
+### Design Tokens & Palette
+- **Main Canvas:** `#F6F8FC` (calm, airy neutral foundation avoiding harsh pure white glare)
+- **Secondary Surface:** `#EEF2F8` (subtle structural separation)
+- **Primary Cards & Modals:** `#FFFFFF` with `backdrop-blur-xl` frosted translucency
+- **Typography:** `#172238` (deep navy primary) and `#66738A` (slate secondary) for WCAG AA/AAA contrast
+- **Borders & Dividers:** `#E3E9F2` (delicate 1px structural framing)
+- **Primary Brand Accents:** `#20B8A5` (Vibrant Teal), `#128C82` (Deep Teal), `#E4F8F3` (Soft Mint Surface)
+- **Context Surfaces:** `#EAF1FF` (Soft Blue), `#EFEDFF` (Soft Lavender), `#FFF4E6` (Warm Caution)
+- **Urgent Action / SOS:** `#D94F63` (Coral Urgent), `#BA3A4D` (Deep Coral)
+
+### Mobile & Desktop Spatial Ergonomics
+- **Desktop (≥ 1024px):** Dual-pane split architecture with a 460px frosted-glass control panel on the left and full-viewport interactive OpenStreetMap canvas on the right.
+- **Mobile (< 1024px):** Map-first layout with a collapsible frosted glass bottom sheet (`rounded-t-[32px]`, `h-[72vh]`) offering minimize/expand toggles, ensuring seamless one-handed reachability.
+- **Floating Bottom Dock:** Translucent glassmorphic pill bar (`h-16`, `shadow-float`, `rounded-full`) anchored above the navigation boundary with active mint indicator pills across 6 core views.
+- **Custom Map DivIcons:** Crisp circular pin markers with diffuse drop-shadows and semantic outer glow rings (Teal for transit, Purple for women's amenities, Emerald for streetlights, Coral for alerts).
+
+---
+
 ## 🛠️ Technology Stack
 
 - **Framework:** Next.js 14 (App Router)
 - **Language:** TypeScript 5.7+ (Strict mode)
-- **Styling:** Tailwind CSS (Navy foundations `#080c18`, Teal/Mint accents `#14b8a6`, `#10b981`)
+- **Styling:** Tailwind CSS 3.4 with custom glassmorphism utilities (`glass-surface`, `glass-dock`, `glass-sheet`)
 - **Maps & GIS:** React Leaflet 4.2 + Leaflet 1.9 with OpenStreetMap tiles and custom HTML DivIcons
 - **Icons:** Lucide React
 - **Validation:** Zod

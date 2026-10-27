@@ -148,15 +148,15 @@ export const ReportModal: React.FC<ReportModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-navy-950/80 backdrop-blur-md animate-fadeIn">
-      <div className="bg-navy-900 border border-slate-700/80 rounded-2xl max-w-lg w-full p-6 text-slate-100 shadow-2xl relative overflow-hidden">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-brand-text/30 backdrop-blur-md animate-fadeIn">
+      <div className="surface-pearl border border-white/95 rounded-sheet max-w-lg w-full p-6 text-brand-text shadow-glass-floating relative overflow-hidden">
         {submitted ? (
           <div className="py-8 text-center space-y-3">
-            <div className="w-14 h-14 rounded-full bg-teal-950 border border-teal-500/50 text-teal-400 mx-auto flex items-center justify-center">
-              <CheckCircle2 className="w-8 h-8" />
+            <div className="w-16 h-16 rounded-full bg-teal-50 border border-teal-200 text-teal-600 mx-auto flex items-center justify-center shadow-sm">
+              <CheckCircle2 className="w-9 h-9" />
             </div>
-            <h3 className="text-xl font-bold text-white">Report Submitted</h3>
-            <p className="text-xs text-slate-300 max-w-sm mx-auto">
+            <h3 className="text-xl font-black text-brand-text">Report Submitted</h3>
+            <p className="text-xs text-brand-text-secondary max-w-sm mx-auto leading-relaxed">
               Thank you for contributing to collective safety awareness. Your report is now pinned to
               the map and visible to fellow commuters.
             </p>
@@ -164,30 +164,30 @@ export const ReportModal: React.FC<ReportModalProps> = ({
         ) : (
           <>
             {/* Header */}
-            <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-rose-950 border border-rose-500/40 flex items-center justify-center text-rose-400">
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-brand-border">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-danger-50 border border-danger-200 flex items-center justify-center text-danger-500 shadow-sm">
                   <AlertTriangle className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-white">Submit Community Observation</h3>
-                  <p className="text-xs text-slate-400">
+                  <h3 className="text-base font-bold text-brand-text">Submit Community Observation</h3>
+                  <p className="text-xs text-brand-text-secondary">
                     Transparent reporting for infrastructure and road conditions
                   </p>
                 </div>
               </div>
               <button
                 onClick={onClose}
-                className="text-slate-400 hover:text-white p-2 rounded-lg bg-navy-800 hover:bg-navy-750 transition-colors"
+                className="text-brand-text-secondary hover:text-brand-text p-2 rounded-xl bg-brand-bg hover:bg-brand-bg-secondary transition-colors"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Category Selection Grid */}
               <div>
-                <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                <label className="block text-[11px] font-bold text-brand-text-muted uppercase tracking-wider mb-2">
                   Select Category
                 </label>
                 <div className="grid grid-cols-2 gap-2 max-h-44 overflow-y-auto pr-1">
@@ -196,16 +196,16 @@ export const ReportModal: React.FC<ReportModalProps> = ({
                       key={cat.id}
                       type="button"
                       onClick={() => setCategory(cat.id)}
-                      className={`p-2.5 rounded-xl border text-left transition-all flex items-start gap-2 ${
+                      className={`p-2.5 rounded-2xl border text-left transition-all flex items-start gap-2.5 ${
                         category === cat.id
-                          ? 'bg-teal-950/80 border-teal-500 text-teal-200 ring-1 ring-teal-500'
-                          : 'bg-navy-950/70 border-slate-800 text-slate-300 hover:border-slate-700'
+                          ? 'bg-teal-50 border-teal-500 text-teal-900 ring-2 ring-teal-500/20 shadow-xs'
+                          : 'bg-brand-bg border-brand-border text-brand-text hover:border-brand-border-light hover:bg-brand-bg-secondary'
                       }`}
                     >
-                      <span className="text-base">{cat.icon}</span>
+                      <span className="text-lg">{cat.icon}</span>
                       <div className="leading-tight">
-                        <div className="text-xs font-semibold">{cat.label}</div>
-                        <div className="text-[10px] text-slate-400 mt-0.5 line-clamp-1">
+                        <div className="text-xs font-bold text-brand-text">{cat.label}</div>
+                        <div className="text-[10px] text-brand-text-secondary mt-0.5 line-clamp-1 font-medium">
                           {cat.description}
                         </div>
                       </div>
@@ -216,7 +216,7 @@ export const ReportModal: React.FC<ReportModalProps> = ({
 
               {/* Location Name */}
               <div>
-                <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                <label className="block text-[11px] font-bold text-brand-text-muted uppercase tracking-wider mb-1">
                   Street / Landmark Name
                 </label>
                 <div className="relative">
@@ -225,18 +225,18 @@ export const ReportModal: React.FC<ReportModalProps> = ({
                     value={locationName}
                     onChange={(e) => setLocationName(e.target.value)}
                     placeholder="e.g. Near Janpath Gate 2, Outer Circle alleyway"
-                    className="w-full py-2 pl-9 pr-3 text-xs rounded-xl bg-navy-950 border border-slate-700 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none text-slate-100 placeholder-slate-500"
+                    className="w-full py-2.5 pl-9 pr-3 text-xs rounded-2xl bg-brand-bg border border-brand-border focus:border-teal-500 focus:bg-white focus:ring-2 focus:ring-teal-100 outline-none text-brand-text placeholder-brand-text-muted font-medium transition-all"
                   />
-                  <MapPin className="w-4 h-4 text-rose-400 absolute left-3 top-2.5" />
+                  <MapPin className="w-4 h-4 text-danger-500 absolute left-3 top-3" />
                 </div>
-                <div className="text-[10px] text-slate-500 mt-1 font-mono">
+                <div className="text-[10px] text-brand-text-muted mt-1 font-mono">
                   Coordinates: {defaultCoords.lat.toFixed(4)}, {defaultCoords.lng.toFixed(4)}
                 </div>
               </div>
 
               {/* Description */}
               <div>
-                <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                <label className="block text-[11px] font-bold text-brand-text-muted uppercase tracking-wider mb-1">
                   Specific Observation Details
                 </label>
                 <textarea
@@ -244,21 +244,21 @@ export const ReportModal: React.FC<ReportModalProps> = ({
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Describe what you observed (e.g. lights completely unlit, dark sidewalk stretch, group blocking entrance)..."
-                  className="w-full p-2.5 text-xs rounded-xl bg-navy-950 border border-slate-700 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none text-slate-100 placeholder-slate-500 resize-none"
+                  className="w-full p-3 text-xs rounded-2xl bg-brand-bg border border-brand-border focus:border-teal-500 focus:bg-white focus:ring-2 focus:ring-teal-100 outline-none text-brand-text placeholder-brand-text-muted resize-none font-medium transition-all"
                 />
               </div>
 
               {/* Validation error if present */}
               {validationError && (
-                <div className="p-2 rounded-lg bg-rose-950/60 border border-rose-800 text-rose-300 text-xs">
+                <div className="p-2.5 rounded-xl bg-danger-50 border border-danger-100 text-danger-700 text-xs font-semibold">
                   {validationError}
                 </div>
               )}
 
               {/* Abuse prevention / emergency notice */}
-              <div className="p-3 rounded-xl bg-navy-950 border border-slate-800 text-[11px] text-slate-400 space-y-1">
-                <div className="flex items-center gap-1.5 text-teal-400 font-semibold">
-                  <ShieldCheck className="w-3.5 h-3.5" />
+              <div className="p-3 rounded-2xl bg-brand-bg border border-brand-border text-[11px] text-brand-text-secondary space-y-1 font-medium">
+                <div className="flex items-center gap-1.5 text-teal-700 font-bold">
+                  <ShieldCheck className="w-4 h-4 text-teal-600" />
                   <span>Privacy & Verification Policy</span>
                 </div>
                 <p>
@@ -272,14 +272,14 @@ export const ReportModal: React.FC<ReportModalProps> = ({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="py-2 px-4 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition-colors"
+                  className="py-2.5 px-4 rounded-full text-xs font-bold text-brand-text-secondary hover:text-brand-text transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="py-2.5 px-5 rounded-xl bg-teal-600 hover:bg-teal-500 active:scale-95 text-white font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-lg shadow-teal-950/60 transition-all disabled:opacity-50"
+                  className="py-2.5 px-6 rounded-full bg-teal-500 hover:bg-teal-600 active:scale-95 text-white font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-md shadow-teal-500/20 transition-all disabled:opacity-50"
                 >
                   {isSubmitting ? (
                     <span>Submitting...</span>

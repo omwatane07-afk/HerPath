@@ -12,15 +12,11 @@ import {
   Building2,
   AlertTriangle,
   ShieldCheck,
-  CheckCircle,
-  FileSpreadsheet,
   Layers,
   ArrowUpRight,
-  TrendingDown,
   Info,
 } from 'lucide-react';
 import { formatRelativeTime } from '@/lib/utils';
-import { StreetlightStatusBadge, DisturbanceCategoryLabel, DataSourceBadge } from '../ui/Badge';
 
 interface CivicInsightsViewProps {
   streetlights: StreetlightSegment[];
@@ -73,51 +69,54 @@ export const CivicInsightsView: React.FC<CivicInsightsViewProps> = ({
   ];
 
   return (
-    <div className="flex flex-col h-full bg-navy-900 border-r border-slate-800 text-slate-100 overflow-y-auto">
+    <div className="flex flex-col h-full bg-brand-bg text-brand-text overflow-y-auto w-full">
       {/* Header */}
-      <div className="p-4 border-b border-slate-800">
-        <h2 className="text-base font-bold text-white flex items-center gap-2">
-          <Layers className="w-4 h-4 text-teal-400" />
+      <div className="p-3.5 sm:p-5 border-b border-brand-border/70 glass-pearl">
+        <h2 className="text-base sm:text-lg font-black text-brand-text flex items-center gap-2">
+          <div className="w-8 h-8 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center border border-teal-200/90 shadow-xs ring-1 ring-champagne-300/60">
+            <Layers className="w-4 h-4 text-teal-600" />
+          </div>
           <span>Civic Infrastructure Insights</span>
         </h2>
-        <p className="text-xs text-slate-400 mt-0.5">
+        <p className="text-[11px] sm:text-xs text-brand-text-secondary mt-1 font-medium leading-relaxed">
           Civic repairs audit, lighting telemetry, and data coverage analysis
         </p>
       </div>
 
-      <div className="p-4 space-y-5">
+      <div className="p-3.5 sm:p-5 space-y-4 sm:space-y-5 pb-24 lg:pb-8">
         {/* Transparency note */}
-        <div className="p-3.5 rounded-xl bg-navy-950 border border-teal-500/30 text-xs text-slate-300 flex items-start gap-2.5">
-          <Info className="w-4 h-4 text-teal-400 shrink-0 mt-0.5" />
-          <p className="leading-relaxed">
-            <strong className="text-teal-300">Civic Focus:</strong> Infrastructure coverage gaps
-            represent missing data or physical maintenance needs, not demographic judgments about
-            neighbourhoods.
+        <div className="p-3.5 sm:p-4 rounded-royal bg-teal-50/80 border border-teal-100 text-xs text-teal-900 flex items-start gap-2.5 shadow-xs">
+          <Info className="w-4 h-4 text-teal-600 shrink-0 mt-0.5" />
+          <p className="leading-relaxed font-medium">
+            <strong className="text-teal-950 font-bold">Civic Focus:</strong> Infrastructure coverage gaps
+            represent missing observations or physical maintenance needs, not demographic judgments about neighbourhoods.
           </p>
         </div>
 
         {/* Top Summary Stats Cards */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="p-3.5 rounded-xl bg-navy-950 border border-slate-800">
-            <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
+          <div className="p-4 rounded-royal surface-pearl border border-brand-border/80 shadow-card">
+            <div className="flex items-center justify-between text-xs text-brand-text-secondary mb-1 font-medium">
               <span>Streetlight Health</span>
-              <Lightbulb className="w-4 h-4 text-amber-400" />
+              <Lightbulb className="w-4 h-4 text-amber-500" />
             </div>
-            <div className="text-2xl font-black text-white">
+            <div className="text-3xl font-black text-brand-text">
               {Math.round((workingLights.length / Math.max(1, streetlights.length)) * 100)}%
             </div>
-            <div className="text-[11px] text-slate-400 mt-1">
+            <div className="text-[11px] text-brand-text-secondary mt-1 font-medium">
               {workingLights.length} working • {activeOutages.length} active outages
             </div>
           </div>
 
-          <div className="p-3.5 rounded-xl bg-navy-950 border border-slate-800">
-            <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
+          <div className="p-4 rounded-royal surface-pearl border border-brand-border/80 shadow-card">
+            <div className="flex items-center justify-between text-xs text-brand-text-secondary mb-1 font-medium">
               <span>Community Reports</span>
-              <AlertTriangle className="w-4 h-4 text-rose-400" />
+              <AlertTriangle className="w-4 h-4 text-danger-500" />
             </div>
-            <div className="text-2xl font-black text-white">{pendingReports.length + verifiedReports.length}</div>
-            <div className="text-[11px] text-slate-400 mt-1">
+            <div className="text-3xl font-black text-brand-text">
+              {pendingReports.length + verifiedReports.length}
+            </div>
+            <div className="text-[11px] text-brand-text-secondary mt-1 font-medium">
               {verifiedReports.length} verified • {resolvedReports.length} resolved
             </div>
           </div>
@@ -126,10 +125,10 @@ export const CivicInsightsView: React.FC<CivicInsightsViewProps> = ({
         {/* Priority Civic Maintenance Action Queue */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-brand-text-muted">
               Civic Repair Priorities ({highPriorityIssues.length} items)
             </h3>
-            <span className="text-[10px] text-teal-400 font-medium">Click to locate</span>
+            <span className="text-[11px] text-teal-700 font-bold">Tap to locate</span>
           </div>
 
           <div className="space-y-2.5">
@@ -137,35 +136,35 @@ export const CivicInsightsView: React.FC<CivicInsightsViewProps> = ({
               <div
                 key={issue.id}
                 onClick={() => onSelectCoordinate && onSelectCoordinate(issue.coords)}
-                className="p-3.5 rounded-xl bg-navy-950 border border-slate-800 hover:border-slate-700 transition-all cursor-pointer group"
+                className="p-4 rounded-royal surface-pearl border border-brand-border/80 shadow-card hover:border-teal-200 transition-all cursor-pointer group"
               >
-                <div className="flex items-center justify-between gap-2 mb-1">
-                  <div className="flex items-center gap-1.5">
+                <div className="flex items-center justify-between gap-2 mb-1.5">
+                  <div className="flex items-center gap-2">
                     {issue.type === 'lighting' ? (
-                      <span className="w-2 h-2 rounded-full bg-rose-400 animate-pulse" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-danger-500 animate-pulse" />
                     ) : (
-                      <span className="w-2 h-2 rounded-full bg-amber-400" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
                     )}
-                    <span className="text-xs font-bold text-white group-hover:text-teal-300 transition-colors">
+                    <span className="text-xs font-bold text-brand-text group-hover:text-teal-700 transition-colors">
                       {issue.title}
                     </span>
                   </div>
                   <span
-                    className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase ${
+                    className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase shadow-xs ${
                       issue.urgency === 'high'
-                        ? 'bg-rose-950 text-rose-300 border border-rose-800'
-                        : 'bg-amber-950 text-amber-300 border border-amber-800'
+                        ? 'bg-danger-50 text-danger-700 border border-danger-200'
+                        : 'bg-warning-50 text-warning-700 border border-warning-200'
                     }`}
                   >
                     {issue.urgency} Priority
                   </span>
                 </div>
-                <p className="text-xs text-slate-300 leading-relaxed">{issue.desc}</p>
-                <div className="flex items-center justify-between pt-2 mt-1 border-t border-slate-800/80 text-[11px] text-slate-500">
+                <p className="text-xs text-brand-text-secondary leading-relaxed font-medium">{issue.desc}</p>
+                <div className="flex items-center justify-between pt-2.5 mt-1 border-t border-brand-border/70 text-[11px] text-brand-text-muted font-medium">
                   <span>Reported {formatRelativeTime(issue.timestamp)}</span>
-                  <span className="text-teal-400 group-hover:translate-x-0.5 transition-transform flex items-center gap-0.5">
-                    <span>View Coordinates</span>
-                    <ArrowUpRight className="w-3 h-3" />
+                  <span className="text-teal-700 group-hover:translate-x-0.5 transition-transform flex items-center gap-0.5 font-bold">
+                    <span>View Map Position</span>
+                    <ArrowUpRight className="w-3.5 h-3.5" />
                   </span>
                 </div>
               </div>
@@ -174,32 +173,32 @@ export const CivicInsightsView: React.FC<CivicInsightsViewProps> = ({
         </div>
 
         {/* Data Coverage Gaps Table */}
-        <div className="p-4 rounded-2xl bg-navy-950 border border-slate-800 space-y-3">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-teal-400" />
+        <div className="p-5 rounded-royal surface-pearl border border-brand-border/80 shadow-card space-y-3.5">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-brand-text flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-teal-600" />
             <span>Infrastructure Coverage Audit</span>
           </h3>
 
-          <div className="space-y-2 text-xs">
-            <div className="flex items-center justify-between py-1.5 border-b border-slate-800">
-              <span className="text-slate-300">Streetlight Data Points</span>
-              <span className="font-mono text-teal-400 font-bold">{streetlights.length} recorded</span>
+          <div className="space-y-2.5 text-xs font-medium">
+            <div className="flex items-center justify-between py-1.5 border-b border-brand-border/70">
+              <span className="text-brand-text-secondary">Streetlight Data Points</span>
+              <span className="font-mono text-teal-700 font-bold">{streetlights.length} recorded</span>
             </div>
-            <div className="flex items-center justify-between py-1.5 border-b border-slate-800">
-              <span className="text-slate-300">Mapped Women's & Essential Restrooms</span>
-              <span className="font-mono text-teal-400 font-bold">
+            <div className="flex items-center justify-between py-1.5 border-b border-brand-border/70">
+              <span className="text-brand-text-secondary">Mapped Women's & Essential Restrooms</span>
+              <span className="font-mono text-teal-700 font-bold">
                 {facilities.filter((f) => f.category === 'womens_restroom' || f.category === 'public_toilet').length} mapped
               </span>
             </div>
-            <div className="flex items-center justify-between py-1.5 border-b border-slate-800">
-              <span className="text-slate-300">Emergency & 24/7 Police Desks</span>
-              <span className="font-mono text-teal-400 font-bold">
+            <div className="flex items-center justify-between py-1.5 border-b border-brand-border/70">
+              <span className="text-brand-text-secondary">Emergency & 24/7 Police Desks</span>
+              <span className="font-mono text-teal-700 font-bold">
                 {facilities.filter((f) => f.category === 'police_station' || f.category === 'hospital').length} mapped
               </span>
             </div>
             <div className="flex items-center justify-between py-1.5">
-              <span className="text-slate-300">Transit Stops with Women Coaches</span>
-              <span className="font-mono text-teal-400 font-bold">
+              <span className="text-brand-text-secondary">Transit Stops with Women Coaches</span>
+              <span className="font-mono text-teal-700 font-bold">
                 {transportStops.filter((t) => t.hasWomensCoach).length} stations
               </span>
             </div>

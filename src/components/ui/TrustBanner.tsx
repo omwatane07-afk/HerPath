@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Info, X, ShieldAlert } from 'lucide-react';
+import { ShieldCheck, X } from 'lucide-react';
 
 export const TrustBanner: React.FC = () => {
   const [dismissed, setDismissed] = useState(false);
@@ -7,20 +7,23 @@ export const TrustBanner: React.FC = () => {
   if (dismissed) return null;
 
   return (
-    <div className="bg-navy-900/90 border-b border-teal-500/20 px-4 py-2.5 text-xs text-slate-300 backdrop-blur-sm">
-      <div className="max-w-7xl mx-auto flex items-start sm:items-center justify-between gap-3">
-        <div className="flex items-start sm:items-center gap-2.5">
-          <ShieldAlert className="w-4 h-4 text-teal-400 shrink-0 mt-0.5 sm:mt-0" />
-          <p className="leading-relaxed">
-            <strong className="text-teal-300 font-semibold">Transparency Promise:</strong> HERPATH
-            provides relative infrastructure context and community observations. We{' '}
-            <span className="text-slate-100 font-medium">never label any route 100% safe</span>,
-            fabricate live crowd counts, or track users covertly.
+    <div className="bg-teal-25/90 border-b border-teal-100/70 px-3 sm:px-4 py-2 text-xs text-brand-text backdrop-blur-md transition-all">
+      <div className="max-w-7xl mx-auto flex items-start sm:items-center justify-between gap-2.5">
+        <div className="flex items-start sm:items-center gap-2 min-w-0">
+          <div className="w-5 h-5 rounded-full bg-teal-100 flex items-center justify-center shrink-0 mt-0.5 sm:mt-0 text-teal-700 ring-1 ring-champagne-300/60 shadow-xs">
+            <ShieldCheck className="w-3.5 h-3.5" />
+          </div>
+          <p className="leading-relaxed text-[11px] sm:text-xs text-brand-text-secondary">
+            <strong className="text-brand-text font-bold">Transparency Promise:</strong> Relative infrastructure context & verified community observations. We{' '}
+            <span className="text-teal-700 font-semibold underline decoration-teal-300">
+              never label any route 100% safe
+            </span>
+            , fabricate live crowd numbers, or track users covertly.
           </p>
         </div>
         <button
           onClick={() => setDismissed(true)}
-          className="text-slate-400 hover:text-slate-200 p-1 shrink-0 transition-colors"
+          className="text-brand-text-muted hover:text-brand-text p-1 shrink-0 transition-colors rounded-lg hover:bg-teal-100/50"
           title="Dismiss advisory"
           aria-label="Dismiss advisory"
         >
