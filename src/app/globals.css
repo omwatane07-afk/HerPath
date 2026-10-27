@@ -51,8 +51,12 @@
     color: var(--text);
   }
   body {
-    @apply antialiased font-sans selection:bg-peacock selection:text-white;
+    @apply antialiased font-sans;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+  ::selection {
+    background-color: var(--peacock);
+    color: #FFFFFF;
   }
   h1, h2, h3, .font-serif-title {
     font-family: var(--font-source-serif), "Source Serif 4", Georgia, serif;
