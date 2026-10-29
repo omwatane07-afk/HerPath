@@ -1,27 +1,211 @@
 import { PlaceSuggestion, Coordinates } from '../types';
-import { DEMO_PRESET_ORIGINS, DEMO_PRESET_DESTINATIONS } from '../lib/mock-data';
 
 const NOMINATIM_BASE =
   process.env.NEXT_PUBLIC_NOMINATIM_API_URL || 'https://nominatim.openstreetmap.org';
 
-const ALL_PRESETS = [...DEMO_PRESET_ORIGINS, ...DEMO_PRESET_DESTINATIONS];
+// Default bias: Pune, Maharashtra (18.5204° N, 73.8567° E)
+export const PUNE_DEFAULT_COORDINATES: Coordinates = {
+  lat: 18.5204,
+  lng: 73.8567,
+};
 
-export async function searchPlaces(query: string): Promise<PlaceSuggestion[]> {
-  const trimmed = query.trim().toLowerCase();
+export interface AutocompleteOptions {
+  biasCoords?: Coordinates | null;
+  countryCode?: string;
+  limit?: number;
+  signal?: AbortSignal;
+}
+
+/**
+ * Searches places using official Geoapify Address Autocomplete API
+ * Documentation: https://apidocs.geoapify.com/docs/geocoding/address-autocomplete/
+ *
+ * Gracefully falls back to OpenStreetMap Nominatim with Pune/India proximity biasing.
+ * Returns only genuine provider results with exact returned coordinates.
+ * NEVER returns hardcoded demonstration places.
+ */
+export async function searchPlaces(
+  query: string,
+  options: AutocompleteOptions = {}
+): Promise<PlaceSuggestion[]> {
+  const trimmed = query.trim();
   if (!trimmed || trimmed.length < 2) return [];
 
-  // First check demo presets for immediate instant response
-  const presetMatches = ALL_PRESETS.filter(
-    (p) =>
-      p.name.toLowerCase().includes(trimmed) ||
-      p.displayName.toLowerCase().includes(trimmed)
-  );
+  const bias = options.biasCoords || PUNE_DEFAULT_COORDINATES;
+  const limit = options.limit || 6;
+  const country = options.countryCode || 'in';
 
+  const geoapifyKey =
+    process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY ||
+    process.env.GEOAPIFY_API_KEY;
+
+  // 1. Try official Geoapify Address Autocomplete endpoint if API key configured
+  if (geoapifyKey && geoapifyKey.trim().length > 0) {
+    try {
+      // Geoapify Autocomplete API with country filter and proximity bias
+      // Proximity format in Geoapify is lon,lat
+      const biasParam = `&bias=proximity:${bias.lng},${bias.lat}`;
+      const filterParam = country ? `&filter=countrycode:${country.toLowerCase()}` : '';
+      const url = `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(
+        trimmed
+      )}${filterParam}${biasParam}&limit=${limit}&apiKey=${geoapifyKey}&lang=en`;
+
+      const controller = new AbortController();
+      const internalTimeout = setTimeout(() => controller.abort(), 4000);
+
+      // Link external abort signal if provided
+      if (options.signal) {
+        options.signal.addEventListener('abort', () => controller.abort());
+      }
+
+      const response = await fetch(url, { signal: controller.signal });
+      clearTimeout(internalTimeout);
+
+      if (response.ok) {
+        const data = await response.json();
+        const features = data.features || (data.results ? data.results.map((r: any) => ({ properties: r })) : []);
+
+        if (Array.isArray(features) && features.length > 0) {
+          const suggestions: PlaceSuggestion[] = features.map((f: any, idx: number) => {
+            const props = f.properties || f;
+            const lat = props.lat || f.geometry?.coordinates?.[1];
+            const lon = props.lon || f.geometry?.coordinates?.[0];
+
+            const name =
+              props.name ||
+              props.address_line1 ||
+              props.formatted?.split(',')[0] ||
+              trimmed;
+
+            const displayName =
+              props.formatted ||
+              [props.address_line1, props.address_line2].filter(Boolean).join(', ') ||
+              name;
+
+            return {
+              id: `geo_${props.place_id || idx}_${Date.now()}`,
+              name,
+              displayName,
+              coordinates: {
+                lat: Number(lat),
+                lng: Number(lon),
+              },
+              type: props.result_type || props.category || 'place',
+            };
+          }).filter((s) => !isNaN(s.coordinates.lat) && !isNaN(s.coordinates.lng));
+
+          if (suggestions.length > 0) {
+            return suggestions;
+          }
+        }
+      } else {
+        console.warn(`Geoapify Autocomplete HTTP ${response.status}: ${await response.text()}`);
+      }
+    } catch (err: any) {
+      if (err.name === 'AbortError') {
+        throw err; // Allow abort signal propagation
+      }
+      console.warn('Geoapify autocomplete error, trying Nominatim fallback:', err);
+    }
+  }
+
+  // 2. Fallback to OpenStreetMap Nominatim search API with proximity viewbox
   try {
+    // Biased around Pune/Maharashtra with bounded=0 so other cities still resolve
+    const viewbox = `${bias.lng - 0.4},${bias.lat + 0.4},${bias.lng + 0.4},${bias.lat - 0.4}`;
+    const countryParam = country ? `&countrycodes=${country.toLowerCase()}` : '';
     const url = `${NOMINATIM_BASE}/search?format=json&q=${encodeURIComponent(
-      query
-    )}&limit=5&addressdetails=1`;
+      trimmed
+    )}${countryParam}&viewbox=${viewbox}&bounded=0&limit=${limit}&addressdetails=1`;
 
+    const controller = new AbortController();
+    const internalTimeout = setTimeout(() => controller.abort(), 4500);
+
+    if (options.signal) {
+      options.signal.addEventListener('abort', () => controller.abort());
+    }
+
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        Accept: 'application/json',
+        'User-Agent': 'HerPath-Pedestrian-Safety/2.0',
+      },
+    });
+    clearTimeout(internalTimeout);
+
+    if (response.ok) {
+      const data = await response.json();
+      if (Array.isArray(data)) {
+        return data.map((item: any) => {
+          const lat = parseFloat(item.lat);
+          const lng = parseFloat(item.lon);
+
+          // Build clean concise place name from address details if available
+          const addr = item.address || {};
+          const primaryName =
+            item.name ||
+            addr.suburb ||
+            addr.neighbourhood ||
+            addr.amenity ||
+            addr.road ||
+            item.display_name.split(',')[0];
+
+          return {
+            id: `nom_${item.place_id}`,
+            name: primaryName,
+            displayName: item.display_name,
+            coordinates: { lat, lng },
+            type: item.type || item.class || 'place',
+          };
+        }).filter((s) => !isNaN(s.coordinates.lat) && !isNaN(s.coordinates.lng));
+      }
+    }
+  } catch (err: any) {
+    if (err.name === 'AbortError') {
+      throw err;
+    }
+    console.warn('Nominatim search request failed:', err);
+  }
+
+  // Return empty array when no genuine provider results are found
+  return [];
+}
+
+/**
+ * Reverse geocodes coordinates to an authentic, human-readable street name
+ */
+export async function reverseGeocode(coords: Coordinates): Promise<string> {
+  const geoapifyKey =
+    process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY ||
+    process.env.GEOAPIFY_API_KEY;
+
+  // 1. Try Geoapify Reverse Geocoding
+  if (geoapifyKey && geoapifyKey.trim().length > 0) {
+    try {
+      const url = `https://api.geoapify.com/v1/geocode/reverse?lat=${coords.lat}&lon=${coords.lng}&format=json&apiKey=${geoapifyKey}`;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3500);
+
+      const response = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
+        const data = await response.json();
+        const first = data.results?.[0];
+        if (first) {
+          const name = first.name || first.address_line1 || first.formatted?.split(',').slice(0, 2).join(', ');
+          if (name) return name;
+        }
+      }
+    } catch (err) {
+      console.warn('Geoapify reverse geocode failed, trying Nominatim fallback:', err);
+    }
+  }
+
+  // 2. Fallback to Nominatim Reverse Geocoding
+  try {
+    const url = `${NOMINATIM_BASE}/reverse?format=json&lat=${coords.lat}&lon=${coords.lng}&zoom=18&addressdetails=1`;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 3500);
 
@@ -29,67 +213,23 @@ export async function searchPlaces(query: string): Promise<PlaceSuggestion[]> {
       signal: controller.signal,
       headers: {
         Accept: 'application/json',
+        'User-Agent': 'HerPath-Pedestrian-Safety/2.0',
       },
     });
     clearTimeout(timeoutId);
 
     if (response.ok) {
       const data = await response.json();
-      const nominatimResults: PlaceSuggestion[] = data.map((item: any) => ({
-        id: `nom_${item.place_id}`,
-        name: item.name || item.display_name.split(',')[0],
-        displayName: item.display_name,
-        coordinates: {
-          lat: parseFloat(item.lat),
-          lng: parseFloat(item.lon),
-        },
-        type: item.type || 'place',
-      }));
-
-      // Combine presets + remote results without duplicates
-      const combined = [...presetMatches];
-      for (const res of nominatimResults) {
-        if (!combined.some((c) => Math.abs(c.coordinates.lat - res.coordinates.lat) < 0.001 && Math.abs(c.coordinates.lng - res.coordinates.lng) < 0.001)) {
-          combined.push(res);
-        }
+      if (data && data.display_name) {
+        const parts = data.display_name.split(',').map((s: string) => s.trim());
+        // Return first 2-3 significant street/area components
+        return parts.slice(0, 3).join(', ');
       }
-      return combined.slice(0, 6);
     }
   } catch (err) {
-    console.warn('Nominatim search failed or timed out, using local presets:', err);
+    console.warn('Nominatim reverse geocode failed:', err);
   }
 
-  return presetMatches;
-}
-
-export async function reverseGeocode(coords: Coordinates): Promise<string> {
-  // Check preset proximity
-  for (const p of ALL_PRESETS) {
-    const dLat = Math.abs(p.coordinates.lat - coords.lat);
-    const dLng = Math.abs(p.coordinates.lng - coords.lng);
-    if (dLat < 0.002 && dLng < 0.002) {
-      return p.name;
-    }
-  }
-
-  try {
-    const url = `${NOMINATIM_BASE}/reverse?format=json&lat=${coords.lat}&lon=${coords.lng}`;
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3000);
-
-    const response = await fetch(url, {
-      signal: controller.signal,
-      headers: { Accept: 'application/json' },
-    });
-    clearTimeout(timeoutId);
-
-    if (response.ok) {
-      const data = await response.json();
-      return data.display_name ? data.display_name.split(',').slice(0, 3).join(',') : `${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)}`;
-    }
-  } catch (err) {
-    console.warn('Reverse geocode failed:', err);
-  }
-
-  return `Current Location (${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)})`;
+  // Return formatted coordinate fallback if offline or unavailable
+  return `Location (${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)})`;
 }

@@ -28,8 +28,8 @@ const LeafletInnerMap = dynamic(
     loading: () => (
       <div className="w-full h-full bg-canvas flex flex-col items-center justify-center text-text-secondary gap-3">
         <div className="w-9 h-9 border-3 border-primary border-t-transparent rounded-full animate-spin" />
-        <span className="text-xs font-semibold tracking-wide text-ink font-editorial">
-          Loading Nightbloom Atlas...
+        <span className="text-xs font-semibold tracking-wide text-ink font-sans">
+          Loading Pedestrian Map...
         </span>
       </div>
     ),
@@ -58,6 +58,8 @@ interface LeafletMapProps {
   destination: Coordinates | null;
   originName?: string;
   destinationName?: string;
+  currentLocation?: Coordinates | null;
+  locationAccuracy?: number | null;
   routes: RouteOption[];
   selectedRouteIndex: number;
   onSelectRouteIndex: (index: number) => void;
@@ -103,6 +105,21 @@ export const LeafletMap: React.FC<LeafletMapProps> = (props) => {
 
       {/* Floating Controls Bar (Top Right) */}
       <div className="absolute top-4 right-4 z-[1000] flex items-center gap-2">
+        {/* Quick Report Issue Button */}
+        {props.onRequestSubmitReportAtCenter && (
+          <button
+            type="button"
+            onClick={props.onRequestSubmitReportAtCenter}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-[#C1121F] text-white shadow-e2 hover:bg-[#A30E1A] transition-all focus-ring-primary active:scale-95"
+            title="Report a civic or lighting issue at this location"
+            aria-label="Report an Issue"
+          >
+            <AlertTriangle className="w-3.5 h-3.5 text-white" />
+            <span className="hidden sm:inline">Report an Issue</span>
+            <span className="sm:hidden">Report</span>
+          </button>
+        )}
+
         {/* Feature-Flagged 3D City Toggle */}
         <button
           type="button"

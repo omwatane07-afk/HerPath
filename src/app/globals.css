@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Caveat:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,81 +6,77 @@
 
 :root {
   /* =========================================================================
-     NIGHTBLOOM DESIGN SYSTEM TOKENS
-     Aubergine ink, electric violet route, champagne detail.
-     Nocturnal luxury that stays legible at noon.
+     GIRLY MAP WORLD DESIGN SYSTEM TOKENS (HERPATH)
+     Clean white, pale lavender, rich purple, hot pink & dark plum
      ========================================================================= */
 
-  /* Structural & Canvas */
-  --canvas: #F7F3EE;
-  --canvas-2: #EEE8E1;
-  --canvas-subtle: #EEE8E1;
+  /* Structural & Canvas (Near-white with pale lavender tint, NO beige) */
+  --canvas: #FCFAFF;
+  --canvas-2: #F6F0FF;
+  --canvas-subtle: #F1EAFF;
   --surface-card: #FFFFFF;
-  --surface-raised: #FBF8F4;
+  --surface-raised: #FAF7FF;
   --white: #FFFFFF;
-  --border: #E4DCD3;
-  --border-control: #867B72;
-  --border-gold: #C9A25E;
+  --border: #EBDDFF;
+  --border-control: #9D8BB6;
+  --border-gold: #FFD966;
 
-  /* Brand Accents */
-  --ink: #1E0F28;
-  --ink-2: #3A1C4A;
-  --primary: #5A2FC2;
-  --primary-hover: #46229C;
-  --primary-tint: #EDE5FA;
-  --champagne: #C9A25E;
-  --champagne-text: #7A5A1E;
-  --champagne-tint: #FDF8EE;
+  /* Brand Colors */
+  --primary: #7047EB;
+  --primary-hover: #5C32D9;
+  --primary-active: #4A258C;
+  --primary-tint: #F1EAFF;
+  --grape: #7047EB;
+  --purple-deep: #4A258C;
+  --lavender: #F1EAFF;
+  --lilac: #DCCBFF;
+  --bubblegum: #FF91C8;
+  --hotpink: #F65BA8;
+  --strawberry: #FF91C8;
+  --butter: #FFD966;
+  --ink: #191421;
+  --ink-2: #2A2038;
+  --soft-ink: #665B76;
 
   /* Typography Colors */
-  --text: #1E0F28;
-  --text-secondary: #5E5068;
-  --text-muted: #6F6179;
-  --text-gold: #7A5A1E;
+  --text: #191421;
+  --text-secondary: #665B76;
+  --text-muted: #8A7D9D;
+  --text-gold: #8A5A00;
 
   /* Route Tokens */
-  --route-selected: #5A2FC2;
-  --route-alt: #6E6090;
+  --route-selected: #7047EB;
+  --route-alt: #DCCBFF;
   --route-casing: #FFFFFF;
+  --route-glow: #B99AFF;
 
-  /* Safety & Semantic (Strict Functional Separation) */
-  --emergency: #C21428;
-  --emergency-hover: #A30F20;
-  --emergency-tint: #FDECEE;
-  --error: #9E1B24;
-  --error-tint: #FCEAEB;
-  --caution: #A8560A;
-  --caution-text: #8A4A08;
-  --caution-tint: #FDF2E3;
-  --verified: #1F6B4D;
-  --verified-tint: #E6F3EC;
-  --info: #1F5FA8;
-  --info-tint: #EEF4FC;
-  --unknown: #6F6179;
-
-  /* Backward Compatibility Aliases */
-  --bordeaux: #1E0F28;
-  --velvet: #3A1C4A;
-  --rose-gold: #5A2FC2;
-  --peacock: #5A2FC2;
-  --peacock-dark: #46229C;
-  --peacock-tint: #EDE5FA;
-  --clay: #C9A25E;
-  --paper: #F7F3EE;
-  --raised: #FBF8F4;
-  --danger: #9E1B24;
+  /* Safety & Semantic Tokens */
+  --verified: #1F7A5C;
+  --verified-tint: #E8F5F0;
+  --caution: #8A5A00;
+  --caution-tint: #FFF3CC;
+  --danger: #A4003F;
+  --danger-tint: #FFE4EC;
+  --emergency: #C1121F;
+  --emergency-hover: #A30E1A;
+  --emergency-tint: #FFEBEB;
+  --sos-bg: #1E1233;
+  --info: #7047EB;
+  --info-tint: #F1EAFF;
+  --unknown: #8A7D9D;
 
   /* Atmospheric Shadows */
-  --shadow-e1: 0 2px 8px rgba(30, 15, 40, 0.05);
-  --shadow-e2: 0 8px 24px rgba(30, 15, 40, 0.08);
-  --shadow-e3: 0 20px 48px -10px rgba(30, 15, 40, 0.14);
-  --shadow-atelier: 0 20px 50px -10px rgba(30, 15, 40, 0.12), 0 0 0 1px rgba(228, 220, 211, 0.6);
-  --shadow-violet: 0 4px 16px rgba(90, 47, 194, 0.25);
+  --shadow-e1: 0 2px 8px rgba(25, 20, 33, 0.05);
+  --shadow-e2: 0 8px 24px rgba(112, 71, 235, 0.08);
+  --shadow-e3: 0 20px 48px -10px rgba(112, 71, 235, 0.16);
+  --shadow-sticker: 0 4px 14px rgba(112, 71, 235, 0.12), 0 0 0 3px #FFFFFF;
+  --shadow-sticker-lg: 0 8px 24px rgba(112, 71, 235, 0.18), 0 0 0 4px #FFFFFF;
+  --shadow-glow: 0 0 16px rgba(185, 154, 255, 0.6);
 
   /* Motion Timing */
   --dur-micro: 150ms;
-  --dur-card: 240ms;
-  --dur-scene: 450ms;
+  --dur-card: 220ms;
+  --dur-scene: 400ms;
   --dur-route: 800ms;
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
   --ease-exit: cubic-bezier(0.4, 0, 1, 1);
@@ -95,197 +91,236 @@
   }
   body {
     @apply antialiased font-sans;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    background-color: #FCFAFF;
+    background-image: radial-gradient(rgba(112, 71, 235, 0.04) 1px, transparent 0);
+    background-size: 24px 24px;
   }
   ::selection {
-    background-color: var(--primary-tint);
-    color: var(--ink);
+    background-color: #F1EAFF;
+    color: #191421;
   }
-  h1, h2, h3, .font-serif-title, .font-editorial {
-    font-family: var(--font-serif-display), "Fraunces", Georgia, serif;
+  h1, h2, h3, .font-serif-title, .font-editorial, .font-heading {
+    font-family: 'Bricolage Grotesque', system-ui, -apple-system, sans-serif;
   }
 }
 
 /* =========================================================================
-   NIGHTBLOOM FOCUS RING & ACCESSIBILITY SPECIFICATION
-   2px solid #5A2FC2 with 2px offset on light surfaces; #E4D4FF on ink surfaces
+   FOCUS RINGS & ACCESSIBILITY
+   3px Purple with white offset; on dark surfaces #DCCBFF
    ========================================================================= */
 
 .focus-ring-primary:focus-visible,
 .focus-ring-bordeaux:focus-visible,
 .focus-ring-peacock:focus-visible {
-  outline: 2px solid var(--primary);
+  outline: 3px solid #7047EB;
   outline-offset: 2px;
 }
 
 .focus-ring-on-dark:focus-visible {
-  outline: 2px solid #E4D4FF;
+  outline: 3px solid #DCCBFF;
   outline-offset: 2px;
 }
 
-/* Control input border boundary (>= 3:1 WCAG contrast) */
-.input-control {
-  border: 1px solid var(--border-control);
-  background-color: #FFFFFF;
-  color: var(--text);
-  border-radius: 12px;
+/* Luggage Tag Input Card */
+.luggage-tag {
+  background: #FFFFFF;
+  border: 1.5px solid #EBDDFF;
+  border-radius: 18px;
+  box-shadow: var(--shadow-e1);
+  position: relative;
   transition: border-color var(--dur-micro) var(--ease-standard), box-shadow var(--dur-micro) var(--ease-standard);
 }
-.input-control:focus {
-  outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px var(--primary-tint);
+.luggage-tag:focus-within {
+  border-color: #7047EB;
+  box-shadow: 0 0 0 3px #F1EAFF;
 }
 
-/* =========================================================================
-   NIGHTBLOOM CARDS & FLOATING SURFACES
-   Floating 440px desktop card panel, e2 shadow, clean 1px border
-   ========================================================================= */
-
-/* Floating Atelier Sidebar Panel (Full-Bleed Map Behind) */
-.panel-floating-nightbloom {
-  background: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  box-shadow: var(--shadow-e2);
-}
-
-/* Primary Surface Card */
+/* Primary Content Card */
 .surface-card {
   background-color: #FFFFFF;
-  border: 1px solid var(--border);
-  border-radius: 16px;
+  border: 1.5px solid #EBDDFF;
+  border-radius: 20px;
   box-shadow: var(--shadow-e1);
 }
 
-/* Secondary Raised Grouping */
-.surface-raised {
-  background-color: var(--surface-raised);
-  border: 1px solid var(--border);
-  border-radius: 14px;
+/* Sticker Card with Die-Cut White Rim */
+.sticker-card {
+  background-color: #FFFFFF;
+  border: 3px solid #FFFFFF;
+  border-radius: 20px;
+  box-shadow: var(--shadow-sticker);
+  position: relative;
+  transition: transform 180ms ease, box-shadow 180ms ease;
 }
 
-/* Interactive Card with Smooth Elevation */
+@media (hover: hover) and (pointer: fine) {
+  .sticker-card:hover {
+    transform: translateY(-4px) rotate(0.4deg);
+    box-shadow: var(--shadow-sticker-lg);
+  }
+}
+
+/* Interactive Card */
 .card-interactive {
   background-color: #FFFFFF;
-  border: 1px solid var(--border);
-  border-radius: 16px;
+  border: 1.5px solid #EBDDFF;
+  border-radius: 20px;
   box-shadow: var(--shadow-e1);
-  transition: transform var(--dur-micro) var(--ease-standard), box-shadow var(--dur-micro) var(--ease-standard), border-color var(--dur-micro) var(--ease-standard);
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .card-interactive:hover {
-    transform: translateY(-2px);
+    transform: translateY(-4px);
     box-shadow: var(--shadow-e2);
-    border-color: var(--primary);
+    border-color: #7047EB;
   }
 }
 
 .card-interactive:active {
-  transform: translateY(0);
+  transform: translateY(2px) scale(0.99);
 }
 
-/* Selected Route Card: Violet Tint Fill & Violet Border */
+/* Selected Route Card: Lavender Tint & Purple Rim */
 .card-selected {
-  background-color: var(--primary-tint) !important;
-  border: 2px solid var(--primary) !important;
-  box-shadow: 0 4px 16px rgba(90, 47, 194, 0.15) !important;
-  transform: none !important;
+  background-color: #F1EAFF !important;
+  border: 2.5px solid #7047EB !important;
+  box-shadow: 0 6px 22px rgba(112, 71, 235, 0.24) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Cute Ribbon Bow Accent */
+.ribbon-bow-accent {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #F65BA8;
+  font-weight: 700;
 }
 
 /* =========================================================================
-   NIGHTBLOOM BUTTONS & ACTIONS
-   One primary button per view (violet fill #5A2FC2, white text, 44px min height)
+   BUTTONS: Pill-shaped, accessible touch target, Purple #7047EB primary
    ========================================================================= */
 
-/* Primary Button: Electric Violet (44px min touch target) */
 .btn-primary,
 .btn-ink,
 .btn-bordeaux {
-  background-color: var(--primary);
+  background-color: #7047EB;
   color: #FFFFFF;
-  min-height: 44px;
-  border-radius: 12px;
-  font-weight: 600;
+  min-height: 48px;
+  border-radius: 9999px;
+  font-weight: 700;
   letter-spacing: 0.01em;
-  box-shadow: 0 2px 8px rgba(90, 47, 194, 0.25);
-  transition: background-color var(--dur-micro) var(--ease-standard), transform var(--dur-micro) var(--ease-standard), box-shadow var(--dur-micro) var(--ease-standard);
+  box-shadow: 0 4px 14px rgba(112, 71, 235, 0.28);
+  transition: background-color var(--dur-micro) var(--ease-standard), transform 90ms ease, box-shadow var(--dur-micro) var(--ease-standard);
 }
 .btn-primary:hover,
 .btn-ink:hover,
 .btn-bordeaux:hover {
-  background-color: var(--primary-hover);
-  box-shadow: 0 4px 14px rgba(90, 47, 194, 0.35);
+  background-color: #5C32D9;
+  box-shadow: 0 6px 18px rgba(112, 71, 235, 0.38);
 }
 .btn-primary:active,
 .btn-ink:active,
 .btn-bordeaux:active {
-  transform: scale(0.98);
+  transform: translateY(2px);
+  box-shadow: 0 2px 6px rgba(112, 71, 235, 0.2);
 }
 
-/* Secondary Button: Clean Porcelain with Control Border */
 .btn-secondary {
   background-color: #FFFFFF;
-  color: var(--text);
-  min-height: 44px;
-  border: 1px solid var(--border-control);
-  border-radius: 12px;
-  font-weight: 600;
-  transition: background-color var(--dur-micro) var(--ease-standard), border-color var(--dur-micro) var(--ease-standard);
+  color: #191421;
+  min-height: 48px;
+  border: 1.5px solid #DCCBFF;
+  border-radius: 9999px;
+  font-weight: 700;
+  transition: background-color var(--dur-micro) var(--ease-standard), border-color var(--dur-micro) var(--ease-standard), transform 90ms ease;
 }
 .btn-secondary:hover {
-  background-color: var(--surface-raised);
-  border-color: var(--primary);
+  background-color: #F1EAFF;
+  border-color: #7047EB;
+}
+.btn-secondary:active {
+  transform: translateY(2px);
 }
 
-/* Dedicated Emergency SOS: Unmistakable Crimson Jewel (56x56px min, zero decorative motion) */
+/* Dedicated Emergency SOS: Safety Critical Exception (Dark #1E1233, Red #C1121F) */
 .btn-emergency-sos {
-  background-color: var(--emergency);
+  background-color: #C1121F;
   color: #FFFFFF;
   font-weight: 800;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  border-radius: 14px;
-  box-shadow: 0 4px 14px rgba(194, 20, 40, 0.35);
-  transition: background-color var(--dur-micro) var(--ease-standard), transform var(--dur-micro) var(--ease-standard);
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(193, 18, 31, 0.4);
+  transition: background-color var(--dur-micro) var(--ease-standard), transform 90ms ease;
 }
 .btn-emergency-sos:hover {
-  background-color: var(--emergency-hover);
+  background-color: #A30E1A;
 }
 .btn-emergency-sos:active {
-  transform: scale(0.97);
+  transform: translateY(2px);
 }
 
 /* =========================================================================
-   MAP TILE STYLING & LEAFLET CANVAS
-   Muted basemap: desaturated so violet routes and markers dominate cleanly
+   PREMIUM WHITE GLASSMORPHISM UTILITIES (HERPATH 2.0)
    ========================================================================= */
 
+.glass-panel {
+  background-color: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 12px 36px -4px rgba(15, 23, 42, 0.08), 0 4px 16px -2px rgba(15, 23, 42, 0.04);
+}
+
+.glass-card {
+  background-color: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(241, 245, 249, 0.9);
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+}
+
+.glass-pill {
+  background-color: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+}
+
+.glass-dropdown {
+  background-color: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 16px 48px -8px rgba(15, 23, 42, 0.14);
+}
+
+/* Basemap tile styling: clean, crisp, modern navigation contrast */
 .leaflet-container {
-  background-color: #E9E4DD !important;
+  background-color: #F8FAFC !important;
   font-family: inherit !important;
 }
 
-/* Carto Positron or Muted OSM Tile Pane Filter */
 .leaflet-tile-pane {
-  filter: contrast(0.98) brightness(1.01) saturate(0.85);
+  filter: contrast(1.02) brightness(1.01) saturate(0.98);
 }
 
-/* Nightbloom Map Popups */
+/* Girly Map Popups */
 .herpath-popup .leaflet-popup-content-wrapper {
   background: #FFFFFF !important;
-  color: var(--text) !important;
-  border-radius: 16px !important;
-  border: 1px solid var(--border) !important;
+  color: #191421 !important;
+  border-radius: 20px !important;
+  border: 2px solid #DCCBFF !important;
   box-shadow: var(--shadow-e3) !important;
   padding: 4px !important;
 }
 
 .herpath-popup .leaflet-popup-tip {
   background: #FFFFFF !important;
-  border: 1px solid var(--border) !important;
+  border: 1.5px solid #DCCBFF !important;
 }
 
 .herpath-popup .leaflet-popup-content {
@@ -294,14 +329,10 @@
 }
 
 .herpath-popup a.leaflet-popup-close-button {
-  color: var(--text-secondary) !important;
+  color: #665B76 !important;
   padding: 8px !important;
   top: 8px !important;
   right: 8px !important;
-}
-
-.herpath-popup a.leaflet-popup-close-button:hover {
-  color: var(--ink) !important;
 }
 
 /* Custom DivIcons */
@@ -310,32 +341,60 @@
   border: none !important;
 }
 
-/* Marker selection lift animation (rises 4px, scales 1.08) */
-.marker-selected {
-  transform: scale(1.08) translateY(-4px) !important;
-  transition: transform var(--dur-card) var(--ease-emphasis);
-  filter: drop-shadow(0 6px 14px rgba(30, 15, 40, 0.25));
-  z-index: 9999 !important;
+/* =========================================================================
+   SIGNATURE ANIMATIONS: CHARACTER WALK & GLOW
+   ========================================================================= */
+
+/* Character Walk Sway & Bounce */
+@keyframes girlWalkBounce {
+  0% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-4px) rotate(1.5deg); }
+  50% { transform: translateY(0) rotate(0deg); }
+  75% { transform: translateY(-4px) rotate(-1.5deg); }
+  100% { transform: translateY(0) rotate(0deg); }
 }
 
-/* Animated route stroke */
-@keyframes routeStrokeAnim {
+.girl-walk-bounce {
+  animation: girlWalkBounce 450ms ease-in-out infinite;
+}
+
+/* Sparkle Floating Trail */
+@keyframes sparkleFloat {
+  0% { transform: scale(0.4) translateY(0); opacity: 0; }
+  50% { transform: scale(1.1) translateY(-8px); opacity: 1; }
+  100% { transform: scale(0.6) translateY(-16px); opacity: 0; }
+}
+
+.sparkle-trail {
+  animation: sparkleFloat 900ms ease-out forwards;
+}
+
+/* Heart Pop */
+@keyframes heartPop {
+  0% { transform: scale(0) rotate(-15deg); opacity: 0; }
+  60% { transform: scale(1.2) rotate(10deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+.heart-pop {
+  animation: heartPop 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Modal In */
+@keyframes modalIn {
   from {
-    stroke-dashoffset: 1000;
+    opacity: 0;
+    transform: scale(0.95) translateY(12px);
   }
   to {
-    stroke-dashoffset: 0;
+    opacity: 1;
+    transform: scale(1) translateY(0);
   }
 }
 
-.route-drawn-active {
-  stroke-dasharray: 1000;
-  animation: routeStrokeAnim var(--dur-route) var(--ease-emphasis) forwards;
+.animate-modal {
+  animation: modalIn var(--dur-scene) var(--ease-standard) forwards;
 }
-
-/* =========================================================================
-   ANIMATIONS & REDUCED MOTION SPECIFICATION
-   ========================================================================= */
 
 @keyframes fadeInCard {
   from {
@@ -352,27 +411,18 @@
   animation: fadeInCard var(--dur-card) var(--ease-standard) forwards;
 }
 
-/* Basemap tile styling: desaturated, clean warm canvas so violet route and markers dominate */
-.leaflet-tile-pane {
-  filter: grayscale(90%) contrast(0.88) brightness(1.06) sepia(0.06);
+/* Marker selection lift animation */
+.marker-selected {
+  transform: scale(1.12) translateY(-6px) !important;
+  transition: transform 300ms var(--ease-emphasis);
+  filter: drop-shadow(0 8px 18px rgba(112, 71, 235, 0.3));
+  z-index: 9999 !important;
 }
 
-@keyframes modalIn {
-  from {
-    opacity: 0;
-    transform: scale(0.96) translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
+/* =========================================================================
+   REDUCED MOTION SPECIFICATION
+   ========================================================================= */
 
-.animate-modal {
-  animation: modalIn var(--dur-scene) var(--ease-standard) forwards;
-}
-
-/* Reduced motion compliance */
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {
     animation-duration: 0.01ms !important;
@@ -380,38 +430,53 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  .card-interactive:hover {
+  .girl-walk-bounce,
+  .sparkle-trail,
+  .heart-pop {
+    animation: none !important;
     transform: none !important;
   }
   .marker-selected {
     transform: none !important;
   }
-  .route-drawn-active {
-    stroke-dasharray: none !important;
-    animation: none !important;
-  }
 }
 
-/* Tabular Numbers Utility */
+/* Tabular Numbers */
 .tabular-nums {
   font-variant-numeric: tabular-nums;
 }
 
-/* Restrained Scrollbar */
+/* Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
-
 ::-webkit-scrollbar-track {
   background: var(--canvas);
 }
-
 ::-webkit-scrollbar-thumb {
   background: var(--border-control);
   border-radius: 9999px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-secondary);
+}
+
+/* =========================================================================
+   MOBILE TOUCH & SAFE AREA INSETS (iOS & Android)
+   ========================================================================= */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.bottom-nav-safe {
+  bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+}
+
+/* Smooth touch manipulation without delay on mobile */
+button, input, select, textarea, a, [role="button"] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }

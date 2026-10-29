@@ -1,11 +1,12 @@
 import { Coordinates, RouteStep } from '../types';
+import { parseRouteGeometry, validateRouteGeometry } from '../lib/geo-utils';
 import { calculateDistanceMeters } from '../lib/utils';
 
 export interface RawRouteResult {
-  source: 'osrm' | 'synthetic_fallback';
+  source: 'geoapify' | 'osrm' | 'synthetic_fallback';
   distanceMeters: number;
   durationSeconds: number;
-  coordinates: [number, number][]; // [lat, lng]
+  coordinates: [number, number][]; // [lat, lng] array
   summary: string;
   steps: RouteStep[];
 }
@@ -16,114 +17,218 @@ export interface RouteProvider {
   fetchRoutes(origin: Coordinates, destination: Coordinates): Promise<RawRouteResult[]>;
 }
 
-export class OSRMRouteProvider implements RouteProvider {
+/**
+ * Geoapify Routing API Provider
+ * Official Documentation: https://apidocs.geoapify.com/docs/routing/
+ * Uses genuine pedestrian walking profile (mode=walk).
+ * Strictly renders real road geometry returned by the API.
+ */
+export class GeoapifyRouteProvider implements RouteProvider {
+  private apiKey: string;
+
+  constructor(apiKey?: string) {
+    this.apiKey =
+      apiKey ||
+      process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY ||
+      process.env.GEOAPIFY_API_KEY ||
+      '';
+  }
+
   async fetchRoutes(origin: Coordinates, destination: Coordinates): Promise<RawRouteResult[]> {
-    const url = `${OSRM_BASE}/route/v1/walking/${origin.lng},${origin.lat};${destination.lng},${destination.lat}?overview=full&geometries=geojson&alternatives=true&steps=true`;
+    const key =
+      this.apiKey ||
+      process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY ||
+      process.env.GEOAPIFY_API_KEY ||
+      '';
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 1200);
-
-    try {
-      const response = await fetch(url, { signal: controller.signal });
-      clearTimeout(timeoutId);
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.code === 'Ok' && Array.isArray(data.routes) && data.routes.length > 0) {
-          const results: RawRouteResult[] = data.routes.map((r: any, idx: number) => {
-            // OSRM coordinates are [lng, lat], convert to [lat, lng] for Leaflet
-            const coords: [number, number][] = r.geometry.coordinates.map(
-              ([lng, lat]: [number, number]) => [lat, lng]
-            );
-
-            const steps: RouteStep[] = (r.legs?.[0]?.steps || []).map((s: any) => ({
-              instruction: s.maneuver?.instruction || s.name || 'Continue on route',
-              distanceMeters: Math.round(s.distance || 0),
-              durationSeconds: Math.round(s.duration || 0),
-              coordinates: [s.maneuver?.location?.[1] || coords[0][0], s.maneuver?.location?.[0] || coords[0][1]],
-            }));
-
-            return {
-              source: 'osrm' as const,
-              distanceMeters: Math.round(r.distance),
-              durationSeconds: Math.round(r.duration),
-              coordinates: coords,
-              summary: r.legs?.[0]?.summary || `Route Alternative ${idx + 1}`,
-              steps: steps.length > 0 ? steps : [
-                {
-                  instruction: 'Head towards destination',
-                  distanceMeters: Math.round(r.distance),
-                  durationSeconds: Math.round(r.duration),
-                  coordinates: coords[0],
-                },
-              ],
-            };
-          });
-
-          // If OSRM only returned 1 route, synthesize secondary corridor alternatives
-          if (results.length === 1) {
-            const secondRoute = generateCorridorAlternative(origin, destination, results[0], 0.002, 'Parallel Transit Corridor');
-            const thirdRoute = generateCorridorAlternative(origin, destination, results[0], -0.002, 'Main Commercial Avenue');
-            results.push(secondRoute, thirdRoute);
-          }
-
-          return results;
-        }
-      }
-    } catch (err) {
-      console.warn('OSRM routing request failed or timed out. Falling back to explainable local corridor routing:', err);
+    if (!key || key.trim().length === 0) {
+      throw new Error('Geoapify API key not configured');
     }
 
-    // Graceful fallback when remote OSRM is unreachable
-    return generateSyntheticRouteAlternatives(origin, destination);
+    // Geoapify Routing API: waypoints=lat,lon|lat,lon & mode=walk & details=instruction_details
+    const url = `https://api.geoapify.com/v1/routing?waypoints=${origin.lat},${origin.lng}|${destination.lat},${destination.lng}&mode=walk&details=instruction_details&alternatives=true&apiKey=${key}`;
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 6000);
+
+    const response = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`Geoapify routing error (${response.status}): ${errText}`);
+    }
+
+    const data = await response.json();
+    if (!data.features || !Array.isArray(data.features) || data.features.length === 0) {
+      throw new Error('No pedestrian routes found between these locations');
+    }
+
+    const results: RawRouteResult[] = [];
+
+    for (let idx = 0; idx < data.features.length; idx++) {
+      const feature = data.features[idx];
+      // Parse exact GeoJSON geometry coordinates [[lng, lat]] -> [[lat, lng]]
+      const coords = parseRouteGeometry(feature.geometry);
+
+      if (!validateRouteGeometry(coords, origin, destination)) {
+        continue;
+      }
+
+      const prop = feature.properties || {};
+      const leg = prop.legs?.[0];
+      const steps: RouteStep[] = (leg?.steps || []).map((s: any) => ({
+        instruction: s.instruction?.text || 'Continue along pedestrian path',
+        distanceMeters: Math.round(s.distance || 0),
+        durationSeconds: Math.round(s.time || 0),
+        coordinates: coords[s.from_index] || coords[0],
+      }));
+
+      const summary =
+        prop.summary ||
+        (idx === 0 ? 'Primary Pedestrian Corridor' : `Alternative Corridor ${idx + 1}`);
+
+      results.push({
+        source: 'geoapify',
+        distanceMeters: Math.round(prop.distance || 0),
+        durationSeconds: Math.round(prop.time || 0),
+        coordinates: coords,
+        summary,
+        steps: steps.length > 0 ? steps : [
+          {
+            instruction: 'Follow pedestrian thoroughfare towards destination',
+            distanceMeters: Math.round(prop.distance || 0),
+            durationSeconds: Math.round(prop.time || 0),
+            coordinates: coords[0],
+          },
+        ],
+      });
+    }
+
+    if (results.length === 0) {
+      throw new Error('Unable to parse valid road geometry from Geoapify response');
+    }
+
+    return results;
   }
 }
 
 /**
- * Generates an alternative corridor by offsetting intermediate waypoints
+ * OpenStreetMap OSRM Pedestrian Foot Provider
+ * Official Documentation: http://project-osrm.org/docs/v5.24.0/api/
+ * Profile: /route/v1/foot/
+ * Queries genuine road network graph. Never fabricates sine-wave paths.
  */
-function generateCorridorAlternative(
-  origin: Coordinates,
-  destination: Coordinates,
-  baseRoute: RawRouteResult,
-  offset: number,
-  label: string
-): RawRouteResult {
-  const newCoords: [number, number][] = baseRoute.coordinates.map(([lat, lng], i, arr) => {
-    // Keep start and end fixed
-    if (i === 0 || i === arr.length - 1) return [lat, lng];
-    const factor = Math.sin((i / arr.length) * Math.PI); // bell curve offset
-    return [lat + offset * factor, lng + offset * factor * 0.8];
-  });
+export class OSRMRouteProvider implements RouteProvider {
+  async fetchRoutes(origin: Coordinates, destination: Coordinates): Promise<RawRouteResult[]> {
+    // In OSRM coordinates format: {lon},{lat};{lon},{lat}
+    const url = `${OSRM_BASE}/route/v1/foot/${origin.lng},${origin.lat};${destination.lng},${destination.lat}?overview=full&geometries=geojson&alternatives=true&steps=true`;
 
-  const distIncrease = Math.round(baseRoute.distanceMeters * 1.12);
-  const durIncrease = Math.round(baseRoute.durationSeconds * 1.15);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 6000);
 
-  return {
-    source: 'synthetic_fallback',
-    distanceMeters: distIncrease,
-    durationSeconds: durIncrease,
-    coordinates: newCoords,
-    summary: label,
-    steps: [
-      {
-        instruction: `Follow ${label} via pedestrian thoroughfare`,
-        distanceMeters: Math.round(distIncrease * 0.5),
-        durationSeconds: Math.round(durIncrease * 0.5),
-        coordinates: newCoords[0],
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        Accept: 'application/json',
+        'User-Agent': 'HerPath-Pedestrian-Safety/2.0',
       },
-      {
-        instruction: 'Turn towards destination along well-lit crossing',
-        distanceMeters: Math.round(distIncrease * 0.5),
-        durationSeconds: Math.round(durIncrease * 0.5),
-        coordinates: newCoords[Math.floor(newCoords.length / 2)],
-      },
-    ],
-  };
+    });
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      throw new Error(`OSRM routing service responded with status ${response.status}`);
+    }
+
+    const data = await response.json();
+    if (data.code !== 'Ok' || !Array.isArray(data.routes) || data.routes.length === 0) {
+      throw new Error(data.message || 'No walkable path found between these locations');
+    }
+
+    const results: RawRouteResult[] = [];
+
+    for (let idx = 0; idx < data.routes.length; idx++) {
+      const r = data.routes[idx];
+      // Parse exact GeoJSON LineString geometry
+      const coords = parseRouteGeometry(r.geometry);
+
+      if (!validateRouteGeometry(coords, origin, destination)) {
+        continue;
+      }
+
+      const leg = r.legs?.[0];
+      const steps: RouteStep[] = (leg?.steps || []).map((s: any) => ({
+        instruction: s.maneuver?.instruction || s.name || 'Continue on pedestrian path',
+        distanceMeters: Math.round(s.distance || 0),
+        durationSeconds: Math.round(s.duration || 0),
+        coordinates: [s.maneuver?.location?.[1] || coords[0][0], s.maneuver?.location?.[0] || coords[0][1]],
+      }));
+
+      // Genuine street name summary from OpenStreetMap road attributes
+      const streetSummary = leg?.summary ? `via ${leg.summary}` : (idx === 0 ? 'Direct Pedestrian Route' : `Alternative Route ${idx + 1}`);
+
+      results.push({
+        source: 'osrm',
+        distanceMeters: Math.round(r.distance),
+        durationSeconds: Math.round(r.duration),
+        coordinates: coords,
+        summary: streetSummary,
+        steps: steps.length > 0 ? steps : [
+          {
+            instruction: 'Head towards destination along pedestrian walkway',
+            distanceMeters: Math.round(r.distance),
+            durationSeconds: Math.round(r.duration),
+            coordinates: coords[0],
+          },
+        ],
+      });
+    }
+
+    if (results.length === 0) {
+      throw new Error('No valid pedestrian paths could be snapped to the road network');
+    }
+
+    // RETURN ONLY REAL ROUTES RETURNED BY THE ENGINE.
+    // Never synthesize fake sine-wave offsets!
+    return results;
+  }
 }
 
 /**
- * Creates 3 realistic pedestrian route corridors between two points when offline
+ * Smart Hybrid Route Provider
+ * Automatically prefers Geoapify when configured, gracefully falling back to OSRM.
+ * Never fabricates synthetic paths when live routing is available.
+ */
+export class SmartHybridRouteProvider implements RouteProvider {
+  private geoapifyProvider = new GeoapifyRouteProvider();
+  private osrmProvider = new OSRMRouteProvider();
+
+  async fetchRoutes(origin: Coordinates, destination: Coordinates): Promise<RawRouteResult[]> {
+    const geoapifyKey =
+      process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY ||
+      process.env.GEOAPIFY_API_KEY;
+
+    if (geoapifyKey && geoapifyKey.trim().length > 0) {
+      try {
+        const routes = await this.geoapifyProvider.fetchRoutes(origin, destination);
+        if (routes && routes.length > 0) {
+          return routes;
+        }
+      } catch (err) {
+        console.warn('Geoapify routing failed, attempting OSRM fallback:', err);
+      }
+    }
+
+    // Fall back to public OSRM pedestrian foot routing
+    return this.osrmProvider.fetchRoutes(origin, destination);
+  }
+}
+
+export const defaultRouteProvider = new SmartHybridRouteProvider();
+
+/**
+ * Mathematical route corridor generator for offline test suite verification only.
+ * NOT used for live pedestrian navigation.
  */
 export function generateSyntheticRouteAlternatives(
   origin: Coordinates,
@@ -132,7 +237,7 @@ export function generateSyntheticRouteAlternatives(
   const directDist = calculateDistanceMeters(origin, destination);
   const walkingPaceSecondsPerMeter = 0.75; // ~4.8 km/h pedestrian walking pace
 
-  // Corridor 1: Direct route with subtle street curvature
+  // Corridor 1: Direct route with subtle curvature
   const points1: [number, number][] = [];
   const segments = 12;
   for (let i = 0; i <= segments; i++) {
@@ -142,7 +247,7 @@ export function generateSyntheticRouteAlternatives(
     points1.push([lat, lng]);
   }
 
-  // Corridor 2: North/East main avenue offset (well-supported boulevard)
+  // Corridor 2: Offset corridor 2
   const points2: [number, number][] = [];
   for (let i = 0; i <= segments; i++) {
     const t = i / segments;
@@ -151,7 +256,7 @@ export function generateSyntheticRouteAlternatives(
     points2.push([lat, lng]);
   }
 
-  // Corridor 3: South/West commercial arcade offset
+  // Corridor 3: Offset corridor 3
   const points3: [number, number][] = [];
   for (let i = 0; i <= segments; i++) {
     const t = i / segments;
@@ -174,12 +279,6 @@ export function generateSyntheticRouteAlternatives(
           durationSeconds: Math.round(directDist * 0.5 * walkingPaceSecondsPerMeter),
           coordinates: points1[0],
         },
-        {
-          instruction: 'Continue towards destination waypoint',
-          distanceMeters: Math.round(directDist * 0.58),
-          durationSeconds: Math.round(directDist * 0.58 * walkingPaceSecondsPerMeter),
-          coordinates: points1[6],
-        },
       ],
     },
     {
@@ -194,12 +293,6 @@ export function generateSyntheticRouteAlternatives(
           distanceMeters: Math.round(directDist * 0.7),
           durationSeconds: Math.round(directDist * 0.7 * walkingPaceSecondsPerMeter),
           coordinates: points2[0],
-        },
-        {
-          instruction: 'Cross at signalised pedestrian junction towards destination',
-          distanceMeters: Math.round(directDist * 0.52),
-          durationSeconds: Math.round(directDist * 0.52 * walkingPaceSecondsPerMeter),
-          coordinates: points2[6],
         },
       ],
     },
@@ -216,15 +309,7 @@ export function generateSyntheticRouteAlternatives(
           durationSeconds: Math.round(directDist * 0.6 * walkingPaceSecondsPerMeter),
           coordinates: points3[0],
         },
-        {
-          instruction: 'Turn into final destination street',
-          distanceMeters: Math.round(directDist * 0.56),
-          durationSeconds: Math.round(directDist * 0.56 * walkingPaceSecondsPerMeter),
-          coordinates: points3[6],
-        },
       ],
     },
   ];
 }
-
-export const defaultRouteProvider = new OSRMRouteProvider();

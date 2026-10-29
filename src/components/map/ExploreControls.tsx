@@ -129,22 +129,22 @@ export const ExploreControls: React.FC<ExploreControlsProps> = ({
   return (
     <>
       {/* Floating Search & Filter Pill (Top Left of Map) */}
-      <div className="absolute top-4 left-4 z-[995] flex flex-col gap-2 max-w-[calc(100vw-32px)] sm:max-w-md w-full pointer-events-auto">
-        <div className="surface-card p-1.5 flex items-center gap-2 shadow-atelier bg-white/95 backdrop-blur-md border border-border-gold/60">
+      <div className="absolute top-4 left-4 z-[995] flex flex-col gap-2 max-w-[calc(100vw-32px)] sm:max-w-md w-full pointer-events-auto font-sans">
+        <div className="p-1.5 flex items-center gap-2 shadow-md bg-white/95 backdrop-blur-xl border border-slate-200/90 rounded-2xl">
           <div className="relative flex-1 flex items-center">
-            <Search className="w-4 h-4 text-text-secondary absolute left-2.5" />
+            <Search className="w-4 h-4 text-slate-400 absolute left-2.5" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search places, lighting, reports..."
-              className="w-full text-xs font-medium pl-8 pr-2 py-1.5 rounded-lg bg-canvas border border-transparent focus:border-rose-gold focus-ring-bordeaux text-bordeaux placeholder:text-text-muted"
+              className="w-full text-xs font-semibold pl-8 pr-2 py-1.5 rounded-xl bg-slate-100 border border-transparent focus:border-indigo-500 focus:outline-none text-slate-900 placeholder:text-slate-400"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                className="p-1 text-text-secondary hover:text-bordeaux mr-1"
+                className="p-1 text-slate-400 hover:text-slate-600 mr-1"
                 aria-label="Clear search"
               >
                 <X className="w-3.5 h-3.5" />
@@ -156,14 +156,14 @@ export const ExploreControls: React.FC<ExploreControlsProps> = ({
           <button
             type="button"
             onClick={() => setShowList(!showList)}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border transition-all focus-ring-bordeaux ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 border transition-all ${
               showList
-                ? 'bg-bordeaux text-white border-bordeaux shadow-sm'
-                : 'bg-canvas text-bordeaux border-border hover:bg-canvas-subtle'
+                ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
+                : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
             }`}
             title="Toggle accessible list view"
           >
-            {showList ? <Map className="w-3.5 h-3.5 text-champagne" /> : <List className="w-3.5 h-3.5 text-champagne" />}
+            {showList ? <Map className="w-3.5 h-3.5" /> : <List className="w-3.5 h-3.5" />}
             <span className="hidden sm:inline">{showList ? 'Map' : 'List'}</span>
           </button>
         </div>
@@ -171,20 +171,20 @@ export const ExploreControls: React.FC<ExploreControlsProps> = ({
         {/* Filter Chips Row */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-xs">
           {[
-            { id: 'all' as const, label: 'All' },
-            { id: 'streetlights' as const, label: 'Lighting' },
-            { id: 'facilities' as const, label: 'Facilities' },
-            { id: 'reports' as const, label: 'Reports' },
-            { id: 'transit' as const, label: 'Transit' },
+            { id: 'all' as const, label: '✨ All' },
+            { id: 'streetlights' as const, label: '💡 Lighting' },
+            { id: 'facilities' as const, label: '🏢 Facilities' },
+            { id: 'reports' as const, label: '📌 Reports' },
+            { id: 'transit' as const, label: '🚌 Transit' },
           ].map((f) => (
             <button
               key={f.id}
               type="button"
               onClick={() => setActiveFilter(f.id)}
-              className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap border shadow-sm transition-all focus-ring-bordeaux ${
+              className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap border shadow-xs transition-all ${
                 activeFilter === f.id
-                  ? 'bg-bordeaux text-white border-bordeaux shadow-sm'
-                  : 'bg-white/95 backdrop-blur-sm text-text-secondary hover:text-bordeaux border-border hover:bg-canvas'
+                  ? 'bg-grape text-white border-grape shadow-sm'
+                  : 'bg-white/95 backdrop-blur-sm text-soft-ink hover:text-ink border-lilac hover:bg-[#F1EAFF]'
               }`}
             >
               {f.label}
@@ -195,22 +195,22 @@ export const ExploreControls: React.FC<ExploreControlsProps> = ({
 
       {/* Accessible List Panel (Overlay on Desktop / Drawer on Mobile) */}
       {showList && (
-        <div className="absolute top-24 left-4 bottom-24 lg:bottom-8 z-[995] w-full max-w-[calc(100vw-32px)] sm:w-80 surface-card shadow-atelier flex flex-col overflow-hidden bg-white/98 backdrop-blur-md border border-border-gold/60 rounded-2xl animate-modal pointer-events-auto">
-          <div className="p-3 border-b border-border flex items-center justify-between bg-canvas/80">
-            <span className="font-editorial font-bold text-xs text-bordeaux uppercase tracking-wider">
+        <div className="absolute top-24 left-4 bottom-24 lg:bottom-8 z-[995] w-full max-w-[calc(100vw-32px)] sm:w-80 shadow-sticker-lg flex flex-col overflow-hidden bg-white/98 backdrop-blur-md border-2 border-lilac rounded-2xl animate-modal pointer-events-auto font-sans">
+          <div className="p-3 border-b border-purple-100 flex items-center justify-between bg-[#F1EAFF]/80">
+            <span className="font-heading font-extrabold text-xs text-ink uppercase tracking-wider">
               {filteredItems.length} Mapped Points
             </span>
             <button
               type="button"
               onClick={() => setShowList(false)}
-              className="p-1 rounded-lg text-text-secondary hover:text-bordeaux"
+              className="p-1 rounded-lg text-soft-ink hover:text-ink"
               aria-label="Close list"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-2 space-y-1.5 divide-y divide-border/60">
+          <div className="flex-1 overflow-y-auto p-2 space-y-1.5 divide-y divide-purple-100/60">
             {filteredItems.slice(0, 50).map((item) => (
               <div
                 key={`${item.type}-${item.id}`}
@@ -218,17 +218,17 @@ export const ExploreControls: React.FC<ExploreControlsProps> = ({
                   setSelectedItem(item);
                   onCenterMap(item.coordinates);
                 }}
-                className="pt-2 pb-1 px-2.5 rounded-xl hover:bg-canvas cursor-pointer transition-colors"
+                className="pt-2 pb-1.5 px-2.5 rounded-xl hover:bg-[#F1EAFF] cursor-pointer transition-colors"
               >
                 <div className="flex items-center justify-between text-[11px] mb-0.5">
-                  <span className="font-semibold text-rose-gold uppercase tracking-wider">
+                  <span className="font-extrabold text-grape uppercase tracking-wider text-[10px]">
                     {item.subtitle}
                   </span>
                   <DataSourceBadge source={item.source} showIcon={false} />
                 </div>
-                <div className="font-bold text-xs text-bordeaux">{item.title}</div>
+                <div className="font-bold text-xs text-ink">{item.title}</div>
                 {item.description && (
-                  <p className="text-[11px] text-text-secondary line-clamp-1 mt-0.5">
+                  <p className="text-[11px] text-soft-ink line-clamp-1 mt-0.5">
                     {item.description}
                   </p>
                 )}
@@ -240,20 +240,20 @@ export const ExploreControls: React.FC<ExploreControlsProps> = ({
 
       {/* Selected Marker Detail Card (Float Bottom Left) */}
       {selectedItem && (
-        <div className="absolute bottom-24 lg:bottom-8 left-4 z-[995] max-w-[calc(100vw-32px)] sm:w-80 surface-card p-4 shadow-atelier border border-border-gold/60 bg-white/98 backdrop-blur-md rounded-2xl animate-modal pointer-events-auto">
+        <div className="absolute bottom-24 lg:bottom-8 left-4 z-[995] max-w-[calc(100vw-32px)] sm:w-80 p-4 shadow-sticker-lg border-2 border-lilac bg-white/98 backdrop-blur-md rounded-2xl animate-modal pointer-events-auto font-sans">
           <div className="flex items-start justify-between gap-2 mb-2">
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-rose-gold font-editorial">
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-hotpink font-heading">
                 {selectedItem.subtitle}
               </span>
-              <h3 className="font-editorial font-bold text-base text-bordeaux leading-snug">
+              <h3 className="font-heading font-extrabold text-base text-ink leading-snug">
                 {selectedItem.title}
               </h3>
             </div>
             <button
               type="button"
               onClick={() => setSelectedItem(null)}
-              className="p-1 text-text-secondary hover:text-bordeaux rounded-lg"
+              className="p-1 text-soft-ink hover:text-ink rounded-lg"
               aria-label="Close details"
             >
               <X className="w-4 h-4" />
@@ -261,37 +261,37 @@ export const ExploreControls: React.FC<ExploreControlsProps> = ({
           </div>
 
           {selectedItem.description && (
-            <p className="text-xs text-text-secondary leading-relaxed mb-2">
+            <p className="text-xs text-soft-ink leading-relaxed mb-2 font-medium">
               {selectedItem.description}
             </p>
           )}
 
-          <div className="flex items-center justify-between text-[11px] text-text-secondary py-1.5 border-t border-border">
-            <span>{selectedItem.statusText || 'Status documented'}</span>
+          <div className="flex items-center justify-between text-[11px] text-soft-ink py-1.5 border-t border-purple-100">
+            <span className="font-medium">{selectedItem.statusText || 'Status documented'}</span>
             <DataSourceBadge source={selectedItem.source} />
           </div>
 
           {selectedItem.timestamp && (
-            <div className="text-[10px] text-text-muted flex items-center gap-1 pb-2">
-              <Clock className="w-3 h-3 text-champagne" />
+            <div className="text-[10px] text-soft-ink/70 flex items-center gap-1 pb-2">
+              <Clock className="w-3 h-3 text-grape" />
               <span>Observed {formatRelativeTime(selectedItem.timestamp)}</span>
             </div>
           )}
 
           {/* Action buttons: Directions & Report Issue */}
-          <div className="pt-2 border-t border-border flex items-center gap-2">
+          <div className="pt-2 border-t border-purple-100 flex items-center gap-2">
             <button
               type="button"
               onClick={() => onSetAsDestination(selectedItem.coordinates, selectedItem.title)}
-              className="btn-bordeaux flex-1 py-2 px-3 text-xs font-semibold flex items-center justify-center gap-1.5 shadow-md"
+              className="btn-primary flex-1 py-2 px-3 text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm"
             >
-              <Navigation className="w-3.5 h-3.5 text-champagne" />
+              <Navigation className="w-3.5 h-3.5 text-white" />
               <span>Directions</span>
             </button>
             <button
               type="button"
               onClick={() => onRequestReport(selectedItem.coordinates)}
-              className="btn-secondary py-2 px-3 text-xs font-semibold"
+              className="btn-secondary py-2 px-3 text-xs font-bold"
             >
               Report Issue
             </button>

@@ -11,8 +11,10 @@ import {
   JourneySession,
   TrustedContact,
   RoutePreferences,
+  WeatherContext,
 } from '@/types';
-import { StorageRepository } from '@/lib/storage';
+import { StorageRepository, DEFAULT_PREFERENCES } from '@/lib/storage';
+import { fetchCurrentWeather } from '@/services/weather-service';
 import {
   DEMO_PRESET_ORIGINS,
   DEMO_PRESET_DESTINATIONS,
@@ -21,12 +23,13 @@ import {
   INITIAL_FACILITIES,
   INITIAL_TRANSPORT_STOPS,
 } from '@/lib/mock-data';
-import { defaultRouteProvider, generateSyntheticRouteAlternatives } from '@/services/routing-service';
+import { defaultRouteProvider } from '@/services/routing-service';
 import { evaluateRoutes } from '@/services/route-context-engine';
 import { Header, ActiveTab } from '@/components/layout/Header';
 import { MobileNav } from '@/components/layout/MobileNav';
 import { LeafletMap } from '@/components/map/LeafletMap';
 import { RoutePlanner } from '@/components/route/RoutePlanner';
+import { ActiveNavigationPanel } from '@/components/route/ActiveNavigationPanel';
 import { RouteContextDrawer } from '@/components/route/RouteContextDrawer';
 import { ReportModal } from '@/components/reports/ReportModal';
 import { ReportList } from '@/components/reports/ReportList';
@@ -35,9 +38,12 @@ import { FamilyJourneyModal } from '@/components/journey/FamilyJourneyModal';
 import { FamilyTripsView } from '@/components/journey/FamilyTripsView';
 import { ActiveJourneyBanner } from '@/components/journey/ActiveJourneyBanner';
 import { EmergencyModal } from '@/components/emergency/EmergencyModal';
+import { SosTripleTapButton } from '@/components/emergency/SosTripleTapButton';
+import { SOSService } from '@/services/sos-service';
 import { CivicInsightsView } from '@/components/civic/CivicInsightsView';
 import { SettingsModal } from '@/components/settings/SettingsModal';
 import { ExploreControls } from '@/components/map/ExploreControls';
+import { OnboardingModal } from '@/components/ui/OnboardingModal';
 import { ChevronDown, ChevronUp, ChevronRight, PhoneCall, ChevronsUpDown } from 'lucide-react';
 
 export type MobileSheetSnap = 'peek' | 'half' | 'full';
@@ -80,19 +86,18 @@ export default function HerPathHome() {
     });
   };
 
-  // Map and Route Coordinates (defaulted to Connaught Place demo hub)
-  const [mapCenter, setMapCenter] = useState<Coordinates>({ lat: 28.6328, lng: 77.2197 });
-  const [origin, setOrigin] = useState<Coordinates | null>(DEMO_PRESET_ORIGINS[0].coordinates);
-  const [originName, setOriginName] = useState<string>(DEMO_PRESET_ORIGINS[0].name);
-  const [destination, setDestination] = useState<Coordinates | null>(
-    DEMO_PRESET_DESTINATIONS[0].coordinates
-  );
-  const [destinationName, setDestinationName] = useState<string>(
-    DEMO_PRESET_DESTINATIONS[0].name
-  );
+  // Map and Route Coordinates: Default fallback to Pune, Maharashtra (18.5204° N, 73.8567° E)
+  const [mapCenter, setMapCenter] = useState<Coordinates>({ lat: 18.5204, lng: 73.8567 });
+  const [origin, setOrigin] = useState<Coordinates | null>(null);
+  const [originName, setOriginName] = useState<string>('');
+  const [destination, setDestination] = useState<Coordinates | null>(null);
+  const [destinationName, setDestinationName] = useState<string>('');
 
-  // User Current Location
+  // User Current Location & Live Navigation
   const [currentLocation, setCurrentLocation] = useState<Coordinates | null>(null);
+  const [locationAccuracy, setLocationAccuracy] = useState<number | null>(null);
+  const [isNavigatingLive, setIsNavigatingLive] = useState<boolean>(false);
+  const [navigatingRoute, setNavigatingRoute] = useState<RouteOption | null>(null);
 
   // Domain Entities from Local Repository
   const [streetlights, setStreetlights] = useState<StreetlightSegment[]>([]);
@@ -101,38 +106,51 @@ export default function HerPathHome() {
   const [transportStops, setTransportStops] = useState<TransportStop[]>([]);
   const [activeJourney, setActiveJourney] = useState<JourneySession | null>(null);
   const [trustedContacts, setTrustedContacts] = useState<TrustedContact[]>([]);
-  const [preferences, setPreferences] = useState<RoutePreferences>(
-    StorageRepository.getPreferences()
-  );
+  const [preferences, setPreferences] = useState<RoutePreferences>(DEFAULT_PREFERENCES);
 
-  // Routing State
-  const [routes, setRoutes] = useState<RouteOption[]>(() => {
-    try {
-      const initialRaw = generateSyntheticRouteAlternatives(
-        DEMO_PRESET_ORIGINS[0].coordinates,
-        DEMO_PRESET_DESTINATIONS[0].coordinates
-      );
-      return evaluateRoutes(initialRaw, {
-        streetlights: INITIAL_STREETLIGHTS,
-        reports: INITIAL_REPORTS,
-        facilities: INITIAL_FACILITIES,
-        transportStops: INITIAL_TRANSPORT_STOPS,
-        preferences: StorageRepository.getPreferences(),
-      });
-    } catch {
-      return [];
-    }
-  });
+  // Routing State: Starts clean without artificial hardcoded paths
+  const [routes, setRoutes] = useState<RouteOption[]>([]);
   const [selectedRouteIndex, setSelectedRouteIndex] = useState<number>(0);
   const [isLoadingRoutes, setIsLoadingRoutes] = useState<boolean>(false);
+  const [routingError, setRoutingError] = useState<string | null>(null);
   const [inspectedRoute, setInspectedRoute] = useState<RouteOption | null>(null);
+
+  // Live Weather Telemetry State (OpenWeatherMap)
+  const [weather, setWeather] = useState<WeatherContext | null>(null);
+  const [isLoadingWeather, setIsLoadingWeather] = useState<boolean>(false);
+
+  // Fetch live weather when origin coordinates change
+  useEffect(() => {
+    if (origin) {
+      let active = true;
+      setIsLoadingWeather(true);
+      fetchCurrentWeather(origin)
+        .then((w) => {
+          if (active) setWeather(w);
+        })
+        .finally(() => {
+          if (active) setIsLoadingWeather(false);
+        });
+      return () => {
+        active = false;
+      };
+    }
+  }, [origin?.lat, origin?.lng]);
 
   // Modal States
   const [isEmergencyModalOpen, setIsEmergencyModalOpen] = useState(false);
+  const [emergencyTriggerMethod, setEmergencyTriggerMethod] = useState<'triple_tap' | 'quick_action'>('triple_tap');
+  const [isSosTestMode, setIsSosTestMode] = useState<boolean>(() => SOSService.isTestMode());
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isJourneyModalOpen, setIsJourneyModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [reportModalCoords, setReportModalCoords] = useState<Coordinates>(mapCenter);
+
+  const handleOpenEmergency = (method: 'triple_tap' | 'quick_action' = 'quick_action') => {
+    setEmergencyTriggerMethod(method);
+    setIsEmergencyModalOpen(true);
+  };
 
   // Load Initial Repository Data on Mount
   const loadData = useCallback(() => {
@@ -148,6 +166,27 @@ export default function HerPathHome() {
   useEffect(() => {
     loadData();
 
+    try {
+      const completed = localStorage.getItem('herpath_onboarding_completed');
+      if (!completed) {
+        setIsOnboardingOpen(true);
+      }
+    } catch {
+      // storage unavailable
+    }
+
+    if (typeof window !== 'undefined' && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          setCurrentLocation(coords);
+          setLocationAccuracy(Math.round(pos.coords.accuracy));
+        },
+        () => {},
+        { timeout: 6000, enableHighAccuracy: false }
+      );
+    }
+
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key && e.key.startsWith('herpath_')) {
         loadData();
@@ -162,8 +201,13 @@ export default function HerPathHome() {
     if (!origin || !destination) return;
 
     setIsLoadingRoutes(true);
+    setRoutingError(null);
     try {
       const rawRoutes = await defaultRouteProvider.fetchRoutes(origin, destination);
+
+      if (!rawRoutes || rawRoutes.length === 0) {
+        throw new Error('No pedestrian route could be found connecting these locations. Please choose points nearer to mapped roads or walking paths.');
+      }
 
       const evaluated = evaluateRoutes(rawRoutes, {
         streetlights,
@@ -176,17 +220,10 @@ export default function HerPathHome() {
       setRoutes(evaluated);
       setSelectedRouteIndex(0);
     } catch (err) {
-      console.warn('Live routing failed, falling back to synthetic alternatives:', err);
-      const fallbackRaw = generateSyntheticRouteAlternatives(origin, destination);
-      const fallbackEvaluated = evaluateRoutes(fallbackRaw, {
-        streetlights,
-        reports,
-        facilities,
-        transportStops,
-        preferences,
-      });
-      setRoutes(fallbackEvaluated);
-      setSelectedRouteIndex(0);
+      console.error('Pedestrian routing error:', err);
+      const message = err instanceof Error ? err.message : 'Unable to calculate a pedestrian route between these locations.';
+      setRoutingError(message);
+      setRoutes([]);
     } finally {
       setIsLoadingRoutes(false);
     }
@@ -196,6 +233,8 @@ export default function HerPathHome() {
   const handleSetFacilityAsDestination = (coords: Coordinates, name: string) => {
     setDestination(coords);
     setDestinationName(name);
+    setRoutingError(null);
+    setRoutes([]);
     handleSelectTab('route');
   };
 
@@ -210,10 +249,51 @@ export default function HerPathHome() {
     loadData();
   };
 
+  const handleFlagReportWithDetails = (id: string, reason: any, details?: string) => {
+    StorageRepository.flagReportWithDetails(id, reason, details);
+    loadData();
+  };
+
+  const handleTransitionStatus = (id: string, newStatus: any, note?: string) => {
+    StorageRepository.transitionReportStatus(
+      id,
+      newStatus,
+      { role: 'reviewer', name: 'Authorized Civic Reviewer' },
+      note
+    );
+    loadData();
+  };
+
   const handleResolveReport = (id: string) => {
     StorageRepository.resolveReport(id);
     loadData();
   };
+
+  // Dynamically refresh route context whenever reports or streetlights change
+  useEffect(() => {
+    if (routes.length > 0) {
+      try {
+        const rawList = routes.map((r) => ({
+          source: (r as any).source || 'osrm',
+          distanceMeters: r.distanceMeters,
+          durationSeconds: r.durationSeconds,
+          coordinates: r.coordinates,
+          summary: r.summary,
+          steps: r.steps,
+        }));
+        const reEvaluated = evaluateRoutes(rawList, {
+          streetlights,
+          reports,
+          facilities,
+          transportStops,
+          preferences,
+        });
+        setRoutes(reEvaluated);
+      } catch {
+        // silent fallback
+      }
+    }
+  }, [reports, streetlights]);
 
   // Family Journey Handlers
   const handleUpdateJourney = (journey: JourneySession) => {
@@ -232,13 +312,15 @@ export default function HerPathHome() {
       <Header
         activeTab={activeTab}
         onSelectTab={handleSelectTab}
-        onOpenEmergency={() => setIsEmergencyModalOpen(true)}
+        onOpenEmergency={handleOpenEmergency}
         onOpenReportModal={() => {
           setReportModalCoords(mapCenter);
           setIsReportModalOpen(true);
         }}
         onOpenSettings={() => setIsSettingsModalOpen(true)}
+        onOpenOnboarding={() => setIsOnboardingOpen(true)}
         hasActiveJourney={Boolean(activeJourney && activeJourney.status !== 'arrived')}
+        isTestMode={isSosTestMode}
       />
 
       {/* 2. Main Full-Bleed Map Canvas with Floating Left Desk */}
@@ -251,6 +333,8 @@ export default function HerPathHome() {
             destination={destination}
             originName={originName}
             destinationName={destinationName}
+            currentLocation={currentLocation}
+            locationAccuracy={locationAccuracy}
             routes={routes}
             selectedRouteIndex={selectedRouteIndex}
             onSelectRouteIndex={setSelectedRouteIndex}
@@ -286,92 +370,120 @@ export default function HerPathHome() {
           />
         )}
 
-        {/* Desktop Left Floating Panel (440px wide, 16px inset, 20px radius, e2 shadow) */}
+        {/* Desktop Left Floating Panel (440px wide, 16px inset, 24px radius, glassmorphism) */}
         {activeTab !== 'map' && (
-          <aside className="hidden lg:flex absolute top-4 left-4 bottom-4 w-[440px] z-20 flex-col bg-card/98 backdrop-blur-md border border-border rounded-[20px] shadow-e2 overflow-hidden">
-            {/* Active Journey Banner shown ONLY in Family module to preserve vertical space */}
-            {activeTab === 'family' && activeJourney && activeJourney.status !== 'arrived' && (
-              <ActiveJourneyBanner
-                journey={activeJourney}
-                onUpdateJourney={handleUpdateJourney}
-                onEndJourney={handleEndJourney}
+          <aside className="hidden lg:flex absolute top-4 left-4 bottom-4 w-[440px] z-20 flex-col bg-white/95 backdrop-blur-xl border border-slate-200/80 rounded-[24px] shadow-xl overflow-hidden">
+            {isNavigatingLive && navigatingRoute ? (
+              <ActiveNavigationPanel
+                route={navigatingRoute}
+                onEndNavigation={() => {
+                  setIsNavigatingLive(false);
+                  setNavigatingRoute(null);
+                }}
+                onRecenterMap={(coords) => setMapCenter(coords)}
+                onUserLocationUpdate={(coords) => setCurrentLocation(coords)}
+                nearbyReports={reports}
               />
-            )}
+            ) : (
+              <>
+                {/* Active Journey Banner shown ONLY in Family module to preserve vertical space */}
+                {activeTab === 'family' && activeJourney && activeJourney.status !== 'arrived' && (
+                  <ActiveJourneyBanner
+                    journey={activeJourney}
+                    onUpdateJourney={handleUpdateJourney}
+                    onEndJourney={handleEndJourney}
+                  />
+                )}
 
-            {activeTab === 'route' && (
-              <RoutePlanner
-                origin={origin}
-                destination={destination}
-                originName={originName}
-                destinationName={destinationName}
-                onSetOrigin={(c, name) => {
-                  setOrigin(c);
-                  setOriginName(name);
-                }}
-                onSetDestination={(c, name) => {
-                  setDestination(c);
-                  setDestinationName(name);
-                }}
-                routes={routes}
-                selectedRouteIndex={selectedRouteIndex}
-                onSelectRouteIndex={setSelectedRouteIndex}
-                isLoadingRoutes={isLoadingRoutes}
-                onFetchRoutes={handleCalculateRoutes}
-                preferences={preferences}
-                onUpdatePreferences={(p) => {
-                  setPreferences(p);
-                  StorageRepository.savePreferences(p);
-                }}
-                onOpenRouteDetails={setInspectedRoute}
-                onStartJourneyWithRoute={(r) => {
-                  setInspectedRoute(null);
-                  setIsJourneyModalOpen(true);
-                }}
-              />
-            )}
+                {activeTab === 'route' && (
+                  <RoutePlanner
+                    origin={origin}
+                    destination={destination}
+                    originName={originName}
+                    destinationName={destinationName}
+                    onSetOrigin={(c, name) => {
+                      setOrigin(c);
+                      setOriginName(name);
+                      setRoutingError(null);
+                      setRoutes([]);
+                    }}
+                    onSetDestination={(c, name) => {
+                      setDestination(c);
+                      setDestinationName(name);
+                      setRoutingError(null);
+                      setRoutes([]);
+                    }}
+                    routes={routes}
+                    selectedRouteIndex={selectedRouteIndex}
+                    onSelectRouteIndex={setSelectedRouteIndex}
+                    isLoadingRoutes={isLoadingRoutes}
+                    onFetchRoutes={handleCalculateRoutes}
+                    preferences={preferences}
+                    onUpdatePreferences={(p) => {
+                      setPreferences(p);
+                      StorageRepository.savePreferences(p);
+                    }}
+                    onOpenRouteDetails={setInspectedRoute}
+                    onStartJourneyWithRoute={(r) => {
+                      setInspectedRoute(null);
+                      setIsJourneyModalOpen(true);
+                    }}
+                    onStartLiveNavigation={(r) => {
+                      setNavigatingRoute(r);
+                      setIsNavigatingLive(true);
+                    }}
+                    weather={weather}
+                    isLoadingWeather={isLoadingWeather}
+                    routingError={routingError}
+                  />
+                )}
 
-            {activeTab === 'facilities' && (
-              <FacilitiesView
-                facilities={facilities}
-                currentLocation={currentLocation || origin}
-                onSetAsDestination={handleSetFacilityAsDestination}
-              />
-            )}
+                {activeTab === 'facilities' && (
+                  <FacilitiesView
+                    facilities={facilities}
+                    currentLocation={currentLocation || origin}
+                    onSetAsDestination={handleSetFacilityAsDestination}
+                  />
+                )}
 
-            {activeTab === 'reports' && (
-              <ReportList
-                reports={reports}
-                onUpvoteReport={handleUpvoteReport}
-                onFlagReport={handleFlagReport}
-                onResolveReport={handleResolveReport}
-                onOpenReportModal={() => {
-                  setReportModalCoords(mapCenter);
-                  setIsReportModalOpen(true);
-                }}
-              />
-            )}
+                {activeTab === 'reports' && (
+                  <ReportList
+                    reports={reports}
+                    onUpvoteReport={handleUpvoteReport}
+                    onFlagReport={handleFlagReport}
+                    onResolveReport={handleResolveReport}
+                    onTransitionStatus={handleTransitionStatus}
+                    onFlagReportWithDetails={handleFlagReportWithDetails}
+                    onOpenReportModal={() => {
+                      setReportModalCoords(mapCenter);
+                      setIsReportModalOpen(true);
+                    }}
+                  />
+                )}
 
-            {activeTab === 'family' && (
-              <FamilyTripsView
-                activeJourney={activeJourney}
-                trustedContacts={trustedContacts}
-                onOpenStartJourneyModal={() => setIsJourneyModalOpen(true)}
-                onEndJourney={handleEndJourney}
-                onOpenAddContact={() => setIsJourneyModalOpen(true)}
-              />
-            )}
+                {activeTab === 'family' && (
+                  <FamilyTripsView
+                    activeJourney={activeJourney}
+                    trustedContacts={trustedContacts}
+                    onOpenStartJourneyModal={() => setIsJourneyModalOpen(true)}
+                    onEndJourney={handleEndJourney}
+                    onOpenAddContact={() => setIsJourneyModalOpen(true)}
+                  />
+                )}
 
-            {activeTab === 'civic' && (
-              <CivicInsightsView
-                streetlights={streetlights}
-                reports={reports}
-                facilities={facilities}
-                transportStops={transportStops}
-                onSelectCoordinate={(coords) => {
-                  setMapCenter(coords);
-                  handleSelectTab('map');
-                }}
-              />
+                {activeTab === 'civic' && (
+                  <CivicInsightsView
+                    streetlights={streetlights}
+                    reports={reports}
+                    facilities={facilities}
+                    transportStops={transportStops}
+                    onSelectCoordinate={(coords) => {
+                      setMapCenter(coords);
+                      handleSelectTab('map');
+                    }}
+                  />
+                )}
+              </>
             )}
           </aside>
         )}
@@ -379,12 +491,12 @@ export default function HerPathHome() {
         {/* Mobile 3-Snap Bottom Sheet (peek ~80px, half ~50vh, full ~88vh) */}
         {activeTab !== 'map' && (
           <div
-            className={`lg:hidden fixed left-0 right-0 bottom-0 z-30 bg-card rounded-t-[28px] border-t border-border shadow-e3 flex flex-col transition-all duration-300 ease-out ${
+            className={`lg:hidden fixed left-0 right-0 bottom-0 z-30 bg-white/95 backdrop-blur-xl rounded-t-[28px] border-t border-slate-200/90 shadow-[0_-8px_30px_rgba(15,23,42,0.08)] flex flex-col transition-all duration-300 ease-out ${
               sheetSnap === 'peek'
                 ? 'h-24'
                 : sheetSnap === 'half'
                 ? 'h-[52vh]'
-                : 'h-[86vh]'
+                : 'h-[88vh]'
             }`}
           >
             {/* Sheet Handle */}
@@ -395,112 +507,138 @@ export default function HerPathHome() {
               tabIndex={0}
               aria-label={`Current sheet height: ${sheetSnap}. Tap to toggle snap height.`}
             >
-              <div className="w-12 h-1.5 bg-border-control/40 rounded-full mb-1" />
-              <div className="flex items-center gap-1.5 text-[11px] font-semibold text-text-secondary">
+              <div className="w-12 h-1.5 bg-slate-300 rounded-full mb-1" />
+              <div className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-600">
                 <span className="capitalize">{activeTab}</span>
-                <ChevronsUpDown className="w-3 h-3 text-text-muted" />
+                <ChevronsUpDown className="w-3 h-3 text-slate-400" />
               </div>
             </div>
 
             {/* Sheet Body */}
-            <div className="flex-1 overflow-y-auto pb-20">
-              {activeTab === 'family' && activeJourney && activeJourney.status !== 'arrived' && (
-                <ActiveJourneyBanner
-                  journey={activeJourney}
-                  onUpdateJourney={handleUpdateJourney}
-                  onEndJourney={handleEndJourney}
+            <div className="flex-1 overflow-y-auto pb-28 pb-safe overscroll-contain">
+              {isNavigatingLive && navigatingRoute ? (
+                <ActiveNavigationPanel
+                  route={navigatingRoute}
+                  onEndNavigation={() => {
+                    setIsNavigatingLive(false);
+                    setNavigatingRoute(null);
+                  }}
+                  onRecenterMap={(coords) => setMapCenter(coords)}
+                  onUserLocationUpdate={(coords) => setCurrentLocation(coords)}
+                  nearbyReports={reports}
                 />
-              )}
+              ) : (
+                <>
+                  {activeTab === 'family' && activeJourney && activeJourney.status !== 'arrived' && (
+                    <ActiveJourneyBanner
+                      journey={activeJourney}
+                      onUpdateJourney={handleUpdateJourney}
+                      onEndJourney={handleEndJourney}
+                    />
+                  )}
 
-              {activeTab === 'route' && (
-                <RoutePlanner
-                  origin={origin}
-                  destination={destination}
-                  originName={originName}
-                  destinationName={destinationName}
-                  onSetOrigin={(c, name) => {
-                    setOrigin(c);
-                    setOriginName(name);
-                  }}
-                  onSetDestination={(c, name) => {
-                    setDestination(c);
-                    setDestinationName(name);
-                  }}
-                  routes={routes}
-                  selectedRouteIndex={selectedRouteIndex}
-                  onSelectRouteIndex={setSelectedRouteIndex}
-                  isLoadingRoutes={isLoadingRoutes}
-                  onFetchRoutes={handleCalculateRoutes}
-                  preferences={preferences}
-                  onUpdatePreferences={(p) => {
-                    setPreferences(p);
-                    StorageRepository.savePreferences(p);
-                  }}
-                  onOpenRouteDetails={setInspectedRoute}
-                  onStartJourneyWithRoute={(r) => {
-                    setInspectedRoute(null);
-                    setIsJourneyModalOpen(true);
-                  }}
-                />
-              )}
+                  {activeTab === 'route' && (
+                    <RoutePlanner
+                      origin={origin}
+                      destination={destination}
+                      originName={originName}
+                      destinationName={destinationName}
+                      onSetOrigin={(c, name) => {
+                        setOrigin(c);
+                        setOriginName(name);
+                        setRoutingError(null);
+                        setRoutes([]);
+                      }}
+                      onSetDestination={(c, name) => {
+                        setDestination(c);
+                        setDestinationName(name);
+                        setRoutingError(null);
+                        setRoutes([]);
+                      }}
+                      routes={routes}
+                      selectedRouteIndex={selectedRouteIndex}
+                      onSelectRouteIndex={setSelectedRouteIndex}
+                      isLoadingRoutes={isLoadingRoutes}
+                      onFetchRoutes={handleCalculateRoutes}
+                      preferences={preferences}
+                      onUpdatePreferences={(p) => {
+                        setPreferences(p);
+                        StorageRepository.savePreferences(p);
+                      }}
+                      onOpenRouteDetails={setInspectedRoute}
+                      onStartJourneyWithRoute={(r) => {
+                        setInspectedRoute(null);
+                        setIsJourneyModalOpen(true);
+                      }}
+                      onStartLiveNavigation={(r) => {
+                        setNavigatingRoute(r);
+                        setIsNavigatingLive(true);
+                        setSheetSnap('half');
+                      }}
+                      weather={weather}
+                      isLoadingWeather={isLoadingWeather}
+                      routingError={routingError}
+                      onExpandSheet={() => setSheetSnap('full')}
+                    />
+                  )}
 
-              {activeTab === 'facilities' && (
-                <FacilitiesView
-                  facilities={facilities}
-                  currentLocation={currentLocation || origin}
-                  onSetAsDestination={handleSetFacilityAsDestination}
-                />
-              )}
+                  {activeTab === 'facilities' && (
+                    <FacilitiesView
+                      facilities={facilities}
+                      currentLocation={currentLocation || origin}
+                      onSetAsDestination={handleSetFacilityAsDestination}
+                    />
+                  )}
 
-              {activeTab === 'reports' && (
-                <ReportList
-                  reports={reports}
-                  onUpvoteReport={handleUpvoteReport}
-                  onFlagReport={handleFlagReport}
-                  onResolveReport={handleResolveReport}
-                  onOpenReportModal={() => {
-                    setReportModalCoords(mapCenter);
-                    setIsReportModalOpen(true);
-                  }}
-                />
-              )}
+                  {activeTab === 'reports' && (
+                    <ReportList
+                      reports={reports}
+                      onUpvoteReport={handleUpvoteReport}
+                      onFlagReport={handleFlagReport}
+                      onResolveReport={handleResolveReport}
+                      onTransitionStatus={handleTransitionStatus}
+                      onFlagReportWithDetails={handleFlagReportWithDetails}
+                      onOpenReportModal={() => {
+                        setReportModalCoords(mapCenter);
+                        setIsReportModalOpen(true);
+                      }}
+                    />
+                  )}
 
-              {activeTab === 'family' && (
-                <FamilyTripsView
-                  activeJourney={activeJourney}
-                  trustedContacts={trustedContacts}
-                  onOpenStartJourneyModal={() => setIsJourneyModalOpen(true)}
-                  onEndJourney={handleEndJourney}
-                  onOpenAddContact={() => setIsJourneyModalOpen(true)}
-                />
-              )}
+                  {activeTab === 'family' && (
+                    <FamilyTripsView
+                      activeJourney={activeJourney}
+                      trustedContacts={trustedContacts}
+                      onOpenStartJourneyModal={() => setIsJourneyModalOpen(true)}
+                      onEndJourney={handleEndJourney}
+                      onOpenAddContact={() => setIsJourneyModalOpen(true)}
+                    />
+                  )}
 
-              {activeTab === 'civic' && (
-                <CivicInsightsView
-                  streetlights={streetlights}
-                  reports={reports}
-                  facilities={facilities}
-                  transportStops={transportStops}
-                  onSelectCoordinate={(coords) => {
-                    setMapCenter(coords);
-                    handleSelectTab('map');
-                  }}
-                />
+                  {activeTab === 'civic' && (
+                    <CivicInsightsView
+                      streetlights={streetlights}
+                      reports={reports}
+                      facilities={facilities}
+                      transportStops={transportStops}
+                      onSelectCoordinate={(coords) => {
+                        setMapCenter(coords);
+                        handleSelectTab('map');
+                      }}
+                    />
+                  )}
+                </>
               )}
             </div>
           </div>
         )}
 
-        {/* Fixed Isolated Desktop SOS Jewel (Bottom-Right, 56x56px, #C21428 fill) */}
-        <button
-          onClick={() => setIsEmergencyModalOpen(true)}
-          className="hidden lg:flex fixed bottom-6 right-6 z-[1000] w-14 h-14 rounded-2xl bg-emergency hover:bg-emergency-hover text-white shadow-e3 items-center justify-center flex-col gap-0.5 focus-ring-on-dark transition-transform active:scale-95"
-          aria-label="Emergency SOS - Open immediate assistance dialer and GPS coordinates"
-          title="Emergency SOS"
-        >
-          <PhoneCall className="w-5 h-5 text-white stroke-[2.5]" />
-          <span className="text-[10px] font-bold tracking-wider leading-none">SOS</span>
-        </button>
+        {/* Fixed Isolated Floating SOS Triple-Tap Jewel (Bottom-Right) */}
+        <SosTripleTapButton
+          variant="floating"
+          onTriggerSOS={(method) => handleOpenEmergency(method)}
+          isTestMode={isSosTestMode}
+        />
       </main>
 
       {/* 3. Mobile Navigation Dock */}
@@ -514,6 +652,7 @@ export default function HerPathHome() {
       {inspectedRoute && (
         <RouteContextDrawer
           route={inspectedRoute}
+          weather={weather}
           onClose={() => setInspectedRoute(null)}
           onStartJourney={() => {
             setInspectedRoute(null);
@@ -526,6 +665,8 @@ export default function HerPathHome() {
         <EmergencyModal
           currentLocation={currentLocation || mapCenter}
           trustedContacts={trustedContacts}
+          triggerMethod={emergencyTriggerMethod}
+          initialTestMode={isSosTestMode}
           onClose={() => setIsEmergencyModalOpen(false)}
         />
       )}
@@ -534,10 +675,10 @@ export default function HerPathHome() {
         <ReportModal
           isOpen={isReportModalOpen}
           defaultCoords={reportModalCoords}
+          existingReports={reports}
           onSubmitReport={(newReport) => {
             StorageRepository.saveReport(newReport);
             loadData();
-            setIsReportModalOpen(false);
           }}
           onClose={() => setIsReportModalOpen(false)}
         />
@@ -578,14 +719,25 @@ export default function HerPathHome() {
           onResetDemoData={() => {
             StorageRepository.resetToDemoDefaults();
             loadData();
-            setOrigin(DEMO_PRESET_ORIGINS[0].coordinates);
-            setOriginName(DEMO_PRESET_ORIGINS[0].name);
-            setDestination(DEMO_PRESET_DESTINATIONS[0].coordinates);
-            setDestinationName(DEMO_PRESET_DESTINATIONS[0].name);
-            handleCalculateRoutes();
+            setOrigin(null);
+            setOriginName('');
+            setDestination(null);
+            setDestinationName('');
+            setRoutes([]);
+            setMapCenter({ lat: 18.5204, lng: 73.8567 });
           }}
         />
       )}
+
+      {/* 5. Scrapbook Onboarding Guide */}
+      <OnboardingModal
+        isOpen={isOnboardingOpen}
+        onClose={() => setIsOnboardingOpen(false)}
+        onStartPlanning={() => {
+          setIsOnboardingOpen(false);
+          handleSelectTab('route');
+        }}
+      />
     </div>
   );
 }

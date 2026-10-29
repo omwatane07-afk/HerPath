@@ -1,0 +1,45 @@
+{
+  "name": "HERPATH Safety-Aware Navigation",
+  "short_name": "HERPATH",
+  "description": "Transparent, safety-informed pedestrian navigation and civic infrastructure insights.",
+  "start_url": "/",
+  "id": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#FFFFFF",
+  "theme_color": "#4F46E5",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["navigation", "travel", "safety"],
+  "shortcuts": [
+    {
+      "name": "Plan Safety Route",
+      "short_name": "Route",
+      "url": "/?tab=route",
+      "description": "Plan safety-informed walking routes"
+    },
+    {
+      "name": "Emergency Assistance",
+      "short_name": "SOS",
+      "url": "/?tab=sos",
+      "description": "Open emergency directory and check-in"
+    }
+  ]
+}

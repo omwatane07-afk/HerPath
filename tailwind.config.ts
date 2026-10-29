@@ -10,153 +10,189 @@ const config: Config = {
     extend: {
       colors: {
         // =====================================================================
-        // NIGHTBLOOM DESIGN SYSTEM
-        // Aubergine ink, electric violet route, champagne detail.
-        // Nocturnal luxury that stays legible at noon.
+        // GIRLY MAP WORLD DESIGN SYSTEM (HERPATH)
+        // Clean white, pale lavender, rich purple, hot pink & dark plum
         // =====================================================================
-        ink: {
-          DEFAULT: "#1E0F28",
-          2: "#3A1C4A",
-          hover: "#140A1C",
-          active: "#0D0612",
-        },
         canvas: {
-          DEFAULT: "#F7F3EE",
-          2: "#EEE8E1",
-          subtle: "#EEE8E1",
+          DEFAULT: "#FCFAFF",
+          2: "#F6F0FF",
+          subtle: "#F1EAFF",
+        },
+        paper: {
+          DEFAULT: "#FCFAFF",
+          2: "#F6F0FF",
         },
         card: {
           DEFAULT: "#FFFFFF",
         },
         raised: {
-          DEFAULT: "#FBF8F4",
-          hover: "#F3EDE4",
+          DEFAULT: "#FFFFFF",
+          hover: "#F8F4FF",
+        },
+        lavender: {
+          DEFAULT: "#F1EAFF",
+          pale: "#F8F4FF",
+          light: "#F1EAFF",
+          dark: "#DCCBFF",
+        },
+        lilac: {
+          DEFAULT: "#DCCBFF",
+          wash: "#F1EAFF",
+          light: "#F5EFFF",
+          dark: "#C5AFFF",
+        },
+        bubblegum: {
+          DEFAULT: "#FF91C8",
+          light: "#FFAED6",
+          dark: "#E86DA9",
+          tint: "#FFF2F8",
+        },
+        hotpink: {
+          DEFAULT: "#F65BA8",
+          hover: "#DE3F90",
+          tint: "#FFF0F6",
+        },
+        strawberry: {
+          DEFAULT: "#FF91C8",
+          hover: "#F65BA8",
+          tint: "#FFF0F6",
+        },
+        grape: {
+          DEFAULT: "#7047EB",
+          hover: "#5C32D9",
+          active: "#4A258C",
+          tint: "#F1EAFF",
         },
         primary: {
-          DEFAULT: "#5A2FC2",
-          hover: "#46229C",
-          active: "#381980",
-          tint: "#EDE5FA",
+          DEFAULT: "#7047EB",
+          hover: "#5C32D9",
+          active: "#4A258C",
+          tint: "#F1EAFF",
+        },
+        purple: {
+          deep: "#4A258C",
+          rich: "#7047EB",
+          glow: "#B99AFF",
+        },
+        periwinkle: {
+          DEFAULT: "#B99AFF",
+          hover: "#9F7AFA",
+          tint: "#F5F0FF",
+        },
+        butter: {
+          DEFAULT: "#FFD966",
+          hover: "#F5CE54",
+          tint: "#FFF9E6",
+        },
+        ink: {
+          DEFAULT: "#191421",
+          2: "#2A2038",
+          hover: "#0E0A14",
+          active: "#08050C",
+        },
+        "soft-ink": {
+          DEFAULT: "#665B76",
         },
         champagne: {
-          DEFAULT: "#C9A25E",
-          hover: "#B58F4A",
-          dark: "#7A5A1E",
-          text: "#7A5A1E",
-          tint: "#FDF8EE",
+          DEFAULT: "#FFD966",
+          hover: "#F5CE54",
+          dark: "#8A5A00",
+          text: "#8A5A00",
+          tint: "#FFF9E6",
         },
         text: {
-          DEFAULT: "#1E0F28",
-          primary: "#1E0F28",
-          secondary: "#5E5068",
-          muted: "#6F6179",
-          gold: "#7A5A1E",
-          disabled: "#8E8296",
+          DEFAULT: "#191421",
+          primary: "#191421",
+          secondary: "#665B76",
+          muted: "#8A7D9D",
+          gold: "#8A5A00",
+          disabled: "#B3A7C5",
         },
         border: {
-          DEFAULT: "#E4DCD3",
-          control: "#867B72",
-          gold: "#C9A25E",
-          subtle: "#EDE6DD",
+          DEFAULT: "#EBDDFF",
+          control: "#8F7D9E",
+          gold: "#FFD966",
+          subtle: "#F5EDFF",
         },
         "route-alt": {
-          DEFAULT: "#6E6090",
+          DEFAULT: "#DCCBFF",
         },
         "route-casing": {
           DEFAULT: "#FFFFFF",
         },
-        // Semantic safety tokens
-        emergency: {
-          DEFAULT: "#C21428",
-          hover: "#A30F20",
-          tint: "#FDECEE",
-        },
-        error: {
-          DEFAULT: "#9E1B24",
-          tint: "#FCEAEB",
+        // Strict Functional Semantic Tokens
+        verified: {
+          DEFAULT: "#1F7A5C",
+          tint: "#E8F5F0",
         },
         caution: {
-          DEFAULT: "#A8560A",
-          text: "#8A4A08",
-          tint: "#FDF2E3",
-        },
-        verified: {
-          DEFAULT: "#1F6B4D",
-          tint: "#E6F3EC",
-        },
-        info: {
-          DEFAULT: "#1F5FA8",
-          tint: "#EEF4FC",
-        },
-        unknown: {
-          DEFAULT: "#6F6179",
-        },
-        // Facility marker categories
-        facility: {
-          transit: "#1F5FA8",
-          women: "#8E2F7E",
-          medical: "#0F766E",
-          police: "#2B3A67",
-          streetlight: "#8A6A10",
-        },
-        // Backward-compatible aliases so existing code never breaks
-        bordeaux: {
-          DEFAULT: "#1E0F28",
-          hover: "#140A1C",
-          dark: "#0D0612",
-          tint: "#EDE5FA",
-        },
-        velvet: {
-          DEFAULT: "#3A1C4A",
-          hover: "#2A1236",
-        },
-        "rose-gold": {
-          DEFAULT: "#5A2FC2",
-          hover: "#46229C",
-          tint: "#EDE5FA",
-        },
-        peacock: {
-          DEFAULT: "#5A2FC2",
-          dark: "#46229C",
-          tint: "#EDE5FA",
-          hover: "#46229C",
-        },
-        clay: {
-          DEFAULT: "#C9A25E",
-          tint: "#FDF8EE",
-        },
-        paper: {
-          DEFAULT: "#F7F3EE",
+          DEFAULT: "#8A5A00",
+          text: "#8A5A00",
+          tint: "#FFF3CC",
         },
         danger: {
-          DEFAULT: "#9E1B24",
-          tint: "#FCEAEB",
+          DEFAULT: "#A4003F",
+          tint: "#FFE4EC",
+        },
+        emergency: {
+          DEFAULT: "#C1121F",
+          hover: "#A30E1A",
+          tint: "#FFEBEB",
+        },
+        error: {
+          DEFAULT: "#C1121F",
+          tint: "#FFEBEB",
+        },
+        info: {
+          DEFAULT: "#7047EB",
+          tint: "#F1EAFF",
+        },
+        unknown: {
+          DEFAULT: "#8A7D9D",
+        },
+        sos: {
+          DEFAULT: "#C1121F",
+          bg: "#1E1233",
+        },
+        facility: {
+          transit: "#7047EB",
+          women: "#F65BA8",
+          medical: "#1F7A5C",
+          police: "#191421",
+          streetlight: "#FFD966",
+          cafe: "#FF91C8",
         },
       },
       boxShadow: {
-        e1: "0 2px 8px rgba(30, 15, 40, 0.05)",
-        e2: "0 8px 24px rgba(30, 15, 40, 0.08)",
-        e3: "0 20px 48px -10px rgba(30, 15, 40, 0.14)",
-        atelier: "0 20px 50px -10px rgba(30, 15, 40, 0.12), 0 0 0 1px rgba(228, 220, 211, 0.6)",
-        violet: "0 4px 16px rgba(90, 47, 194, 0.25)",
+        e1: "0 2px 8px rgba(25, 20, 33, 0.05)",
+        e2: "0 8px 24px rgba(112, 71, 235, 0.08)",
+        e3: "0 20px 48px -10px rgba(112, 71, 235, 0.16)",
+        sticker: "0 4px 14px rgba(112, 71, 235, 0.12), 0 0 0 3px #FFFFFF",
+        "sticker-lg": "0 8px 24px rgba(112, 71, 235, 0.18), 0 0 0 4px #FFFFFF",
+        grape: "0 4px 18px rgba(112, 71, 235, 0.32)",
+        pink: "0 4px 18px rgba(246, 91, 168, 0.35)",
+        glow: "0 0 16px rgba(185, 154, 255, 0.6)",
       },
       borderRadius: {
         sm: "8px",
         md: "12px",
         card: "20px",
-        atelier: "24px",
+        sticker: "20px",
         sheet: "28px",
         modal: "28px",
+        pill: "9999px",
       },
       fontFamily: {
-        serif: ["var(--font-serif-display)", "Fraunces", "Georgia", "serif"],
-        editorial: ["var(--font-serif-display)", "Fraunces", "Georgia", "serif"],
-        sans: ["var(--font-sans-ui)", "Plus Jakarta Sans", "system-ui", "-apple-system", "sans-serif"],
+        heading: ["'Bricolage Grotesque'", "system-ui", "-apple-system", "sans-serif"],
+        editorial: ["'Bricolage Grotesque'", "system-ui", "-apple-system", "sans-serif"],
+        serif: ["'Bricolage Grotesque'", "system-ui", "-apple-system", "sans-serif"],
+        sans: ["'Inter'", "'DM Sans'", "system-ui", "-apple-system", "sans-serif"],
+        handwriting: ["'Caveat'", "cursive"],
       },
       transitionDuration: {
         micro: "150ms",
-        card: "240ms",
-        scene: "450ms",
+        card: "220ms",
+        scene: "400ms",
         route: "800ms",
       },
       transitionTimingFunction: {

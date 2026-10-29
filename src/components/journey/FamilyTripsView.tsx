@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { JourneySession, TrustedContact } from '@/types';
 import { formatRelativeTime } from '@/lib/utils';
 import {
@@ -12,7 +12,13 @@ import {
   Share2,
   Check,
   Eye,
+  Sparkles,
+  MapPin,
+  Clock,
+  ShieldCheck,
 } from 'lucide-react';
+import { PuffyCloud } from '../ui/PuffyCloud';
+import { JellyPin } from '../ui/JellyPin';
 
 interface FamilyTripsViewProps {
   activeJourney: JourneySession | null;
@@ -30,24 +36,39 @@ export const FamilyTripsView: React.FC<FamilyTripsViewProps> = ({
   onOpenAddContact,
 }) => {
   const [copied, setCopied] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const handleShare = () => {
     if (!activeJourney) return;
     const url = `${typeof window !== 'undefined' ? window.location.origin : ''}?journey=${activeJourney.shareToken}`;
-    navigator.clipboard.writeText(
-      `Following my journey to ${activeJourney.destinationName}. Local demo link: ${url}`
-    );
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      navigator.clipboard.writeText(
+        `Following my journey to ${activeJourney.destinationName}. Local demo link: ${url}`
+      );
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // clipboard fallback
+    }
   };
 
+  const isSharingActive = Boolean(activeJourney && activeJourney.status !== 'arrived');
+
   return (
-    <div className="flex flex-col h-full bg-card text-ink overflow-y-auto w-full font-sans">
-      {/* Header */}
-      <div className="p-4 sm:p-5 border-b border-border bg-card flex items-center justify-between">
+    <div className="flex flex-col h-full bg-[#FCFAFF] text-ink overflow-y-auto w-full font-sans">
+      {/* Header with Scrapbook Title */}
+      <div className="p-4 sm:p-5 border-b border-border bg-white flex items-center justify-between">
         <div>
-          <h2 className="font-editorial text-xl sm:text-2xl font-bold text-ink">Family Journey Companion</h2>
-          <p className="text-xs text-text-secondary mt-0.5">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-lilac text-grape text-[10px] font-bold mb-1">
+            <Sparkles className="w-3 h-3 text-grape" />
+            <span>Trusted Companions</span>
+          </div>
+          <h2 className="font-heading text-xl sm:text-2xl font-extrabold text-ink">Family Trips</h2>
+          <p className="text-xs text-soft-ink mt-0.5 font-medium">
             Explicit, user-controlled trip sharing with trusted contacts.
           </p>
         </div>
@@ -55,25 +76,218 @@ export const FamilyTripsView: React.FC<FamilyTripsViewProps> = ({
           <button
             type="button"
             onClick={onOpenStartJourneyModal}
-            className="btn-primary py-2 px-3.5 text-xs font-semibold flex items-center gap-1.5 shadow-sm"
+            className="btn-primary py-2 px-4 text-xs font-bold flex items-center gap-1.5 shadow-sm"
           >
             <Compass className="w-3.5 h-3.5 text-white" />
-            <span>Start a trip</span>
+            <span>Start Trip</span>
           </button>
         )}
       </div>
 
       <div className="p-4 sm:p-5 space-y-4 pb-24 lg:pb-8">
-        {/* Trusted Contacts Section (Always Displayed Above the Fold) */}
+        {/* Prominent Sharing ON / OFF State Stamp */}
+        <div className="sticker-card p-4 flex items-center justify-between gap-3 bg-white">
+          <div className="flex items-center gap-3">
+            <div
+              className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs ${
+                isSharingActive
+                  ? 'bg-emerald-100 text-emerald-800 border-2 border-emerald-300'
+                  : 'bg-[#F1EAFF] text-soft-ink border-2 border-lilac'
+              }`}
+            >
+              <ShieldCheck className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-heading font-extrabold text-xs uppercase tracking-wider text-ink">
+                  Location Sharing Status:
+                </span>
+                <span
+                  className={`text-[11px] font-extrabold px-2 py-0.5 rounded-full ${
+                    isSharingActive
+                      ? 'bg-emerald-500 text-white animate-pulse'
+                      : 'bg-[#F1EAFF] text-soft-ink border border-lilac'
+                  }`}
+                >
+                  {isSharingActive ? 'SHARING: ON' : 'SHARING: OFF'}
+                </span>
+              </div>
+              <p className="text-[11px] text-soft-ink mt-0.5 font-medium">
+                {isSharingActive
+                  ? `Shared with ${activeJourney?.trustedContact?.name || 'designated contact'} only.`
+                  : 'Your device location is strictly private and stored on-device.'}
+              </p>
+            </div>
+          </div>
+
+          {isSharingActive && (
+            <button
+              type="button"
+              onClick={onEndJourney}
+              className="px-3.5 py-1.5 rounded-full border-2 border-grape text-grape hover:bg-grape hover:text-white font-bold text-xs uppercase tracking-wide transition-colors"
+            >
+              Stop Sharing
+            </button>
+          )}
+        </div>
+
+        {/* Active Journey Ribbon or Empty State */}
+        {activeJourney ? (
+          <section aria-labelledby="active-trip-heading" className="sticker-card p-5 space-y-4 bg-white relative">
+            <div className="washi-tape washi-pink w-20 -top-2 left-8" />
+
+            <div className="flex items-center justify-between border-b border-purple-100 pb-3">
+              <div>
+                <span className="text-[10px] font-extrabold text-grape uppercase tracking-wider font-heading">
+                  Active Walk Ribbon
+                </span>
+                <h3 id="active-trip-heading" className="font-heading text-xl font-extrabold text-ink mt-0.5">
+                  {activeJourney.destinationName}
+                </h3>
+                <p className="text-xs text-soft-ink">
+                  Starting from: {activeJourney.originName}
+                </p>
+              </div>
+
+              <div className="text-right">
+                <span className="text-[11px] font-bold text-soft-ink">
+                  Started {formatRelativeTime(activeJourney.createdAt)}
+                </span>
+              </div>
+            </div>
+
+            {/* Distinctive Journey Ribbon Visualization */}
+            <div className="p-4 rounded-[20px] bg-lilac/40 border border-purple-100 space-y-2">
+              <div className="text-xs font-extrabold text-grape uppercase tracking-wider flex items-center justify-between">
+                <span>Journey Ribbon Progress</span>
+                <span className="font-bold text-soft-ink">Every {activeJourney.checkInIntervalMinutes} min</span>
+              </div>
+
+              {/* Horizontal Ribbon Path with Stop Stickers */}
+              <div className="relative py-4 px-2">
+                {/* Connecting Track Line */}
+                <div className="absolute top-1/2 left-6 right-6 -translate-y-1/2 h-1.5 bg-purple-200 rounded-full" />
+                <div className="absolute top-1/2 left-6 w-2/3 -translate-y-1/2 h-1.5 bg-grape rounded-full" />
+
+                <div className="relative flex items-center justify-between">
+                  {/* Stop 1: Origin */}
+                  <div className="flex flex-col items-center">
+                    <div className="w-8 h-8 rounded-full bg-white border-2 border-grape shadow-sm flex items-center justify-center text-grape font-extrabold text-xs">
+                      A
+                    </div>
+                    <span className="text-[10px] font-bold text-ink mt-1 max-w-[80px] truncate text-center">
+                      {activeJourney.originName.split(' ')[0]}
+                    </span>
+                  </div>
+
+                  {/* Stop 2: En Route Check-in */}
+                  <div className="flex flex-col items-center">
+                    <div className="w-8 h-8 rounded-full bg-emerald-500 border-2 border-white shadow-sm flex items-center justify-center text-white font-extrabold text-xs animate-bounce">
+                      ✓
+                    </div>
+                    <span className="text-[10px] font-bold text-emerald-800 mt-1">En Route</span>
+                  </div>
+
+                  {/* Stop 3: Destination */}
+                  <div className="flex flex-col items-center">
+                    <div className="w-8 h-8 rounded-full bg-hotpink border-2 border-white shadow-sm flex items-center justify-center text-white font-extrabold text-xs">
+                      B
+                    </div>
+                    <span className="text-[10px] font-bold text-ink mt-1 max-w-[80px] truncate text-center">
+                      {activeJourney.destinationName.split(' ')[0]}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Checkpoints Audit Log */}
+            <div className="pt-2 border-t border-purple-100">
+              <div className="text-xs font-extrabold uppercase tracking-wider text-soft-ink mb-2 font-heading">
+                Check-in Audit Log ({activeJourney.checkIns.length} recorded)
+              </div>
+              <div className="space-y-1.5">
+                {activeJourney.checkIns.slice(0, 4).map((chk) => (
+                  <div
+                    key={chk.id}
+                    className="flex items-center justify-between p-2.5 rounded-xl bg-paper border border-border text-xs"
+                  >
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-verified" />
+                      <span className="font-bold text-ink">
+                        {chk.status === 'arrived' ? 'Arrived Safely' : 'Periodic Confirmation'}
+                      </span>
+                    </div>
+                    <span className="text-soft-ink text-[11px] tabular-nums font-semibold">
+                      {isClient
+                        ? new Date(chk.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                        : ''}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Shareable Journey Link */}
+            <div className="p-3.5 rounded-[18px] bg-paper border border-border text-xs space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-ink">Private Journey Link</span>
+                <button
+                  type="button"
+                  onClick={handleShare}
+                  className="btn-secondary min-h-[36px] py-1 px-3 text-xs flex items-center gap-1.5"
+                >
+                  {copied ? <Check className="w-3.5 h-3.5 text-verified" /> : <Share2 className="w-3.5 h-3.5" />}
+                  <span>{copied ? 'Copied' : 'Copy link'}</span>
+                </button>
+              </div>
+              <p className="text-[11px] text-soft-ink leading-relaxed">
+                Local-first sharing: only users with this token can view status.
+              </p>
+            </div>
+
+            {/* Permanent Stop Sharing Button */}
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={onEndJourney}
+                className="btn-primary w-full py-3 px-4 font-bold text-xs uppercase tracking-wider shadow-md"
+                aria-label="Stop sharing journey location now"
+              >
+                Stop Sharing Location
+              </button>
+            </div>
+          </section>
+        ) : (
+          <section className="sticker-card p-6 text-center space-y-3 bg-white">
+            <div className="w-20 h-20 mx-auto flex items-center justify-center">
+              <PuffyCloud size={75} drift />
+            </div>
+            <h4 className="font-heading text-lg font-extrabold text-ink">No Journey Currently Active</h4>
+            <p className="text-xs text-soft-ink max-w-sm mx-auto leading-relaxed font-medium">
+              When you start a journey, choose which designated contact receives your destination and check-in timeline. You can stop sharing at any moment.
+            </p>
+            <button
+              type="button"
+              onClick={onOpenStartJourneyModal}
+              className="btn-primary py-2.5 px-6 text-xs font-bold inline-flex items-center gap-2 shadow-md"
+            >
+              <Compass className="w-4 h-4 text-white" />
+              <span>Start a Trip Ribbon</span>
+            </button>
+          </section>
+        )}
+
+        {/* Trusted Contacts Section */}
         <section aria-labelledby="trusted-contacts-heading" className="space-y-2.5">
           <div className="flex items-center justify-between">
-            <h3 id="trusted-contacts-heading" className="font-editorial text-base font-bold text-ink">
-              Trusted Contacts
+            <h3 id="trusted-contacts-heading" className="font-heading text-base font-extrabold text-ink">
+              Designated Contacts
             </h3>
             <button
               type="button"
               onClick={onOpenAddContact}
-              className="text-primary hover:text-ink text-xs font-semibold flex items-center gap-1"
+              className="text-grape hover:text-grape-hover text-xs font-bold flex items-center gap-1"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Add contact</span>
@@ -84,28 +298,28 @@ export const FamilyTripsView: React.FC<FamilyTripsViewProps> = ({
             {trustedContacts.map((contact) => (
               <div
                 key={contact.id}
-                className="surface-card p-3.5 flex items-center justify-between gap-3 shadow-e1 border border-border hover:border-primary transition-colors"
+                className="sticker-card p-3.5 flex items-center justify-between gap-3 bg-white"
               >
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <h4 className="font-bold text-sm text-ink truncate">{contact.name}</h4>
+                    <h4 className="font-heading font-extrabold text-sm text-ink truncate">{contact.name}</h4>
                     {contact.isEmergencyAlertContact && (
-                      <span className="text-[10px] font-semibold text-emergency bg-emergency-tint px-1.5 py-0.2 rounded-full border border-emergency/30">
+                      <span className="text-[10px] font-extrabold text-white bg-emergency px-1.5 py-0.2 rounded-full">
                         SOS
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-text-secondary mt-0.5">
+                  <p className="text-xs text-soft-ink mt-0.5 font-medium">
                     {contact.relation} · {contact.phone}
                   </p>
-                  <div className="text-[10px] text-text-muted mt-1">
-                    Delivery state: <span className="font-medium">Device local / Unknown</span>
+                  <div className="text-[10px] text-soft-ink mt-1">
+                    State: <span className="font-semibold text-grape">Authorized</span>
                   </div>
                 </div>
 
                 <a
                   href={`tel:${contact.phone.replace(/[^0-9+]/g, '')}`}
-                  className="btn-secondary min-h-[44px] min-w-[44px] px-3.5 flex items-center justify-center gap-1.5 text-xs font-semibold shrink-0"
+                  className="btn-secondary min-h-[40px] px-3.5 flex items-center justify-center gap-1.5 text-xs font-bold shrink-0"
                   aria-label={`Call ${contact.name}`}
                 >
                   <Phone className="w-3.5 h-3.5 text-ink" />
@@ -115,141 +329,6 @@ export const FamilyTripsView: React.FC<FamilyTripsViewProps> = ({
             ))}
           </div>
         </section>
-
-        {/* Active Journey Card or Empty State */}
-        {activeJourney ? (
-          <section aria-labelledby="active-trip-heading" className="surface-card p-5 space-y-4 shadow-e2 border border-border">
-            <div className="flex items-center justify-between">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-primary-tint text-primary border border-primary/30">
-                <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                <span>Sharing Active: {activeJourney.trustedContact?.name || 'Contact'}</span>
-              </span>
-              <span className="text-xs text-text-secondary font-medium">
-                Started {formatRelativeTime(activeJourney.createdAt)}
-              </span>
-            </div>
-
-            <div>
-              <div className="text-[10px] font-bold text-primary uppercase tracking-wider font-editorial">
-                Destination
-              </div>
-              <h3 id="active-trip-heading" className="font-editorial text-2xl font-bold text-ink mt-0.5">
-                {activeJourney.destinationName}
-              </h3>
-              <p className="text-xs text-text-secondary mt-0.5">
-                Starting from: {activeJourney.originName}
-              </p>
-            </div>
-
-            {/* Explicit Breakdown of What's Shared & Privacy Scope */}
-            <div className="p-3.5 rounded-xl bg-surface-raised border border-border text-xs space-y-2">
-              <h4 className="font-bold text-xs text-ink flex items-center gap-1.5">
-                <Eye className="w-3.5 h-3.5 text-primary" />
-                <span>What information is shared</span>
-              </h4>
-              <ul className="space-y-1 text-text-secondary">
-                <li className="flex items-start gap-1.5">
-                  <span className="text-ink font-bold">•</span>
-                  <span><strong>Viewer:</strong> {activeJourney.trustedContact?.name || 'Trusted Contact'} ({activeJourney.trustedContact?.phone || 'No phone recorded'})</span>
-                </li>
-                <li className="flex items-start gap-1.5">
-                  <span className="text-ink font-bold">•</span>
-                  <span><strong>Shared data:</strong> Destination name, planned corridor, and periodic check-in status</span>
-                </li>
-                <li className="flex items-start gap-1.5">
-                  <span className="text-ink font-bold">•</span>
-                  <span><strong>Check-in frequency:</strong> Every {activeJourney.checkInIntervalMinutes} minutes</span>
-                </li>
-                <li className="flex items-start gap-1.5">
-                  <span className="text-ink font-bold">•</span>
-                  <span><strong>Sharing expires:</strong> Automatically upon marked safe arrival or when stopped below</span>
-                </li>
-              </ul>
-            </div>
-
-            {/* Checkpoints Audit Log */}
-            <div className="pt-3 border-t border-border">
-              <div className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-2 font-editorial">
-                Check-in Audit Log ({activeJourney.checkIns.length} recorded)
-              </div>
-              <div className="space-y-1.5">
-                {activeJourney.checkIns.slice(0, 4).map((chk) => (
-                  <div
-                    key={chk.id}
-                    className="flex items-center justify-between p-2.5 rounded-xl bg-canvas border border-border text-xs"
-                  >
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-verified" />
-                      <span className="font-semibold text-ink">
-                        {chk.status === 'arrived' ? 'Arrived Safely' : 'Periodic Confirmation'}
-                      </span>
-                    </div>
-                    <span className="text-text-secondary text-[11px] tabular-nums">
-                      {new Date(chk.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Sharing Link & Honest Notice */}
-            <div className="p-3.5 rounded-xl bg-canvas border border-border text-xs space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="font-semibold text-ink">Shareable Journey Link</span>
-                <button
-                  type="button"
-                  onClick={handleShare}
-                  className="btn-secondary py-1 px-2.5 text-xs flex items-center gap-1.5"
-                >
-                  {copied ? <Check className="w-3.5 h-3.5 text-verified" /> : <Share2 className="w-3.5 h-3.5" />}
-                  <span>{copied ? 'Copied' : 'Copy link'}</span>
-                </button>
-              </div>
-              <p className="text-[11px] text-text-muted leading-relaxed">
-                Demo link copied to clipboard. In this evaluation mode, journey data is stored on this device only.
-              </p>
-            </div>
-
-            {/* Permanent STOP SHARING Button (Never hidden or animated away) */}
-            <div className="pt-2">
-              <button
-                type="button"
-                onClick={onEndJourney}
-                className="w-full py-3 px-4 rounded-xl border-2 border-primary text-primary hover:bg-primary hover:text-white font-bold text-xs uppercase tracking-wider transition-all shadow-sm focus-ring-primary"
-                aria-label="Stop sharing journey location now"
-              >
-                Stop Sharing Location
-              </button>
-            </div>
-          </section>
-        ) : (
-          <section className="surface-card p-6 text-center space-y-3 shadow-e1 border border-border">
-            {/* Hand-authored SVG Nightbloom Illustration */}
-            <div className="w-24 h-24 mx-auto" aria-hidden="true">
-              <svg viewBox="0 0 96 96" fill="none" className="w-full h-full">
-                <circle cx="48" cy="48" r="44" fill="#F7F3EE" stroke="#C9A25E" strokeWidth="1.5" strokeDasharray="3 3" />
-                <path d="M48 24C38 24 30 32 30 42C30 55 48 72 48 72C48 72 66 55 66 42C66 32 58 24 48 24Z" fill="#EDE5FA" stroke="#5A2FC2" strokeWidth="2" />
-                <circle cx="48" cy="42" r="7" fill="#1E0F28" />
-                <path d="M26 68L36 62M70 68L60 62" stroke="#C9A25E" strokeWidth="1.5" strokeLinecap="round" />
-              </svg>
-            </div>
-            <div className="text-[10px] text-text-muted uppercase tracking-wider font-mono">
-              Illustration, not a map record
-            </div>
-            <h4 className="font-editorial text-lg font-bold text-ink">No Journey Currently Shared</h4>
-            <p className="text-xs text-text-secondary max-w-sm mx-auto leading-relaxed">
-              When you start a trip, you choose which trusted contact receives your destination, expected arrival, and periodic check-in status. You can stop sharing at any moment.
-            </p>
-            <button
-              type="button"
-              onClick={onOpenStartJourneyModal}
-              className="btn-primary py-2.5 px-5 text-xs font-bold inline-flex items-center gap-2 shadow-md"
-            >
-              <Compass className="w-4 h-4 text-white" />
-              <span>Start a trip</span>
-            </button>
-          </section>
-        )}
       </div>
     </div>
   );

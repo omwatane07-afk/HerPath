@@ -7,6 +7,7 @@ import {
   Polyline,
   Marker,
   Popup,
+  Circle,
   useMap,
   useMapEvents,
 } from 'react-leaflet';
@@ -21,6 +22,8 @@ import {
   TransportStop,
 } from '@/types';
 import { formatRelativeTime } from '@/lib/utils';
+import { CivicReportingService } from '@/services/civic-reporting-service';
+import { getCivicCategory } from '@/lib/civic-categories';
 import {
   Plus,
   Minus,
@@ -40,6 +43,8 @@ interface LeafletInnerMapProps {
   destination: Coordinates | null;
   originName?: string;
   destinationName?: string;
+  currentLocation?: Coordinates | null;
+  locationAccuracy?: number | null;
   routes: RouteOption[];
   selectedRouteIndex: number;
   onSelectRouteIndex: (index: number) => void;
@@ -75,18 +80,30 @@ function createCustomMarkerIcon(
   });
 }
 
-// Origin: Nightbloom Ink (#1E0F28) with white casing & gold text 'A'
+// Origin: Crisp Indigo Pin A
 const originIcon = createCustomMarkerIcon(
-  `<div class="w-9 h-9 rounded-full bg-[#1E0F28] border-2 border-white shadow-e2 flex items-center justify-center text-[#C9A25E] font-editorial font-bold text-xs ring-2 ring-[#1E0F28]/25" role="img" aria-label="Starting point A">A</div>`,
-  '',
-  [36, 36]
+  `<div class="w-8 h-8 rounded-full bg-indigo-600 border-2 border-white shadow-md flex items-center justify-center text-white font-bold text-xs ring-2 ring-indigo-200" role="img" aria-label="Starting Point A">A</div>`,
+  'origin-marker',
+  [32, 32]
 );
 
-// Destination: Electric Violet (#5A2FC2) with white casing & text 'B'
+// Destination: Crisp Rose Pin B
 const destinationIcon = createCustomMarkerIcon(
-  `<div class="w-9 h-9 rounded-full bg-[#5A2FC2] border-2 border-white shadow-e2 flex items-center justify-center text-white font-editorial font-bold text-xs ring-2 ring-[#5A2FC2]/30" role="img" aria-label="Destination B">B</div>`,
-  '',
-  [36, 36]
+  `<div class="w-8 h-8 rounded-full bg-rose-600 border-2 border-white shadow-md flex items-center justify-center text-white font-bold text-xs ring-2 ring-rose-200" role="img" aria-label="Destination B">B</div>`,
+  'destination-marker',
+  [32, 32]
+);
+
+// Live GPS Location marker: High-visibility pulsating blue jewel
+const currentLocationIcon = createCustomMarkerIcon(
+  `<div class="relative flex items-center justify-center w-8 h-8">
+    <div class="absolute w-8 h-8 rounded-full bg-blue-500/25 animate-ping"></div>
+    <div class="w-5 h-5 rounded-full bg-blue-600 border-2 border-white shadow-lg flex items-center justify-center relative z-10">
+      <div class="w-1.5 h-1.5 rounded-full bg-white"></div>
+    </div>
+  </div>`,
+  'current-location-marker',
+  [32, 32]
 );
 
 // Streetlight Marker: Gold-Amber Circle (#8A6A10)
@@ -147,10 +164,46 @@ function getFacilityIcon(category: string) {
   );
 }
 
-// Community Disturbance/Hazard: Amber Triangle (#A8560A)
-function getDisturbanceIcon(category: string) {
+// Community Disturbance/Civic Report Markers with accessible distinct glyphs, shapes, and colors
+function getReportMarkerIcon(report: CommunityReport) {
+  const staleness = CivicReportingService.checkStaleness(report);
+  const isStale = staleness.isStale && report.status !== 'resolved';
+
+  if (isStale) {
+    return createCustomMarkerIcon(
+      `<div class="w-8 h-8 rounded-full bg-amber-50 border-2 border-dashed border-amber-600 shadow-sm flex items-center justify-center text-xs text-amber-700 font-bold" role="img" aria-label="Stale Civic Report">🕒</div>`,
+      '',
+      [32, 32]
+    );
+  }
+
+  if (report.status === 'verified') {
+    return createCustomMarkerIcon(
+      `<div class="w-8 h-8 rounded-full bg-emerald-700 border-2 border-white shadow-md flex items-center justify-center text-xs text-white font-bold ring-2 ring-emerald-300" role="img" aria-label="Verified Civic Report">🛡️</div>`,
+      '',
+      [32, 32]
+    );
+  }
+
+  if (report.status === 'under_review') {
+    return createCustomMarkerIcon(
+      `<div class="w-8 h-8 rounded-lg rotate-45 bg-sky-600 border-2 border-white shadow-md flex items-center justify-center text-white" role="img" aria-label="Under Review Report"><span class="-rotate-45 text-[11px]">🔍</span></div>`,
+      '',
+      [32, 32]
+    );
+  }
+
+  if (report.status === 'resolved') {
+    return createCustomMarkerIcon(
+      `<div class="w-7 h-7 rounded-full bg-purple-100 border-2 border-purple-400 shadow-sm flex items-center justify-center text-[10px] text-purple-700 font-bold" role="img" aria-label="Resolved Report">✓</div>`,
+      '',
+      [28, 28]
+    );
+  }
+
+  // Pending
   return createCustomMarkerIcon(
-    `<div class="w-8 h-8 bg-[#FDF2E3] border-2 border-[#A8560A] rounded-md flex items-center justify-center shadow-sm text-xs text-[#A8560A] font-bold" role="img" aria-label="Community Report: caution disturbance">⚠️</div>`,
+    `<div class="w-8 h-8 bg-amber-100 border-2 border-amber-500 rounded-md flex items-center justify-center shadow-sm text-xs text-amber-900 font-bold" role="img" aria-label="Pending Civic Report">⚠️</div>`,
     '',
     [32, 32]
   );
@@ -168,6 +221,24 @@ function getTransportIcon(type: string) {
   );
 }
 
+// Dynamic Map Resizer to eliminate blank tiles across flex containers
+function MapResizer() {
+  const map = useMap();
+  useEffect(() => {
+    map.invalidateSize();
+    const t1 = setTimeout(() => map.invalidateSize(), 150);
+    const t2 = setTimeout(() => map.invalidateSize(), 600);
+    const handleResize = () => map.invalidateSize();
+    window.addEventListener('resize', handleResize);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [map]);
+  return null;
+}
+
 // Controller to auto-pan and fit bounds when routes change
 function MapBoundsController({
   routes,
@@ -183,18 +254,19 @@ function MapBoundsController({
   const map = useMap();
 
   useEffect(() => {
+    map.invalidateSize();
     if (routes.length > 0 && routes[selectedRouteIndex]?.coordinates?.length > 0) {
       const coords = routes[selectedRouteIndex].coordinates;
       const bounds = L.latLngBounds(coords.map(([lat, lng]) => [lat, lng]));
-      map.fitBounds(bounds, { padding: [80, 80], maxZoom: 16 });
+      map.fitBounds(bounds, { padding: [60, 60], maxZoom: 16 });
     } else if (origin && destination) {
       const bounds = L.latLngBounds([
         [origin.lat, origin.lng],
         [destination.lat, destination.lng],
       ]);
-      map.fitBounds(bounds, { padding: [90, 90], maxZoom: 15 });
+      map.fitBounds(bounds, { padding: [60, 60], maxZoom: 15 });
     } else if (origin) {
-      map.panTo([origin.lat, origin.lng]);
+      map.panTo([origin.lat, origin.lng], { animate: true });
     }
   }, [map, routes, selectedRouteIndex, origin, destination]);
 
@@ -270,6 +342,8 @@ export const LeafletInnerMap: React.FC<LeafletInnerMapProps> = ({
   destination,
   originName,
   destinationName,
+  currentLocation,
+  locationAccuracy,
   routes,
   selectedRouteIndex,
   onSelectRouteIndex,
@@ -284,13 +358,16 @@ export const LeafletInnerMap: React.FC<LeafletInnerMapProps> = ({
   onFlagReport,
   onResolveReport,
 }) => {
-  // Muted Light Basemap Tiles (Standard OSM with CSS desaturation and warm lightness filter)
-  const tileUrl =
-    process.env.NEXT_PUBLIC_MAP_TILE_URL ||
-    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-  const tileAttribution =
-    process.env.NEXT_PUBLIC_MAP_ATTRIBUTION ||
-    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+  // Map Tiles: Uses Geoapify osm-bright-smooth tiles if API key configured, otherwise OSM default
+  const geoapifyKey = process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY;
+  const tileUrl = geoapifyKey && geoapifyKey.trim().length > 0
+    ? `https://maps.geoapify.com/v1/tile/osm-bright-smooth/{z}/{x}/{y}.png?apiKey=${geoapifyKey}`
+    : process.env.NEXT_PUBLIC_MAP_TILE_URL ||
+      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+  const tileAttribution = geoapifyKey && geoapifyKey.trim().length > 0
+    ? 'Powered by <a href="https://www.geoapify.com/" target="_blank">Geoapify</a> | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    : process.env.NEXT_PUBLIC_MAP_ATTRIBUTION ||
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
   return (
     <MapContainer
@@ -300,7 +377,9 @@ export const LeafletInnerMap: React.FC<LeafletInnerMapProps> = ({
       scrollWheelZoom={true}
       className="w-full h-full z-0 font-sans"
     >
-      <TileLayer url={tileUrl} attribution={tileAttribution} subdomains="abcd" />
+      <TileLayer url={tileUrl} attribution={tileAttribution} subdomains="abc" maxZoom={19} />
+
+      <MapResizer />
 
       <CustomMapControls center={center} />
 
@@ -351,12 +430,47 @@ export const LeafletInnerMap: React.FC<LeafletInnerMapProps> = ({
         </Marker>
       )}
 
-      {/* Render Route Polylines */}
+      {/* Live User GPS Location Marker & Accuracy Halo */}
+      {currentLocation && (
+        <>
+          <Circle
+            center={[currentLocation.lat, currentLocation.lng]}
+            radius={Math.min(locationAccuracy || 20, 150)}
+            pathOptions={{
+              color: '#3B82F6',
+              fillColor: '#60A5FA',
+              fillOpacity: 0.15,
+              weight: 1.5,
+              dashArray: '3, 4',
+            }}
+          />
+          <Marker position={[currentLocation.lat, currentLocation.lng]} icon={currentLocationIcon}>
+            <Popup className="herpath-popup">
+              <div className="p-1 space-y-1">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 rounded-full bg-blue-600 animate-ping" />
+                  <span className="text-[10px] uppercase font-bold text-blue-700 tracking-wider">
+                    Your Live GPS Location
+                  </span>
+                </div>
+                <div className="text-xs font-bold text-ink">
+                  Current Position
+                </div>
+                <div className="text-[11px] text-text-secondary">
+                  Accuracy: ±{locationAccuracy || 10} meters
+                </div>
+                <div className="text-[10px] text-text-muted font-mono">
+                  {currentLocation.lat.toFixed(5)}, {currentLocation.lng.toFixed(5)}
+                </div>
+              </div>
+            </Popup>
+          </Marker>
+        </>
+      )}
+
+      {/* Render Genuine Route Polylines */}
       {routes.map((route, idx) => {
         const isSelected = idx === selectedRouteIndex;
-        const isSynthetic =
-          (route as any).source === 'synthetic_fallback' ||
-          route.steps.some((s) => s.instruction.includes('thoroughfare'));
 
         return (
           <React.Fragment key={route.id}>
@@ -366,22 +480,21 @@ export const LeafletInnerMap: React.FC<LeafletInnerMapProps> = ({
                 positions={route.coordinates}
                 pathOptions={{
                   color: '#FFFFFF',
-                  weight: 10,
-                  opacity: 0.98,
+                  weight: 8,
+                  opacity: 0.95,
                   lineCap: 'round',
                   lineJoin: 'round',
                 }}
               />
             )}
 
-            {/* Route Polyline: Electric Violet #5A2FC2 for Selected, Slate #6E6090 Dashed for Alternates */}
+            {/* Core Navigation Polyline: Solid Indigo for Selected, Solid Slate for Valid Alternatives */}
             <Polyline
               positions={route.coordinates}
               pathOptions={{
-                color: isSelected ? '#5A2FC2' : '#6E6090',
-                weight: isSelected ? 6 : 4,
-                opacity: isSelected ? 1 : 0.55,
-                dashArray: !isSelected || isSynthetic ? '6, 6' : undefined,
+                color: isSelected ? '#4F46E5' : '#94A3B8',
+                weight: isSelected ? 5 : 3.5,
+                opacity: isSelected ? 1 : 0.8,
                 lineCap: 'round',
                 lineJoin: 'round',
               }}
@@ -390,22 +503,20 @@ export const LeafletInnerMap: React.FC<LeafletInnerMapProps> = ({
               }}
             >
               <Popup className="herpath-popup">
-                <div className="p-1 space-y-1">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-primary font-editorial">
-                    {route.perspective === 'fastest'
-                      ? 'Fastest Walking Path'
-                      : route.perspective === 'better_supported'
-                      ? 'Better-Supported Corridor'
-                      : 'Balanced Walking Route'}
-                  </span>
-                  <div className="font-bold text-sm text-ink">{route.summary}</div>
-                  <div className="text-xs text-text-secondary font-mono">
-                    {Math.round(route.durationSeconds / 60)} min · {(route.distanceMeters / 1000).toFixed(1)} km
+                <div className="p-1.5 space-y-1">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-indigo-600 inline-block" />
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 font-sans">
+                      {route.perspective === 'fastest'
+                        ? 'Primary Pedestrian Path'
+                        : route.perspective === 'better_supported'
+                        ? 'Infrastructure-Informed Alternative'
+                        : 'Pedestrian Route Corridor'}
+                    </span>
                   </div>
-                  <div className="text-[11px] text-text-muted">
-                    {isSynthetic
-                      ? 'Note: Approximated corridor geometry'
-                      : 'Verified OSRM pedestrian corridor'}
+                  <div className="font-bold text-sm text-slate-900">{route.summary}</div>
+                  <div className="text-xs text-slate-600 font-medium">
+                    {Math.round(route.durationSeconds / 60)} min · {(route.distanceMeters / 1000).toFixed(1)} km
                   </div>
                 </div>
               </Popup>
@@ -413,39 +524,6 @@ export const LeafletInnerMap: React.FC<LeafletInnerMapProps> = ({
           </React.Fragment>
         );
       })}
-
-      {/* Reported-Risk Hazard Overlays on Map: Amber Dashed Line + Text Label */}
-      {reports
-        .filter((r) => r.status !== 'resolved')
-        .slice(0, 2)
-        .map((r, i) => {
-          const delta = i === 0 ? 0.002 : -0.002;
-          const hazardLine: [number, number][] = [
-            [r.coordinates.lat - 0.0008, r.coordinates.lng - delta],
-            [r.coordinates.lat + 0.0008, r.coordinates.lng + delta],
-          ];
-          return (
-            <Polyline
-              key={`hazard-overlay-${r.id}`}
-              positions={hazardLine}
-              pathOptions={{
-                color: '#A8560A',
-                weight: 4,
-                dashArray: '4, 6',
-                opacity: 0.8,
-              }}
-            >
-              <Popup className="herpath-popup">
-                <div className="p-1">
-                  <span className="text-[10px] font-bold uppercase text-caution font-editorial">
-                    Reported Observation Area
-                  </span>
-                  <p className="text-xs font-semibold text-ink mt-0.5">{r.locationName}</p>
-                </div>
-              </Popup>
-            </Polyline>
-          );
-        })}
 
       {/* Streetlight Markers */}
       {activeLayers.streetlights &&
@@ -514,40 +592,132 @@ export const LeafletInnerMap: React.FC<LeafletInnerMapProps> = ({
 
       {/* Community Report Markers */}
       {activeLayers.reports &&
-        reports.map((rep) => (
-          <Marker
-            key={rep.id}
-            position={[rep.coordinates.lat, rep.coordinates.lng]}
-            icon={getDisturbanceIcon(rep.category)}
-          >
-            <Popup className="herpath-popup">
-              <div className="p-1 space-y-1.5 min-w-[190px]">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] uppercase font-bold text-caution font-editorial">
-                    Community Report
-                  </span>
-                  <span className="text-[10px] font-mono text-text-muted">
-                    {formatRelativeTime(rep.createdAt)}
-                  </span>
+        reports.map((rep) => {
+          const catConfig = getCivicCategory(rep.category);
+          const staleness = CivicReportingService.checkStaleness(rep);
+          const isStale = staleness.isStale && rep.status !== 'resolved';
+
+          return (
+            <Marker
+              key={rep.id}
+              position={[rep.coordinates.lat, rep.coordinates.lng]}
+              icon={getReportMarkerIcon(rep)}
+            >
+              <Popup className="herpath-popup">
+                <div className="p-1 space-y-1.5 min-w-[240px] text-xs">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[10px] uppercase font-bold text-grape font-editorial flex items-center gap-1">
+                      <span>{catConfig.icon}</span>
+                      <span>{catConfig.shortName}</span>
+                    </span>
+                    <span className="text-[10px] font-mono text-text-muted">
+                      {formatRelativeTime(rep.observedAt || rep.createdAt)}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span
+                      className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
+                        rep.status === 'verified'
+                          ? 'bg-emerald-100 text-emerald-800'
+                          : rep.status === 'under_review'
+                          ? 'bg-sky-100 text-sky-800'
+                          : rep.status === 'resolved'
+                          ? 'bg-purple-100 text-purple-800'
+                          : 'bg-amber-100 text-amber-800'
+                      }`}
+                    >
+                      {rep.status.toUpperCase()}
+                    </span>
+
+                    {/* Truthful Freshness Tag */}
+                    <span
+                      className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
+                        rep.status === 'resolved'
+                          ? 'bg-purple-50 text-purple-800'
+                          : isStale
+                          ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                          : staleness.ageHours < 6
+                          ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                          : 'bg-sky-50 text-sky-800'
+                      }`}
+                    >
+                      {rep.status === 'resolved'
+                        ? 'Marked resolved'
+                        : isStale
+                        ? 'Not recently confirmed'
+                        : staleness.ageHours < 6
+                        ? 'Recent report'
+                        : 'Older report'}
+                    </span>
+
+                    <span className="text-[9px] bg-canvas text-soft-ink px-1 py-0.5 rounded border border-border">
+                      {rep.isDemoData ? 'Demo data' : 'Local submission'}
+                    </span>
+                  </div>
+
+                  <div className="font-bold text-xs text-ink">{rep.locationName}</div>
+                  <div className="text-[11px] text-text-secondary">{rep.description}</div>
+
+                  {rep.evidence?.photoUrl && (
+                    <img
+                      src={rep.evidence.photoUrl}
+                      alt="Report evidence thumbnail"
+                      className="w-full h-20 object-cover rounded-lg border border-purple-100"
+                    />
+                  )}
+
+                  <div className="text-[10px] text-text-muted">
+                    Corroborated by {rep.confirmationCount || rep.upvotes} commuters · {rep.flagCount || 0} disputes
+                  </div>
+
+                  {rep.status !== 'resolved' ? (
+                    <div className="flex items-center gap-1 pt-1 flex-wrap">
+                      {onUpvoteReport && (
+                        <button
+                          type="button"
+                          onClick={() => onUpvoteReport(rep.id)}
+                          className="flex-1 btn-secondary py-1 text-[10px] font-bold"
+                          title="Confirm this issue is still active"
+                        >
+                          Still happening ({rep.confirmationCount || rep.upvotes})
+                        </button>
+                      )}
+                      {onResolveReport && (
+                        <button
+                          type="button"
+                          onClick={() => onResolveReport(rep.id)}
+                          className="px-2 py-1 rounded bg-purple-50 hover:bg-purple-100 text-grape font-bold text-[10px] border border-purple-200"
+                          title="Report as resolved/cleared"
+                        >
+                          Resolved
+                        </button>
+                      )}
+                      {onFlagReport && (
+                        <button
+                          type="button"
+                          onClick={() => onFlagReport(rep.id)}
+                          className="px-2 py-1 rounded text-[10px] text-soft-ink hover:text-danger hover:bg-danger-tint"
+                          title="Report inaccurate"
+                        >
+                          Inaccurate
+                        </button>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-[10px] text-purple-700 font-bold bg-purple-50 p-1 rounded text-center">
+                      ✓ This report was verified resolved
+                    </div>
+                  )}
+
+                  <div className="text-[9px] text-amber-900/80 bg-amber-50 p-1 rounded border border-amber-200 leading-tight">
+                    Notice: Unverified community feedback. No reports does not mean a location is safe.
+                  </div>
                 </div>
-                <div className="font-bold text-xs text-ink">{rep.locationName}</div>
-                <div className="text-[11px] text-text-secondary">{rep.description}</div>
-                <div className="text-[10px] text-text-muted italic">
-                  Corroborated by {rep.upvotes} travelers
-                </div>
-                {onUpvoteReport && rep.status !== 'resolved' && (
-                  <button
-                    type="button"
-                    onClick={() => onUpvoteReport(rep.id)}
-                    className="w-full mt-1 btn-secondary py-1 text-xs"
-                  >
-                    Confirm Observation (+1)
-                  </button>
-                )}
-              </div>
-            </Popup>
-          </Marker>
-        ))}
+              </Popup>
+            </Marker>
+          );
+        })}
 
       {/* Transit Stop Markers */}
       {activeLayers.transport &&

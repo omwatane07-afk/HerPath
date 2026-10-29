@@ -26,7 +26,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({
 
   return (
     <nav
-      className="lg:hidden fixed bottom-3 left-3 right-3 max-w-lg mx-auto h-[60px] bg-card/95 backdrop-blur-md rounded-2xl flex items-center justify-between p-1 z-40 shadow-e3 border border-border transition-all"
+      className="lg:hidden fixed bottom-[calc(0.75rem+env(safe-area-inset-bottom,0px))] left-3 right-3 max-w-lg mx-auto h-[62px] bg-white/95 backdrop-blur-xl rounded-full flex items-center justify-between p-1.5 z-40 shadow-[0_8px_30px_rgba(15,23,42,0.12)] border border-slate-200/80"
       aria-label="Mobile Navigation"
     >
       {tabs.map((tab) => {
@@ -37,24 +37,24 @@ export const MobileNav: React.FC<MobileNavProps> = ({
           <button
             key={tab.id}
             onClick={() => onSelectTab(tab.id)}
-            className={`flex flex-col items-center justify-center min-h-[44px] min-w-[44px] h-full flex-1 rounded-xl transition-all duration-150 relative focus-ring-primary ${
+            className={`flex flex-col items-center justify-center min-h-[44px] min-w-[44px] h-full flex-1 rounded-full transition-all duration-150 relative focus-ring-primary ${
               isActive
-                ? 'text-white font-bold bg-primary shadow-sm'
-                : 'text-text-secondary hover:text-ink hover:bg-canvas font-medium'
+                ? 'text-white font-bold bg-indigo-600 shadow-sm scale-100'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-semibold'
             }`}
             aria-current={isActive ? 'page' : undefined}
           >
             <Icon
               className={`w-4 h-4 shrink-0 transition-colors ${
-                isActive ? 'text-white' : 'text-text-secondary'
+                isActive ? 'text-white' : 'text-slate-500'
               }`}
             />
-            <span className="text-[10px] mt-0.5 tracking-tight leading-none font-sans">
+            <span className="text-[10px] mt-0.5 tracking-tight leading-none font-sans font-medium">
               {tab.label}
             </span>
             {tab.badge && !isActive && (
               <span
-                className="w-2 h-2 rounded-full bg-champagne absolute top-1.5 right-2 animate-pulse"
+                className="w-2.5 h-2.5 rounded-full bg-amber-400 border-2 border-white absolute top-1.5 right-2 animate-pulse"
                 title="Trip active"
               />
             )}

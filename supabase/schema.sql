@@ -8,24 +8,47 @@ create extension if not exists "uuid-ossp";
 create table if not exists public.community_reports (
   id uuid primary key default uuid_generate_v4(),
   category text not null check (category in (
+    'broken_streetlight',
+    'broken_footpath',
+    'road_damage',
+    'pedestrian_obstruction',
+    'harassment_risk',
+    'suspicious_activity',
+    'isolated_area',
+    'transit_disruption',
+    'facility_unavailable',
+    'other_hazard',
     'harassment',
     'disruptive_group',
     'suspected_intoxication',
     'streetlight_issue',
-    'broken_footpath',
     'blocked_road',
     'transport_disruption',
-    'facility_unavailable',
     'other_concern'
   )),
   latitude double precision not null,
   longitude double precision not null,
   location_name text,
   description text,
-  status text not null default 'pending' check (status in ('pending', 'verified', 'resolved', 'outdated')),
+  status text not null default 'pending' check (status in ('pending', 'under_review', 'verified', 'resolved', 'outdated', 'invalidated')),
   source text not null default 'community' check (source in ('community', 'official', 'demo', 'sensor')),
   upvotes integer not null default 0,
+  confirmation_count integer not null default 1,
   flag_count integer not null default 0,
+  is_demo_data boolean default false,
+  observed_at timestamptz default now(),
+  submitted_at timestamptz default now(),
+  last_confirmed_at timestamptz,
+  photo_url text,
+  photo_name text,
+  photo_size_bytes integer,
+  photo_mime_type text,
+  submitted_with_gps boolean default false,
+  duplicate_of_id uuid references public.community_reports(id) on delete set null,
+  duplicate_count integer default 0,
+  reviewed_at timestamptz,
+  reviewed_by text,
+  resolved_by text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   expires_at timestamptz default (now() + interval '48 hours'),
@@ -35,6 +58,32 @@ create table if not exists public.community_reports (
 create index if not exists idx_community_reports_coords on public.community_reports(latitude, longitude);
 create index if not exists idx_community_reports_status on public.community_reports(status);
 create index if not exists idx_community_reports_created on public.community_reports(created_at desc);
+create index if not exists idx_community_reports_duplicate on public.community_reports(duplicate_of_id);
+
+-- 1b. Report Status Transition Audit History
+create table if not exists public.report_status_history (
+  id uuid primary key default uuid_generate_v4(),
+  report_id uuid references public.community_reports(id) on delete cascade,
+  from_status text not null,
+  to_status text not null,
+  actor text not null,
+  note text,
+  changed_at timestamptz not null default now()
+);
+
+create index if not exists idx_status_history_report on public.report_status_history(report_id);
+
+-- 1c. Report Flagging & Community Disputes
+create table if not exists public.report_flags (
+  id uuid primary key default uuid_generate_v4(),
+  report_id uuid references public.community_reports(id) on delete cascade,
+  reason text not null check (reason in ('incorrect', 'outdated', 'duplicate', 'resolved_incorrectly', 'other')),
+  details text,
+  flagged_by_role text default 'user',
+  created_at timestamptz not null default now()
+);
+
+create index if not exists idx_report_flags_report on public.report_flags(report_id);
 
 -- 2. Streetlight Infrastructure Conditions
 create table if not exists public.streetlight_reports (
@@ -139,11 +188,19 @@ alter table public.facilities enable row level security;
 alter table public.transport_stops enable row level security;
 alter table public.journey_sessions enable row level security;
 alter table public.journey_checkins enable row level security;
+alter table public.report_status_history enable row level security;
+alter table public.report_flags enable row level security;
 
 -- Public read access for maps & facilities
 create policy "Allow public read on reports" on public.community_reports for select using (true);
 create policy "Allow insert on reports" on public.community_reports for insert with check (true);
 create policy "Allow update on reports" on public.community_reports for update using (true);
+
+create policy "Allow public read on status history" on public.report_status_history for select using (true);
+create policy "Allow insert on status history" on public.report_status_history for insert with check (true);
+
+create policy "Allow public read on flags" on public.report_flags for select using (true);
+create policy "Allow insert on flags" on public.report_flags for insert with check (true);
 
 create policy "Allow public read on streetlights" on public.streetlight_reports for select using (true);
 create policy "Allow insert on streetlights" on public.streetlight_reports for insert with check (true);

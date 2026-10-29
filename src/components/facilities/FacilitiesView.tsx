@@ -13,6 +13,7 @@ import {
   Accessibility,
   UserCheck,
   Bookmark,
+  Sparkles,
 } from 'lucide-react';
 
 interface FacilitiesViewProps {
@@ -23,7 +24,7 @@ interface FacilitiesViewProps {
 }
 
 const CATEGORY_TABS = [
-  { id: 'all', label: 'All Places', glyph: '🏢' },
+  { id: 'all', label: 'All Places', glyph: '✨' },
   { id: 'womens_restroom', label: "Women's Restrooms", glyph: '🚺' },
   { id: 'public_toilet', label: 'Public Toilets', glyph: '🚻' },
   { id: 'pharmacy', label: 'Pharmacies', glyph: '💊' },
@@ -67,44 +68,48 @@ export const FacilitiesView: React.FC<FacilitiesViewProps> = ({
   });
 
   const getCategoryColor = (category: string) => {
-    if (category === 'womens_restroom' || category === 'public_toilet') return 'text-[#8E2F7E]';
-    if (category === 'pharmacy' || category === 'hospital') return 'text-[#0F766E]';
-    if (category === 'police_station' || category === 'help_point') return 'text-[#2B3A67]';
-    return 'text-primary';
+    if (category === 'womens_restroom' || category === 'public_toilet') return 'text-hotpink font-bold';
+    if (category === 'pharmacy' || category === 'hospital') return 'text-emerald-700 font-bold';
+    if (category === 'police_station' || category === 'help_point') return 'text-grape font-bold';
+    return 'text-grape font-bold';
   };
 
   return (
-    <div className="flex flex-col h-full bg-card text-ink overflow-hidden w-full font-sans">
+    <div className="flex flex-col h-full bg-[#FCFAFF] text-ink overflow-hidden w-full font-sans">
       {/* Header */}
-      <div className="p-4 sm:p-5 border-b border-border bg-card">
-        <h2 className="font-editorial text-xl sm:text-2xl font-bold text-ink">Essential Facilities</h2>
-        <p className="text-xs text-text-secondary mt-0.5 leading-relaxed">
-          Curated directory of verified women’s restrooms, pharmacies, and 24/7 assistance points.
+      <div className="p-4 sm:p-5 border-b border-border bg-white">
+        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-lilac text-grape text-[10px] font-bold mb-1">
+          <Sparkles className="w-3 h-3 text-grape" />
+          <span>Verified Places</span>
+        </div>
+        <h2 className="font-heading text-xl sm:text-2xl font-extrabold text-ink">Essential Facilities</h2>
+        <p className="text-xs text-soft-ink mt-0.5 leading-relaxed font-medium">
+          Verified directory of women’s restrooms, 24/7 pharmacies, and police assistance desks.
         </p>
 
         {/* Search Input */}
-        <div className="mt-3.5 relative">
+        <div className="mt-3.5 relative luggage-tag">
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search facility name, address, or service..."
-            className="input-control w-full py-2.5 pl-9 pr-3 text-xs text-ink placeholder:text-text-muted font-medium"
+            className="w-full py-2.5 pl-9 pr-3 text-xs text-ink placeholder:text-soft-ink/70 font-semibold bg-transparent rounded-[18px] focus:outline-none"
             aria-label="Search facilities"
           />
-          <Search className="w-4 h-4 text-text-muted absolute left-3 top-3" />
+          <Search className="w-4 h-4 text-soft-ink absolute left-3 top-3" />
         </div>
 
-        {/* Horizontally scrollable category filter row */}
+        {/* Horizontally scrollable sticker category filter row */}
         <div className="mt-3 flex gap-1.5 overflow-x-auto pb-1 scrollbar-none text-xs" role="tablist">
           {CATEGORY_TABS.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setSelectedCategory(tab.id)}
-              className={`px-3 py-1.5 rounded-xl whitespace-nowrap font-semibold transition-all focus-ring-primary flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-full whitespace-nowrap font-bold transition-all focus-ring-primary flex items-center gap-1.5 ${
                 selectedCategory === tab.id
-                  ? 'bg-primary text-white font-bold shadow-sm'
-                  : 'bg-canvas text-text-secondary hover:text-ink hover:bg-canvas-2 border border-border'
+                  ? 'bg-grape text-white shadow-sm'
+                  : 'bg-[#F1EAFF] text-soft-ink hover:text-ink hover:bg-lilac border border-purple-100'
               }`}
             >
               <span>{tab.glyph}</span>
@@ -114,22 +119,22 @@ export const FacilitiesView: React.FC<FacilitiesViewProps> = ({
         </div>
 
         {/* Accessibility & Staff Filter Checkboxes */}
-        <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-text-secondary pt-1 border-t border-border/60">
-          <label className="flex items-center gap-1.5 cursor-pointer">
+        <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-soft-ink pt-2 border-t border-purple-100">
+          <label className="flex items-center gap-1.5 cursor-pointer font-semibold">
             <input
               type="checkbox"
               checked={accessibleOnly}
               onChange={(e) => setAccessibleOnly(e.target.checked)}
-              className="rounded border-border-control text-primary focus:ring-primary h-3.5 w-3.5"
+              className="rounded-md border-border-control text-grape focus:ring-grape h-3.5 w-3.5"
             />
             <span>Step-free access</span>
           </label>
-          <label className="flex items-center gap-1.5 cursor-pointer">
+          <label className="flex items-center gap-1.5 cursor-pointer font-semibold">
             <input
               type="checkbox"
               checked={femaleStaffOnly}
               onChange={(e) => setFemaleStaffOnly(e.target.checked)}
-              className="rounded border-border-control text-primary focus:ring-primary h-3.5 w-3.5"
+              className="rounded-md border-border-control text-grape focus:ring-grape h-3.5 w-3.5"
             />
             <span>Female staff on duty</span>
           </label>
@@ -137,18 +142,18 @@ export const FacilitiesView: React.FC<FacilitiesViewProps> = ({
       </div>
 
       {/* Directory Content List */}
-      <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3">
-        <div className="flex items-center justify-between text-xs text-text-muted px-0.5">
-          <span className="font-semibold uppercase tracking-wider text-[11px] text-text-secondary font-editorial">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3 pb-24 lg:pb-6">
+        <div className="flex items-center justify-between text-xs text-soft-ink px-0.5">
+          <span className="font-heading font-extrabold uppercase tracking-wider text-[11px] text-soft-ink">
             {filtered.length} Facilities Located
           </span>
-          <span className="text-[11px]">Distances from current position</span>
+          <span className="text-[11px] font-medium">Distances from current position</span>
         </div>
 
         {filtered.length === 0 ? (
-          <div className="surface-card p-8 text-center text-text-secondary space-y-2 border border-border">
-            <Building2 className="w-8 h-8 text-border-control mx-auto" />
-            <p className="text-sm font-semibold text-ink font-editorial">No matching facilities found</p>
+          <div className="sticker-card p-8 text-center text-soft-ink space-y-2 bg-white">
+            <Building2 className="w-8 h-8 text-purple-300 mx-auto" />
+            <p className="text-sm font-extrabold text-ink font-heading">No matching facilities found</p>
             <p className="text-xs">
               Try adjusting your category selection, search terms, or accessibility filters.
             </p>
@@ -164,25 +169,25 @@ export const FacilitiesView: React.FC<FacilitiesViewProps> = ({
             return (
               <article
                 key={fac.id}
-                className="surface-card p-4 space-y-2.5 transition-all card-interactive shadow-e1 border border-border hover:border-primary"
+                className="sticker-card p-4 space-y-2.5 transition-all bg-white"
               >
                 {/* Header: Name, Distance, Verification */}
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <span className={`text-[10px] font-bold uppercase tracking-wider font-editorial ${colorClass}`}>
+                      <span className={`text-[10px] font-extrabold uppercase tracking-wider font-heading ${colorClass}`}>
                         {fac.category.replace(/_/g, ' ')}
                       </span>
                       {dist !== null && (
-                        <span className="text-[11px] text-text-secondary font-medium tabular-nums">
+                        <span className="text-[11px] text-soft-ink font-semibold tabular-nums">
                           · {formatDistance(dist)} away
                         </span>
                       )}
                     </div>
-                    <h3 className="font-editorial text-base font-bold text-ink leading-snug">
+                    <h3 className="font-heading text-base font-extrabold text-ink leading-snug">
                       {fac.name}
                     </h3>
-                    <p className="text-xs text-text-secondary mt-0.5 line-clamp-1">
+                    <p className="text-xs text-soft-ink mt-0.5 line-clamp-1 font-medium">
                       {fac.address}
                     </p>
                   </div>
@@ -191,18 +196,18 @@ export const FacilitiesView: React.FC<FacilitiesViewProps> = ({
                 </div>
 
                 {/* Operating hours & phone if known */}
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-secondary">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-soft-ink">
                   <div className="flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-champagne" />
-                    <span>{fac.openingHours ? fac.openingHours : 'Hours not listed'}</span>
+                    <Clock className="w-3.5 h-3.5 text-butter" />
+                    <span className="font-medium">{fac.openingHours ? fac.openingHours : 'Hours not listed'}</span>
                   </div>
 
                   {fac.phone && (
                     <div className="flex items-center gap-1.5">
-                      <Phone className="w-3.5 h-3.5 text-text-muted" />
+                      <Phone className="w-3.5 h-3.5 text-soft-ink" />
                       <a
                         href={`tel:${fac.phone.replace(/[^0-9+]/g, '')}`}
-                        className="hover:text-primary font-medium underline"
+                        className="hover:text-grape font-bold underline"
                       >
                         {fac.phone}
                       </a>
@@ -213,42 +218,46 @@ export const FacilitiesView: React.FC<FacilitiesViewProps> = ({
                 {/* Attribute Badges */}
                 <div className="flex flex-wrap gap-1.5 pt-1">
                   {fac.hasFemaleStaff && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#8E2F7E]/10 text-[#8E2F7E] border border-[#8E2F7E]/30">
-                      <UserCheck className="w-3 h-3 text-[#8E2F7E]" />
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-pink-50 text-pink-700 border border-pink-200">
+                      <UserCheck className="w-3 h-3 text-pink-600" />
                       <span>Female Staff</span>
                     </span>
                   )}
                   {fac.isAccessible && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-canvas text-ink border border-border">
-                      <Accessibility className="w-3 h-3 text-text-secondary" />
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                      <Accessibility className="w-3 h-3 text-blue-600" />
                       <span>Step-Free Access</span>
+                    </span>
+                  )}
+                  {fac.verificationStatus === 'official_verified' && (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                      <span>✓ Civic Verified</span>
                     </span>
                   )}
                 </div>
 
-                {/* Single Primary Action: Get Directions & Secondary Save */}
-                <div className="pt-2.5 border-t border-border flex items-center justify-between gap-2">
+                {/* Primary Action Button: Set as Destination */}
+                <div className="pt-2 border-t border-purple-100 flex items-center justify-between gap-2">
                   <button
                     type="button"
-                    onClick={() => onSetAsDestination(fac.coordinates, fac.name)}
-                    className="btn-primary py-2 px-4 text-xs font-semibold flex items-center gap-1.5 shadow-sm"
+                    onClick={() => toggleSave(fac.id)}
+                    className={`text-xs font-bold px-3 py-1.5 rounded-full border transition-colors flex items-center gap-1.5 ${
+                      isSaved
+                        ? 'bg-butter/30 text-amber-900 border-butter'
+                        : 'bg-paper text-soft-ink border-border hover:text-ink'
+                    }`}
                   >
-                    <Navigation className="w-3.5 h-3.5 text-white" />
-                    <span>Get directions</span>
+                    <Bookmark className={`w-3.5 h-3.5 ${isSaved ? 'fill-amber-500 text-amber-600' : ''}`} />
+                    <span>{isSaved ? 'Saved' : 'Save'}</span>
                   </button>
 
                   <button
                     type="button"
-                    onClick={() => toggleSave(fac.id)}
-                    className={`py-2 px-3 rounded-xl text-xs font-medium border transition-colors flex items-center gap-1.5 ${
-                      isSaved
-                        ? 'bg-primary-tint text-primary border-primary/40'
-                        : 'bg-card text-text-secondary hover:text-ink hover:bg-canvas border-border-control/50'
-                    }`}
-                    title={isSaved ? 'Saved to places' : 'Save place'}
+                    onClick={() => onSetAsDestination(fac.coordinates, fac.name)}
+                    className="btn-primary px-4 py-1.5 text-xs font-bold flex items-center gap-1.5"
                   >
-                    <Bookmark className={`w-3.5 h-3.5 ${isSaved ? 'fill-current' : ''}`} />
-                    <span>{isSaved ? 'Saved' : 'Save'}</span>
+                    <Navigation className="w-3.5 h-3.5 text-white" />
+                    <span>Walk Here</span>
                   </button>
                 </div>
               </article>

@@ -1,6 +1,20 @@
 import React from 'react';
-import { DataSourceType, StreetlightStatus, DisturbanceCategory } from '../../types';
-import { Shield, Users, Radio, CheckCircle, AlertTriangle, Clock, HelpCircle, Sparkles, AlertCircle } from 'lucide-react';
+import { DataSourceType, StreetlightStatus, DisturbanceCategory, ReportLifecycleStatus } from '../../types';
+import { getCivicCategory } from '../../lib/civic-categories';
+import {
+  Shield,
+  Users,
+  Radio,
+  CheckCircle,
+  AlertTriangle,
+  Clock,
+  HelpCircle,
+  Sparkles,
+  AlertCircle,
+  FileSearch,
+  CheckCircle2,
+  XCircle,
+} from 'lucide-react';
 
 interface DataSourceBadgeProps {
   source: DataSourceType;
@@ -130,69 +144,86 @@ export const StreetlightStatusBadge: React.FC<{ status: StreetlightStatus }> = (
   }
 };
 
-export const DisturbanceCategoryLabel: React.FC<{ category: DisturbanceCategory }> = ({
+export const ReportLifecycleBadge: React.FC<{ status: ReportLifecycleStatus | string }> = ({
+  status,
+}) => {
+  switch (status) {
+    case 'verified':
+      return (
+        <span
+          className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-300 shadow-xs"
+          title="Evidence corroborated and verified according to municipal criteria"
+        >
+          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+          <span>Verified Civic</span>
+        </span>
+      );
+    case 'under_review':
+      return (
+        <span
+          className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-sky-50 text-sky-800 border border-sky-300 shadow-xs"
+          title="Authorized reviewer or municipal engineer is currently examining report evidence"
+        >
+          <FileSearch className="w-3 h-3 text-sky-600" />
+          <span>Under Review</span>
+        </span>
+      );
+    case 'resolved':
+      return (
+        <span
+          className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#F1EAFF] text-soft-ink border border-lilac"
+          title="Reported issue confirmed as resolved by municipal or maintenance workflow"
+        >
+          <CheckCircle className="w-3 h-3 text-grape" />
+          <span>Resolved</span>
+        </span>
+      );
+    case 'invalidated':
+      return (
+        <span
+          className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-600 border border-gray-300"
+          title="Report evidence was reviewed and determined to be invalid or erroneous"
+        >
+          <XCircle className="w-3 h-3 text-gray-500" />
+          <span>Invalidated</span>
+        </span>
+      );
+    case 'outdated':
+      return (
+        <span
+          className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-300"
+          title="Report has expired its category freshness threshold"
+        >
+          <Clock className="w-3 h-3 text-amber-600" />
+          <span>Stale / Outdated</span>
+        </span>
+      );
+    case 'pending':
+    default:
+      return (
+        <span
+          className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200"
+          title="Initial submission received; pending authorized review"
+        >
+          <AlertTriangle className="w-3 h-3 text-amber-600" />
+          <span>Pending Review</span>
+        </span>
+      );
+  }
+};
+
+export const DisturbanceCategoryLabel: React.FC<{ category: DisturbanceCategory | string }> = ({
   category,
 }) => {
-  const map: Record<DisturbanceCategory, { label: string; style: string; icon: React.ReactNode }> = {
-    harassment: {
-      label: 'Harassment Concern',
-      style: 'bg-danger-tint text-danger border-danger/30',
-      icon: <AlertCircle className="w-3 h-3 text-danger" />,
-    },
-    disruptive_group: {
-      label: 'Disruptive Group',
-      style: 'bg-caution-tint text-caution-dark border-caution/30',
-      icon: <AlertTriangle className="w-3 h-3 text-caution" />,
-    },
-    suspected_intoxication: {
-      label: 'Intoxication Disturbance',
-      style: 'bg-caution-tint text-caution-dark border-caution/30',
-      icon: <AlertTriangle className="w-3 h-3 text-caution" />,
-    },
-    streetlight_issue: {
-      label: 'Streetlight Outage',
-      style: 'bg-caution-tint text-caution-dark border-caution/30',
-      icon: <AlertTriangle className="w-3 h-3 text-caution" />,
-    },
-    broken_footpath: {
-      label: 'Broken Footpath',
-      style: 'bg-raised text-text border-border-strong',
-      icon: <AlertTriangle className="w-3 h-3 text-text-secondary" />,
-    },
-    blocked_road: {
-      label: 'Blocked Way',
-      style: 'bg-danger-tint text-danger border-danger/30',
-      icon: <AlertCircle className="w-3 h-3 text-danger" />,
-    },
-    transport_disruption: {
-      label: 'Transit Disruption',
-      style: 'bg-info/10 text-info border-info/30',
-      icon: <AlertTriangle className="w-3 h-3 text-info" />,
-    },
-    facility_unavailable: {
-      label: 'Facility Unavailable',
-      style: 'bg-raised text-text border-border-strong',
-      icon: <AlertTriangle className="w-3 h-3 text-text-secondary" />,
-    },
-    other_concern: {
-      label: 'Travel Concern',
-      style: 'bg-raised text-text border-border-strong',
-      icon: <AlertTriangle className="w-3 h-3 text-text-secondary" />,
-    },
-  };
-
-  const item = map[category] || {
-    label: category.replace(/_/g, ' '),
-    style: 'bg-raised text-text border-border',
-    icon: <AlertTriangle className="w-3 h-3 text-text-secondary" />,
-  };
+  const catConfig = getCivicCategory(category);
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border shadow-e1 ${item.style}`}
+      className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border shadow-xs bg-white text-ink border-purple-200"
+      title={catConfig.description}
     >
-      {item.icon}
-      <span>{item.label}</span>
+      <span className="text-xs">{catConfig.icon}</span>
+      <span className="font-bold text-ink">{catConfig.shortName}</span>
     </span>
   );
 };

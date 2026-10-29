@@ -35,6 +35,46 @@ export interface FactorBreakdown {
   lastUpdated?: string;
 }
 
+export interface RouteComparisonTradeOff {
+  timeDeltaSeconds: number; // compared to fastest (0 for fastest)
+  distanceDeltaMeters: number; // compared to fastest (0 for fastest)
+  lightingAdvantage?: string;
+  facilityAdvantage?: string;
+  reportsAvoidedOrEncountered?: string;
+  uncertaintySummary: string;
+  headlineTradeOff: string;
+}
+
+export interface RouteFacilityNearby {
+  facility: EssentialFacility;
+  distanceMeters: number;
+}
+
+export interface RouteReportNearby {
+  report: CommunityReport;
+  distanceMeters: number;
+  isVerified: boolean;
+  isOutdatedOrStale: boolean;
+}
+
+export interface WeatherContext {
+  tempCelsius: number;
+  feelsLikeCelsius: number;
+  condition: string;
+  description: string;
+  icon: string;
+  iconUrl?: string;
+  humidityPercent: number;
+  windSpeedMps: number;
+  visibilityMeters?: number;
+  rainMm?: number;
+  observedAt: string;
+  source: 'live_openweathermap' | 'unavailable';
+  isLive: boolean;
+  advisoryNote?: string;
+  statusMessage?: string;
+}
+
 export interface RouteOption {
   id: string;
   perspective: RoutePerspective;
@@ -55,6 +95,14 @@ export interface RouteOption {
   dataCoveragePercent: number; // transparent representation of known vs unknown segments
   relativeScoreDescription: string;
   disclaimer: string;
+  // Enhanced explainable fields:
+  tradeOff?: RouteComparisonTradeOff;
+  nearbyFacilitiesWithDistance?: RouteFacilityNearby[];
+  relevantReports?: RouteReportNearby[];
+  unknownStretchesSummary?: string;
+  recommendationRationale?: string;
+  isOnlyAvailableRoute?: boolean;
+  weather?: WeatherContext;
 }
 
 export interface RouteStep {
@@ -84,22 +132,101 @@ export type DisturbanceCategory =
   | 'facility_unavailable'
   | 'other_concern';
 
-export type ReportStatus = 'pending' | 'verified' | 'resolved' | 'outdated';
+export type ReportLifecycleStatus =
+  | 'pending'
+  | 'under_review'
+  | 'verified'
+  | 'resolved'
+  | 'outdated'
+  | 'invalidated';
+
+export type ReportStatus = ReportLifecycleStatus;
+
+export type ReportFlagReason =
+  | 'incorrect'
+  | 'outdated'
+  | 'duplicate'
+  | 'resolved_incorrectly'
+  | 'other';
+
+export interface ReportFlag {
+  id: string;
+  reason: ReportFlagReason;
+  details?: string;
+  createdAt: string;
+  flaggedByRole?: 'user' | 'reviewer';
+}
+
+export interface ReportEvidence {
+  photoUrl?: string;
+  photoName?: string;
+  photoSizeBytes?: number;
+  photoMimeType?: string;
+  submittedWithGps: boolean;
+  notes?: string;
+}
+
+export interface ReportStatusTransition {
+  fromStatus: ReportLifecycleStatus;
+  toStatus: ReportLifecycleStatus;
+  changedAt: string;
+  actor: 'reporter' | 'reviewer' | 'system' | 'corroborator';
+  note?: string;
+}
 
 export interface CommunityReport {
   id: string;
-  category: DisturbanceCategory;
+  category: DisturbanceCategory | string;
   coordinates: Coordinates;
   locationName: string;
   description: string;
-  status: ReportStatus;
+  status: ReportLifecycleStatus;
   source: DataSourceType;
   upvotes: number;
   flagCount: number;
+  flags?: ReportFlag[];
+  statusHistory?: ReportStatusTransition[];
+  evidence?: ReportEvidence;
+  duplicateOfId?: string;
+  duplicateCount?: number;
   createdAt: string;
   expiresAt: string;
   resolvedAt?: string;
+  resolvedBy?: string;
+  reviewedAt?: string;
+  reviewedBy?: string;
   isStale?: boolean;
+  // Lifecycle & Trust extensions
+  observedAt?: string;
+  submittedAt?: string;
+  confirmationCount?: number;
+  lastConfirmedAt?: string;
+  isDemoData?: boolean;
+}
+
+export interface PoliceStation {
+  id: string;
+  name: string;
+  address?: string;
+  distanceMeters?: number;
+  phone?: string;
+  coordinates: Coordinates;
+  isVerifiedPhone: boolean;
+  isDemoData: boolean;
+  openingHours?: string;
+  source?: 'geoapify_places' | 'emergency_directory' | 'demo_simulation';
+}
+
+export interface SOSEvent {
+  id: string;
+  activatedAt: string;
+  cancelledAt?: string;
+  resolvedAt?: string;
+  location?: Coordinates;
+  locationAccuracyMeters?: number;
+  isTestMode: boolean;
+  triggerMethod: 'triple_tap' | 'quick_action';
+  status: 'countdown' | 'active' | 'cancelled' | 'resolved';
 }
 
 export type StreetlightStatus =

@@ -10,21 +10,27 @@ import {
   Layers,
   PhoneCall,
   SlidersHorizontal,
-  Compass,
   Info,
   X,
   ShieldCheck,
+  Sparkles,
+  BookOpen,
 } from 'lucide-react';
+import { JellyPin } from '../ui/JellyPin';
+import { GirlyCharacter } from '../character/GirlyCharacter';
+import { SosTripleTapButton } from '../emergency/SosTripleTapButton';
 
 export type ActiveTab = 'route' | 'map' | 'facilities' | 'reports' | 'family' | 'civic';
 
 interface HeaderProps {
   activeTab: ActiveTab;
   onSelectTab: (tab: ActiveTab) => void;
-  onOpenEmergency: () => void;
+  onOpenEmergency: (triggerMethod?: 'triple_tap' | 'quick_action') => void;
   onOpenReportModal: () => void;
   onOpenSettings: () => void;
+  onOpenOnboarding?: () => void;
   hasActiveJourney: boolean;
+  isTestMode?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -33,7 +39,9 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenEmergency,
   onOpenReportModal,
   onOpenSettings,
+  onOpenOnboarding,
   hasActiveJourney,
+  isTestMode = false,
 }) => {
   const [isInfoOpen, setIsInfoOpen] = useState(false);
   const infoRef = useRef<HTMLDivElement>(null);
@@ -58,57 +66,58 @@ export const Header: React.FC<HeaderProps> = ({
     { id: 'map', label: 'Explore', icon: <MapPin className="w-3.5 h-3.5" /> },
     { id: 'facilities', label: 'Places', icon: <Building2 className="w-3.5 h-3.5" /> },
     { id: 'reports', label: 'Reports', icon: <AlertTriangle className="w-3.5 h-3.5" /> },
-    { id: 'family', label: 'Family', icon: <Users className="w-3.5 h-3.5" /> },
-    { id: 'civic', label: 'Civic', icon: <Layers className="w-3.5 h-3.5" /> },
+    { id: 'family', label: 'Family Trips', icon: <Users className="w-3.5 h-3.5" /> },
+    { id: 'civic', label: 'Civic Insights', icon: <Layers className="w-3.5 h-3.5" /> },
   ];
 
   return (
-    <header className="h-14 w-full max-w-full bg-ink text-white border-b border-champagne/25 px-3 sm:px-6 flex items-center justify-between z-30 sticky top-0 shadow-e2 shrink-0">
-      {/* Brand Wordmark & Compass Emblem */}
+    <header className="h-14 w-full max-w-full bg-white/90 backdrop-blur-xl border-b border-slate-200/80 px-3 sm:px-6 flex items-center justify-between z-30 sticky top-0 shadow-[0_2px_12px_rgba(15,23,42,0.03)] shrink-0">
+      {/* Brand Wordmark & Girly Mascot Emblem */}
       <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
         <button
           onClick={() => onSelectTab('route')}
-          className="flex items-center gap-2 text-left focus-ring-on-dark rounded-lg py-1 transition-transform active:scale-95"
-          aria-label="HERPATH Home"
+          className="flex items-center gap-2.5 text-left rounded-xl py-1 transition-transform active:scale-95 group focus-ring-primary"
+          aria-label="HERPATH Navigation Home"
         >
-          <div className="w-8 h-8 rounded-lg bg-ink-2 flex items-center justify-center text-champagne border border-champagne/40">
-            <Compass className="w-4 h-4 stroke-[2]" />
+          <div className="w-8 h-8 rounded-full bg-purple-50 flex items-center justify-center p-0.5 border border-purple-200/80 shadow-xs group-hover:scale-105 transition-transform overflow-hidden">
+            <GirlyCharacter size={26} isWalking={false} />
           </div>
           <div>
             <div className="flex items-baseline gap-1.5">
-              <span className="font-editorial text-xl sm:text-2xl font-bold tracking-tight text-white leading-none">
+              <span className="font-heading text-lg sm:text-xl font-extrabold tracking-tight text-slate-900 leading-none">
                 HERPATH
               </span>
-              <span className="text-[9px] uppercase font-bold tracking-widest text-champagne px-1.5 py-0.5 rounded bg-champagne/15 border border-champagne/30 hidden sm:inline">
-                Nightbloom
+              <span className="text-[9px] uppercase font-extrabold tracking-wider text-purple-700 px-2 py-0.5 rounded-full bg-purple-50 border border-purple-200 shadow-xs hidden sm:inline flex items-center gap-1">
+                <span>🎀</span>
+                <span>Navigation</span>
               </span>
             </div>
-            <p className="text-[9px] font-sans font-medium text-text-muted tracking-normal hidden md:block">
-              Safety-Aware Navigation & Journey Companion
+            <p className="text-[9px] font-sans font-semibold text-slate-500 tracking-normal hidden md:block">
+              Safety-Aware Pedestrian Navigation
             </p>
           </div>
         </button>
       </div>
 
       {/* Six Module Navigation Tabs (Center) */}
-      <nav className="hidden lg:flex items-center gap-1 bg-ink-2/80 p-1 rounded-xl border border-border-control/30" aria-label="Main Navigation">
+      <nav className="hidden lg:flex items-center gap-1 bg-slate-100/70 p-1 rounded-full border border-slate-200/60 backdrop-blur-md" aria-label="Main Navigation">
         {navItems.map((item) => {
           const isActive = activeTab === item.id;
           return (
             <button
               key={item.id}
               onClick={() => onSelectTab(item.id)}
-              className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 focus-ring-on-dark ${
+              className={`relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all duration-150 focus-ring-primary ${
                 isActive
-                  ? 'bg-primary text-white shadow-sm'
-                  : 'text-text-muted hover:text-white hover:bg-white/10'
+                  ? 'bg-purple-600 text-white shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
               }`}
             >
               {item.icon}
               <span>{item.label}</span>
               {item.id === 'family' && hasActiveJourney && (
                 <span
-                  className="w-2 h-2 rounded-full bg-champagne ml-0.5 animate-pulse"
+                  className="w-2 h-2 rounded-full bg-amber-400 ml-0.5 animate-pulse"
                   title="Journey active"
                   aria-label="Journey active"
                 />
@@ -118,15 +127,28 @@ export const Header: React.FC<HeaderProps> = ({
         })}
       </nav>
 
-      {/* Right Action Suite: Info Popover, Report, Settings, Dedicated Emergency SOS */}
+      {/* Right Action Suite: Guide, Info Popover, Settings, Dedicated Emergency SOS */}
       <div className="flex items-center gap-2 sm:gap-2.5">
-        {/* Transparent Info Popover Trigger (Clears permanent top banner space) */}
+        {/* Onboarding Guide Replay Trigger */}
+        {onOpenOnboarding && (
+          <button
+            type="button"
+            onClick={onOpenOnboarding}
+            className="w-9 h-9 rounded-full flex items-center justify-center text-slate-600 hover:text-purple-700 hover:bg-purple-50 transition-colors focus-ring-primary"
+            title="Open HERPATH Navigation Guide"
+            aria-label="HERPATH Guide"
+          >
+            <Sparkles className="w-4 h-4 text-purple-600" />
+          </button>
+        )}
+
+        {/* Info Popover Trigger */}
         <div className="relative" ref={infoRef}>
           <button
             type="button"
             onClick={() => setIsInfoOpen(!isInfoOpen)}
-            className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors focus-ring-on-dark ${
-              isInfoOpen ? 'bg-primary text-white' : 'text-text-muted hover:text-white hover:bg-white/10'
+            className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors focus-ring-primary ${
+              isInfoOpen ? 'bg-purple-100 text-purple-800' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
             title="How HERPATH route information works"
             aria-label="How route information works"
@@ -136,67 +158,55 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
 
           {isInfoOpen && (
-            <div className="absolute right-0 top-11 w-80 sm:w-96 bg-card text-ink rounded-card border border-border shadow-e3 p-4 z-50 animate-modal">
-              <div className="flex items-start justify-between gap-3 pb-2.5 border-b border-border">
+            <div className="absolute right-0 top-11 w-80 sm:w-96 glass-dropdown p-5 z-50 animate-modal text-slate-800">
+              <div className="flex items-start justify-between gap-3 pb-3 border-b border-slate-100">
                 <div className="flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-verified" />
-                  <h4 className="font-editorial font-bold text-sm text-ink">How HERPATH Works</h4>
+                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                  <h4 className="font-heading font-bold text-sm text-slate-900">How HERPATH Works</h4>
                 </div>
                 <button
                   type="button"
                   onClick={() => setIsInfoOpen(false)}
-                  className="text-text-muted hover:text-ink p-1 rounded-md"
+                  className="text-slate-400 hover:text-slate-700 p-1 rounded-md"
                   aria-label="Close information"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
-              <div className="pt-2.5 text-xs text-text-secondary space-y-2">
+
+              <div className="text-xs text-slate-600 space-y-2.5 mt-3 leading-relaxed">
                 <p>
-                  HERPATH provides transparent infrastructure data (streetlights, open facilities, and community reports) to help you choose walking corridors.
+                  <strong className="text-slate-900 font-bold">Transparent Data:</strong> Walking corridors are evaluated using verified streetlight databases, open municipal services, and recent community observations.
                 </p>
-                <div className="p-2.5 rounded-md bg-canvas text-ink border border-border text-[11px] space-y-1">
-                  <p className="font-semibold text-primary">Core Transparency Promises:</p>
-                  <ul className="list-disc list-inside space-y-0.5 text-text-secondary">
-                    <li>We <strong>never claim any route is 100% safe</strong>.</li>
-                    <li>Missing data represents a municipal gap, never a neighborhood risk.</li>
-                    <li>No secret tracking; your location is never sold or shared without permission.</li>
-                  </ul>
+                <p>
+                  <strong className="text-slate-900 font-bold">Zero Fabrication:</strong> We never label any public road &ldquo;100% safe&rdquo;. Unmapped stretches are highlighted honestly as data gaps.
+                </p>
+                <div className="p-2.5 rounded-xl bg-purple-50 border border-purple-200 text-purple-900 text-[11px] font-semibold flex items-center gap-2">
+                  <Sparkles className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                  <span>Evidence-backed recommendations, transparent trade-offs, honest uncertainty.</span>
                 </div>
               </div>
             </div>
           )}
         </div>
 
-        {/* Quick Report Trigger */}
+        {/* Preferences / Settings Trigger */}
         <button
-          onClick={onOpenReportModal}
-          className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border-control/40 text-xs font-semibold text-white hover:bg-white/10 transition-colors focus-ring-on-dark"
-          title="Contribute a streetlight or infrastructure report"
-        >
-          <AlertTriangle className="w-3.5 h-3.5 text-caution" />
-          <span>Report</span>
-        </button>
-
-        {/* Settings Trigger */}
-        <button
+          type="button"
           onClick={onOpenSettings}
-          className="w-9 h-9 rounded-lg flex items-center justify-center text-text-muted hover:text-white hover:bg-white/10 transition-colors focus-ring-on-dark"
-          title="Privacy, sharing & accessibility settings"
+          className="w-9 h-9 rounded-full flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors focus-ring-primary"
+          title="Routing priorities & local settings"
           aria-label="Open settings"
         >
           <SlidersHorizontal className="w-4 h-4" />
         </button>
 
-        {/* Dedicated Emergency SOS Button (Instant, un-animated, isolated control) */}
-        <button
-          onClick={onOpenEmergency}
-          className="btn-emergency-sos h-10 px-3.5 sm:px-4 flex items-center justify-center gap-2 focus-ring-on-dark shrink-0"
-          aria-label="Emergency SOS - Open immediate assistance dialer and GPS coordinates"
-        >
-          <PhoneCall className="w-4 h-4 text-white stroke-[2.5]" />
-          <span className="font-sans font-bold text-xs sm:text-sm tracking-wider">SOS</span>
-        </button>
+        {/* Dedicated Emergency SOS (Triple-Tap Safety Trigger) */}
+        <SosTripleTapButton
+          variant="header"
+          onTriggerSOS={(method) => onOpenEmergency(method)}
+          isTestMode={isTestMode}
+        />
       </div>
     </header>
   );
